@@ -1,0 +1,104 @@
+﻿@model GovConnect.ViewModels.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<h2>@ViewData["Title"]</h2>
+@* <div asp-validation-summary="All" class="text-danger"></div> *@
+<form asp-action="Register" enctype="multipart/form-data" method="post">
+    <div class="form-group">
+        <label for="FirstName">First Name</label>
+        <input type="text" class="form-control" name="FirstName" asp-for="FirstName" />
+        <span asp-validation-for="FirstName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="LastName">Last Name</label>
+        <input type="text" class="form-control" id="LastName" name="LastName" value="@Model.LastName" />
+        <span asp-validation-for="LastName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="Email">Email</label>
+        <input type="email" class="form-control" id="Email" name="Email" value="@Model.Email" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="Password">Password</label>
+        <input type="password" class="form-control" id="Password" name="Password" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="ConfirmPassword">Confirm Password</label>
+        <input type="password" class="form-control" id="ConfirmPassword" name="ConfirmPassword"  />
+        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+    <label for="Gender">Gender</label>
+    <div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" id="Male" name="Gender" value="Male" 
+                @(Model.Gender == "Male" ? "checked" : "") />
+            <label class="form-check-label" for="Male">Male</label>
+        </div>
+
+        <div class="form-check">
+            <input class="form-check-input" type="radio" id="Female" name="Gender" value="Female"
+                @(Model.Gender == "Female" ? "checked" : "") />
+            <label class="form-check-label" for="Female">Female</label>
+        </div>
+
+        <div class="form-check">
+            <input class="form-check-input" type="radio" id="Other" name="Gender" value="Other"
+                @(Model.Gender == "Other" ? "checked" : "") />
+            <label class="form-check-label" for="Other">Other</label>
+        </div>
+    </div>
+    <span asp-validation-for="Gender" class="text-danger"></span>
+    </div>
+
+
+    <div class="form-group">
+        <label for="Mobile">Mobile Number</label>
+        <input type="text" class="form-control" id="Mobile" name="Mobile" value="@Model.Mobile"/>
+        <span asp-validation-for="Mobile" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="Pincode">Pincode</label>
+        <input type="number" class="form-control" id="Pincode" name="Pincode" value="@Model.Pincode"  />
+        <span asp-validation-for="Pincode" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="Mandal">Mandal</label>
+        <input type="text" class="form-control" id="Mandal" name="Mandal" value="@Model.Mandal"  />
+        <span asp-validation-for="Mandal" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="District">District</label>
+        <input type="text" class="form-control" id="District" name="District" value="@Model.District"  />
+        <span asp-validation-for="District" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="City">City</label>
+        <input type="text" class="form-control" id="City" name="City" value="@Model.City" />
+        <span asp-validation-for="City" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="ProfilePic">Profile Picture</label>
+        <input type="file" class="form-control" id="ProfilePic" name="ProfilePic" />
+        <span asp-validation-for="ProfilePic" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Register</button>
+    </div>
+</form>
