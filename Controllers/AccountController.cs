@@ -49,6 +49,7 @@ namespace GovConnect.Controllers
                     Mandal = model.Mandal,
                     District = model.District,
                     City = model.City,
+
                     Profilepic = await ConvertFileToByteArray(model.ProfilePic) 
                 };
 

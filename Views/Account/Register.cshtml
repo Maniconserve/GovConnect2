@@ -1,104 +1,121 @@
 ﻿@model GovConnect.ViewModels.RegisterViewModel
 
 @{
-    ViewData["Title"] = "Register";
+    Layout = "_Gov_Layout";
 }
-
-<h2>@ViewData["Title"]</h2>
-@* <div asp-validation-summary="All" class="text-danger"></div> *@
-<form asp-action="Register" enctype="multipart/form-data" method="post">
-    <div class="form-group">
-        <label for="FirstName">First Name</label>
-        <input type="text" class="form-control" name="FirstName" asp-for="FirstName" />
-        <span asp-validation-for="FirstName" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label for="LastName">Last Name</label>
-        <input type="text" class="form-control" id="LastName" name="LastName" value="@Model.LastName" />
-        <span asp-validation-for="LastName" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label for="Email">Email</label>
-        <input type="email" class="form-control" id="Email" name="Email" value="@Model.Email" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label for="Password">Password</label>
-        <input type="password" class="form-control" id="Password" name="Password" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label for="ConfirmPassword">Confirm Password</label>
-        <input type="password" class="form-control" id="ConfirmPassword" name="ConfirmPassword"  />
-        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-    <label for="Gender">Gender</label>
-    <div>
-        <div class="form-check">
-            <input class="form-check-input" type="radio" id="Male" name="Gender" value="Male" 
-                @(Model.Gender == "Male" ? "checked" : "") />
-            <label class="form-check-label" for="Male">Male</label>
+<html>
+<head>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <div class="bg-gray-300 p-10 rounded-lg shadow-lg w-full max-w-4xl">
+        <h1 class="text-center text-2xl font-bold mb-2">Register</h1>
+        
+        <div class="flex justify-center">
+            <div class="w-full">
+                <form asp-action="Register" enctype="multipart/form-data" method="post" class="grid grid-cols-2 gap-4">
+                   <div class="flex justify-between mb-6 w-full max-w-4xl">
+                    <label for="profile-upload" class="cursor-pointer flex items-center space-x-4 w-1/2">
+                        <!-- Image Container with Same Width as Input Fields -->
+                        <div id="image-container" class="bg-white p-4 rounded-full border-2 border-gray-300 w-32 h-32 flex justify-center items-center relative">
+                            <img id="profile-preview" src="" alt="Profile Image" class="hidden w-32 h-32 rounded-full object-cover">
+                            <i id="default-icon" class="fas fa-user fa-5x text-gray-500"></i>
+                            <input asp-for="ProfilePic" id="profile-upload" type="file" class="hidden" accept="image/*" value="@Model.ProfilePic">
+                            <!-- Custom drag-and-drop message -->
+                            <span id="drag-message" class="absolute text-center text-gray-500">Drag & Drop Image</span>
+                        </div>
+                    </label>
+                    </div>
+                    <div>
+                        <label class="block mb-1">First Name</label>
+                        <input asp-for="FirstName" type="text" placeholder="Enter First Name" class="p-1 border rounded" style="width: 300px;" value="@Model.FirstName">
+                        <br /><span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
+                    <div>
+                        <label class="block mb-1" style="margin-left: 50px;">Last Name</label>
+                        <input asp-for="LastName" type="text" placeholder="Enter Last Name" class="w-full p-1 border rounded" style="width: 300px;margin-left: 50px;" value="@Model.LastName">
+                        <br /><span asp-validation-for="LastName" class="text-danger" style="width: 300px;margin-left: 50px;"></span>
+                    </div>
+                    <div>
+                        <label class="block mb-1">Email</label>
+                        <input asp-for="Email" type="email" placeholder="Enter Email" class="w-full p-1 border rounded" style="width: 300px;" value="@Model.Email">
+                        <br /><span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div>
+                        <label class="block mb-1" style="margin-left: 50px;">Mobile</label>
+                        <input asp-for ="Mobile" type="text" placeholder="Enter Mobile No" class="w-full p-1 border rounded" style="width: 300px;margin-left: 50px;" value="@Model.Mobile">
+                        <br /><span asp-validation-for="Mobile" class="text-danger" style="width: 300px;margin-left: 50px;"></span>
+                    </div>
+                    <div>
+                        <label class="block mb-1">Password</label>
+                        <input asp-for="Password" type="password" placeholder="Enter Password" class="w-full p-1 border rounded" style="width: 300px;" >
+                        <br /><span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    <div>
+                        <label class="block mb-1" style="margin-left: 50px;">Confirm Password</label>
+                        <input asp-for="ConfirmPassword" type="password" placeholder="Confirm Password" class="w-full p-1 border rounded" style="width: 300px;margin-left: 50px;">
+                        <br /><span asp-validation-for="ConfirmPassword" class="text-danger" style="width: 300px;margin-left: 50px;"></span>
+                    </div>
+                    <div>
+                        <label class="block mb-1">Gender</label>
+                        <div class="flex items-center">
+                            <input type="radio" name="gender" class="mr-2"> Male
+                            <input type="radio" name="gender" class="ml-4 mr-2"> Female
+                        </div>
+                        <br /><span asp-validation-for="Gender" class="text-danger"></span>
+                    </div>
+                    <div>
+                        <label class="block mb-1" style="margin-left: 50px;">Pincode</label>
+                        <input asp-for="Pincode" type="text" placeholder="Enter Pincode" class="w-full p-1 border rounded" style="width: 300px;margin-left: 50px;" value="@Model.Pincode">
+                        <br /><span asp-validation-for="Pincode" class="text-danger" style="width: 300px;margin-left: 50px;"></span>
+                    </div>
+                    <div>
+                        <label class="block mb-1">Mandal</label>
+                        <input asp-for="Mandal" type="text" placeholder="Enter Mandal" class="w-full p-1 border rounded" style="width: 300px;" value="@Model.Mandal">
+                        <br /><span asp-validation-for="Mandal" class="text-danger"></span>
+                    </div>
+                    <div>
+                        <label class="block mb-1" style="margin-left: 50px;">District</label>
+                        <input asp-for="District" type="text" placeholder="Enter District" class="w-full p-1 border rounded" style="width: 300px;margin-left: 50px;" value="@Model.District">
+                        <br /><span asp-validation-for="District" class="text-danger" style="width: 300px;margin-left: 50px;"></span>
+                    </div>
+                    <div>
+                        <label class="block mb-1">City</label>
+                        <input asp-for="City" type="text" placeholder="Enter City" class="w-full p-1 border rounded" style="width: 300px;" value="@Model.City">
+                        <br /><span asp-validation-for="City" class="text-danger"></span>
+                    </div>
+                    <div>
+                        <label class="block mb-1" style="margin-left: 50px;">Village</label>
+                        <input asp-for="Village" type="text" placeholder="Enter Village" class="w-full p-1 border rounded" style="width: 300px;margin-left: 50px;" value="@Model.Village">
+                        <br /><span asp-validation-for="Village" class="text-danger" style="width: 300px;margin-left: 50px;"></span>
+                    </div>
+                    <div class="col-span-2 flex justify-center mt-4">
+                        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded">Submit</button>
+                    </div>
+                </form>
+            </div>
         </div>
-
-        <div class="form-check">
-            <input class="form-check-input" type="radio" id="Female" name="Gender" value="Female"
-                @(Model.Gender == "Female" ? "checked" : "") />
-            <label class="form-check-label" for="Female">Female</label>
-        </div>
-
-        <div class="form-check">
-            <input class="form-check-input" type="radio" id="Other" name="Gender" value="Other"
-                @(Model.Gender == "Other" ? "checked" : "") />
-            <label class="form-check-label" for="Other">Other</label>
-        </div>
     </div>
-    <span asp-validation-for="Gender" class="text-danger"></span>
-    </div>
+</body>
+</html>
+<script>
+    document.getElementById("profile-upload").addEventListener("change", function (event) {
+        var file = event.target.files[0];
+        var reader = new FileReader();
 
+        reader.onload = function (e) {
+            var imageElement = document.getElementById("profile-preview");
+            var iconElement = document.getElementById("default-icon");
 
-    <div class="form-group">
-        <label for="Mobile">Mobile Number</label>
-        <input type="text" class="form-control" id="Mobile" name="Mobile" value="@Model.Mobile"/>
-        <span asp-validation-for="Mobile" class="text-danger"></span>
-    </div>
+            // Hide the default icon and show the image
+            iconElement.style.display = "none";
+            imageElement.style.display = "block";
+            imageElement.src = e.target.result;  // Set the image source to the uploaded file
+        };
 
-    <div class="form-group">
-        <label for="Pincode">Pincode</label>
-        <input type="number" class="form-control" id="Pincode" name="Pincode" value="@Model.Pincode"  />
-        <span asp-validation-for="Pincode" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label for="Mandal">Mandal</label>
-        <input type="text" class="form-control" id="Mandal" name="Mandal" value="@Model.Mandal"  />
-        <span asp-validation-for="Mandal" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label for="District">District</label>
-        <input type="text" class="form-control" id="District" name="District" value="@Model.District"  />
-        <span asp-validation-for="District" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label for="City">City</label>
-        <input type="text" class="form-control" id="City" name="City" value="@Model.City" />
-        <span asp-validation-for="City" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <label for="ProfilePic">Profile Picture</label>
-        <input type="file" class="form-control" id="ProfilePic" name="ProfilePic" />
-        <span asp-validation-for="ProfilePic" class="text-danger"></span>
-    </div>
-
-    <div class="form-group">
-        <button type="submit" class="btn btn-primary">Register</button>
-    </div>
-</form>
+        if (file) {
+            reader.readAsDataURL(file);  // Read the file as a data URL
+        }
+    });
+</script>

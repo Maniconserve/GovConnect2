@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GovConnect.Migrations
 {
     [DbContext(typeof(SqlServerDbContext))]
-    [Migration("20241114125354_CitizenTable")]
+    [Migration("20241115122008_CitizenTable")]
     partial class CitizenTable
     {
         /// <inheritdoc />

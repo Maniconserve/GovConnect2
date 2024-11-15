@@ -1,0 +1,70 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/footer.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/header.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    @* <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" /> *@
+</head>
+<body>
+    <div class="header">
+        <div class="gov-connect">
+            <span class="g">G</span><span class="ov">ov</span><span class="g-5">C</span><span class="connect">onnect</span>
+        </div>
+        <div class="header-menu">
+            <div class="menu-item"><span class="features-home">Home</span></div>
+            <div class="menu-item"><span class="templates-lodge">Lodge</span></div>
+            <div class="menu-item"><span class="pricing-status">Status</span></div>
+            <div class="menu-item"><span class="blog">Services</span></div>
+            <div class="menu-item"><span class="sign-in">Schemes</span></div>
+        </div>
+        <button class="button"><span class="try-free">Login</span></button>
+    </div>
+    <div class="container d-flex justify-content-center align-items-center mt-4 mb-4">
+        @RenderBody()
+    </div>
+
+    
+    <div class="footer">
+        <div class="flex-row-cc">
+            <div class="logo-youtube">
+                <img src="~/Images/youtube.png" width="30px" height="30px"></img>
+            </div>
+            <div class="logo-twitter">
+                <img src="~/Images/twitter.png" width="30px" height="30px"></img>
+            </div>
+            <div class="logo-facebook">
+                <img src="~/Images/facebook.png" width="30px" height="30px"></img>
+            </div>
+            <div class="logo-instagram">
+                <img src="~/Images/instagram.png" width="30px" height="30px"></img>
+            </div>
+        </div>
+        <span class="playcine-media-direct">© Govt Of Andhra Pradesh. All rights reserved</span>
+        <div class="footer-wrapper">
+            <div class="menu-item">
+                <span class="legacy-notices">Grama Sachivalayam</span>
+            </div>
+            <div class="menu-item">
+                <span class="gift-cards">APCOS</span>
+            </div>
+            <div class="menu-item">
+                <span class="media-center">India.gov.in</span>
+            </div>
+            <div class="menu-item">
+                <span class="media-center-17">CM Relief Fund</span>
+            </div>
+            <div class="menu-item">
+                <span class="connect-andhra">Connect Andhra</span>
+            </div>
+            <div class="menu-item">
+                <span class="india-code">India Code</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

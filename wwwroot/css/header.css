@@ -1,0 +1,105 @@
+﻿:root {
+    --default-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft Yahei UI", "Microsoft Yahei", "Source Han Sans CN", sans-serif;
+}
+
+/* Universal box-sizing */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: var(--default-font-family);
+}
+
+/* Header Styles */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 1176px;
+    height: 64px;
+    margin: 20px auto 0;
+    background: #ffffff;
+    border-radius: 32px;
+    box-shadow: 0 4px 9px 0 rgba(23, 26, 31, 0.11);
+    padding: 0 20px;
+}
+
+    /* GovConnect Text */
+    .header .gov-connect {
+        font-size: 24px;
+        font-weight: 700;
+        display: flex;
+        gap: 2px;
+        align-items: center;
+        color: #000;
+    }
+
+    /* Individual GovConnect parts */
+    .header .g,
+    .header .g-5 {
+        font-weight: 700;
+    }
+
+    .header .ov,
+    .header .connect {
+        font-weight: 400;
+    }
+
+/* Header Menu - Align right */
+.header-menu {
+    display: flex;
+    flex-direction: row; /* Arrange items in a row */
+    gap: 12px; /* Reduced space between menu items */
+    align-items: center; /* Align items vertically to the center */
+    margin-left: auto; /* This will push the menu to the right */
+}
+
+/* Individual Menu Items */
+.header .menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: color 0.3s ease; /* Only change text color on hover */
+}
+
+    /* On hover, change the text color (but no border or background) */
+    .header .menu-item:hover {
+        color: #171a1f; /* Change text color */
+    }
+
+    /* Text styles for each menu item */
+    .header .menu-item span {
+        font-family: Inter, var(--default-font-family);
+        font-size: 14px;
+        font-weight: 400;
+        color: #565e6c;
+        text-align: center;
+    }
+
+/* Login Button */
+.header .button {
+    background-color: #171a1f;
+    color: #fff;
+    padding: 8px 18px;
+    margin:6px;
+    border-radius: 18px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+    .header .button:hover {
+        background-color: #333;
+    }
+
+/* Optional: Style for the button text */
+.header .try-free {
+    font-size: 14px;
+    font-weight: 700;
+}
