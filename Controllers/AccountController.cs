@@ -105,6 +105,10 @@ namespace GovConnect.Controllers
             }
             return View(model);
         }
+        public IActionResult Officer_Login()
+        {
+            return View();
+        }
 
         private async Task<byte[]> ConvertFileToByteArray(IFormFile file)
         {

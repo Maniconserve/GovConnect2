@@ -22,7 +22,7 @@
             <div class="menu-item"><span class="blog">Services</span></div>
             <div class="menu-item"><span class="sign-in">Schemes</span></div>
         </div>
-        <button class="button"><span class="try-free">Login</span></button>
+        <a asp-controller="Account" asp-action="Login" class="button text-decoration-none"><span class="try-free">Login</span></a>
     </div>
     <div class="container d-flex justify-content-center align-items-center mt-4 mb-4">
         @RenderBody()
