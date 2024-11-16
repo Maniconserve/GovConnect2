@@ -1,5 +1,6 @@
 using GovConnect.Data;
 using GovConnect.Models;
+using GovConnect.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<EmailSender>();
 var connectionString = builder.Configuration.GetConnectionString("SQLServerConnection") ?? throw new InvalidOperationException("Connection string 'SQLServerIdentityConnection' not found.");
 builder.Services.AddDbContext<SqlServerDbContext>(options =>
     options.UseSqlServer(connectionString));
@@ -20,8 +22,9 @@ builder.Services.AddIdentity<Citizen, IdentityRole>(
         options.Password.RequireLowercase = true;
         options.Password.RequiredUniqueChars = 4;
         options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";
+        //options.Tokens.ProviderMap.Add("Default", new TokenProviderDescriptor(typeof(DataProtectorTokenProvider<Citizen>)));
     })
-    .AddEntityFrameworkStores<SqlServerDbContext>();
+    .AddEntityFrameworkStores<SqlServerDbContext>().AddDefaultTokenProviders(); ;
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

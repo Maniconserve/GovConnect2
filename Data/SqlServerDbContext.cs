@@ -21,7 +21,6 @@ namespace GovConnect.Data
             modelBuilder.Entity<Citizen>()
                 .Property(u => u.UserName)
                 .HasColumnName("FirstName");
-
         }
     }
 }

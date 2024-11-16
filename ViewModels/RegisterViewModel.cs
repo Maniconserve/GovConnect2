@@ -55,6 +55,7 @@ namespace GovConnect.ViewModels
         [Required(ErrorMessage = "Village is required")]
         [RegularExpression(@"^[A-Za-z\s]+$", ErrorMessage = "Village Name must contain only letters and spaces.")]
         public string Village { get; set; }
+        [Required(ErrorMessage = "ProfilePic is required")]
         public IFormFile ProfilePic { get; set; }
     }
 }
