@@ -1,0 +1,132 @@
+﻿@model GovConnect.Models.Citizen
+
+@{
+    Layout = "_Gov_Layout";
+}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Font Awesome CDN for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+
+                        <!-- Profile Picture Upload -->
+                        <div class="text-center mb-4">
+                            @if (Model.Profilepic != null && Model.Profilepic.Length > 0)
+                            {
+                                var imageBase64 = Convert.ToBase64String(Model.Profilepic);
+                                var imageSrc = "data:image/jpeg;base64," + imageBase64;
+                                <img src="@imageSrc" alt="Profile picture" class="rounded-circle" height="150" width="150" />
+                            }
+                            else
+                            {
+                                <img src="https://via.placeholder.com/150" alt="Profile placeholder" class="rounded-circle" height="150" width="150" />
+                            }
+                            <div class="mt-2">
+                                <label asp-for="Profilepic" class="btn btn-outline-secondary">
+                                    <i class="fas fa-upload"></i> Upload
+                                </label>
+                                <input type="file" asp-for="Profilepic" class="form-control visually-hidden" />
+                            </div>
+                        </div>
+
+                        <!-- Form Fields -->
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="UserName" class="form-label">First Name</label>
+                                    <input asp-for="UserName" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="LastName" class="form-label">Last Name</label>
+                                    <input asp-for="LastName" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Gender" class="form-label">Gender</label>
+                                    <select asp-for="Gender" class="form-select">
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="PhoneNumber" class="form-label">Mobile</label>
+                                    <input asp-for="PhoneNumber" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Address Fields -->
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Pincode" class="form-label">Pincode</label>
+                                    <input asp-for="Pincode" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Mandal" class="form-label">Mandal</label>
+                                    <input asp-for="Mandal" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    <label asp-for="District" class="form-label">District</label>
+                                    <input asp-for="District" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="City" class="form-label">City</label>
+                                    <input asp-for="City" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Village" class="form-label">Village</label>
+                                    <input asp-for="Village" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="form-group mb-3">
+                            <label asp-for="Email" class="form-label">Email</label>
+                            <input asp-for="Email" class="form-control" />
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>

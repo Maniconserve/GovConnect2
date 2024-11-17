@@ -57,5 +57,6 @@ namespace GovConnect.ViewModels
         public string Village { get; set; }
         [Required(ErrorMessage = "ProfilePic is required")]
         public IFormFile ProfilePic { get; set; }
+
     }
 }

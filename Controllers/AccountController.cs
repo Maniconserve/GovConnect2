@@ -1,8 +1,8 @@
 ﻿using GovConnect.Models;
 using GovConnect.Services;
 using GovConnect.ViewModels;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +19,45 @@ namespace GovConnect.Controllers
             signInManager = _signInManager;
             emailSender = _emailSender;
         }
+        [HttpGet]
+        public async Task<IActionResult> Edit()
+        {
+            try
+            {
+                // Get the currently logged-in user asynchronously
+                //var user = await citizenManager.GetUserAsync(User);
+
+                //if (user == null)
+                //{
+                //    return NotFound(); // Return an error if the user is not found
+                //}
+
+                //// Map user data to the Citizen model
+                //var model = new Citizen
+                //{
+                //    UserName = user.UserName,
+                //    LastName = user.LastName,
+                //    Gender = user.Gender,
+                //    PhoneNumber = user.PhoneNumber,
+                //    City = user.City,
+                //    Email = user.Email,
+                //    Profilepic = user.Profilepic,
+                //    Pincode = user.Pincode,
+                //    Mandal = user.Mandal,
+                //    District = user.District,
+                //    Village = user.Village
+                //};
+                var model = new Citizen();
+                return View(model); // Return the view with the model
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (e.g., use a logging framework like Serilog or NLog)
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
         [HttpGet]
         public IActionResult Register()
         {
@@ -168,6 +207,7 @@ namespace GovConnect.Controllers
                 return RedirectToAction("Index", "Home");
             }
         }
+
         [HttpGet]
         public IActionResult ForgotPassword() {
             return View();
@@ -242,6 +282,16 @@ namespace GovConnect.Controllers
                 }
             }
             return RedirectToAction("Index");  // Redirect to form again
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Logout()
+        {
+            // Sign out the user
+            await HttpContext.SignOutAsync();
+
+            // Redirect to the homepage or login page
+            return RedirectToAction("Index", "Home");
         }
     }
 }
