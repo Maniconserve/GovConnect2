@@ -1,8 +1,97 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    Layout = "_Gov_Layout"; 
 }
+<style>
+    .custom-bg {
+        background-color: #E5E7EB; 
+        border-radius: 15px; 
+    }
+    .custom-border {
+        border-radius: 15px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease; 
+    }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    .custom-border:hover {
+        transform: scale(1.05); 
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .custom-border {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+ </style>
+    
+<!-- Grievance Information Section -->
+<div class="custom-bg  p-5 shadow-sm d-flex flex-row justify-content-between align-items-center">
+    <div>
+        <p class="h5 font-weight-bold">
+            "Public Grievance Redressal System(PGRS)” is a universal grievance redressal helpline that allows citizens to directly raise their issue to the Chief Minister’s Office.
+        </p>
+        <ul class="list-group mt-5 m-3">
+            <li>Register individual or household-level grievances</li>
+            <li>Follow up on the status of a registered grievance</li>
+            <li>Enquire about government services and schemes</li>
+        </ul>
+    </div>
+    <div class="text-center">
+        <img alt="Hon'ble Chief Minister Government of Andhra Pradesh" class="rounded-rectangle" height="100" src="https://storage.googleapis.com/a1aa/image/r6fFOZHpnlXDJCocVQmjV9rbWAvHVZnkGyKwoeh81RgsQOyTA.jpg" width="100" height="100"/>
+        <p class="text-muted ">
+            Hon'ble Chief Minister<br />
+            Government of Andhra Pradesh
+        </p>
+    </div>
+</div>
+
+<!-- Process Involved Section (Vertically Centered) -->
+<div class="custom-bg p-5 rounded-lg shadow-sm mt-5 d-flex justify-content-center align-items-center">
+    <div class="text-center w-100">
+        <h2 class="text-primary font-weight-bold">Process Involved</h2>
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="bg-white p-4 rounded-lg shadow-sm custom-border">
+                    <i class="fas fa-headset fa-3x mb-2"></i>
+                    <p>Register Grievance</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="bg-white p-4 rounded-lg shadow-sm custom-border">
+                    <i class="fas fa-id-card-alt fa-3x mb-2"></i>
+                    <p>Receive Grievance No</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="bg-white p-4 rounded-lg shadow-sm custom-border">
+                    <i class="fas fa-user-check fa-3x mb-2"></i>
+                    <p>Get Updates</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Grievance Stats Section (Vertically Centered) -->
+<div class="custom-bg p-5 rounded-lg shadow-sm mt-5 mb-5  d-flex justify-content-center align-items-center">
+    <div class="text-center w-100">
+        <h2 class="text-primary font-weight-bold">Grievance Stats Effects from 19-10-2024</h2>
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="bg-danger text-white p-4 rounded-lg shadow-sm">
+                    <p class="h3 font-weight-bold">1,10,353</p>
+                    <p>Grievances Registered</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="bg-success text-white p-4 rounded-lg shadow-sm">
+                    <p class="h3 font-weight-bold">81,394</p>
+                    <p>Grievances Resolved</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="bg-warning text-white p-4 rounded-lg shadow-sm">
+                    <p class="h3 font-weight-bold">28,959</p>
+                    <p>Grievances Pending</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

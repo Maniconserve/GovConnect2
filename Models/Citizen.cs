@@ -12,5 +12,6 @@ namespace GovConnect.Models
         public String District { get; set; }
         public String City { get; set; }
         public String Village { get; set; }
+
     }
 }

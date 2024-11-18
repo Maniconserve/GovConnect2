@@ -1,7 +1,7 @@
-﻿using GovConnect.Models;
+﻿using GovConnect.Data;
+using GovConnect.Models;
 using GovConnect.Services;
 using GovConnect.ViewModels;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,42 +12,44 @@ namespace GovConnect.Controllers
     {
         private UserManager<Citizen> citizenManager;
         private SignInManager<Citizen> signInManager;
+        private SqlServerDbContext SqlServerDbContext;
+        private CitizenService citizenService;
         private EmailSender emailSender;
         private static string originalotp;
-        public AccountController(UserManager<Citizen> _citizenManager,SignInManager<Citizen> _signInManager, EmailSender _emailSender) {
+        public AccountController(UserManager<Citizen> _citizenManager,SignInManager<Citizen> _signInManager, EmailSender _emailSender, SqlServerDbContext _SqlServerDbContext, CitizenService _citizenService) {
             citizenManager = _citizenManager;
             signInManager = _signInManager;
             emailSender = _emailSender;
+            SqlServerDbContext = _SqlServerDbContext;
+            citizenService = _citizenService;
         }
         [HttpGet]
         public async Task<IActionResult> Edit()
         {
             try
             {
-                // Get the currently logged-in user asynchronously
-                //var user = await citizenManager.GetUserAsync(User);
+                //Get the currently logged-in user asynchronously
+                var user = await citizenManager.GetUserAsync(User);
 
-                //if (user == null)
-                //{
-                //    return NotFound(); // Return an error if the user is not found
-                //}
-
-                //// Map user data to the Citizen model
-                //var model = new Citizen
-                //{
-                //    UserName = user.UserName,
-                //    LastName = user.LastName,
-                //    Gender = user.Gender,
-                //    PhoneNumber = user.PhoneNumber,
-                //    City = user.City,
-                //    Email = user.Email,
-                //    Profilepic = user.Profilepic,
-                //    Pincode = user.Pincode,
-                //    Mandal = user.Mandal,
-                //    District = user.District,
-                //    Village = user.Village
-                //};
-                var model = new Citizen();
+                if (user == null)
+                {
+                    return NotFound(); // Return an error if the user is not found
+                }
+                // Map user data to the Citizen model
+                var model = new Citizen
+                {
+                    UserName = user.UserName,
+                    LastName = user.LastName,
+                    Gender = user.Gender,
+                    PhoneNumber = user.PhoneNumber,
+                    City = user.City,
+                    Email = user.Email,
+                    Profilepic = user.Profilepic,
+                    Pincode = user.Pincode,
+                    Mandal = user.Mandal,
+                    District = user.District,
+                    Village = user.Village
+                };
                 return View(model); // Return the view with the model
             }
             catch (Exception ex)
@@ -57,10 +59,41 @@ namespace GovConnect.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+        [HttpPost]
+        public async Task<IActionResult> Edit(Citizen citizen)
+        {
+            Citizen user = await citizenManager.GetUserAsync(User);
+            // Step 2: Compare the current email with the new email from the form
+            if (citizen.Email != user.Email)
+            {
+                // Update the email and set EmailConfirmed to false
+                user.Email = citizen.Email;
+                user.EmailConfirmed = false;
+                
+            }
+            user.UserName = citizen.UserName == null ? user.UserName : citizen.UserName;
+            user.LastName = citizen.LastName == null ? user.LastName : citizen.LastName;
+            user.PhoneNumber = citizen.PhoneNumber == null ? user.PhoneNumber : citizen.PhoneNumber;
+            user.City = citizen.City == null ? user.City : citizen.City;
+            user.Gender = citizen.Gender == null ? user.Gender : citizen.Gender;
+            user.District = citizen.District == null ? user.District : citizen.District;
+            user.Pincode = citizen.Pincode == null ? user.Pincode : citizen.Pincode;
+            user.Mandal = citizen.Mandal == null ? user.Mandal : citizen.Mandal;
+            user.Village = citizen.Village == null ? user.Village : citizen.Village;
+            user.Profilepic = citizen.Profilepic == null ? user.Profilepic : citizen.Profilepic;
+            await citizenManager.UpdateAsync(user);
+            return RedirectToAction("Edit"); // Redirect to the profile page or wherever appropriate
+        }
+
 
         [HttpGet]
         public IActionResult Register()
         {
+            if (User.Identity.IsAuthenticated)
+            {
+                // Redirect to a different page (e.g., Home or Dashboard)
+                return RedirectToAction("Index", "Home");
+            }
             var model = new RegisterViewModel();
             return View(model);
         }
@@ -112,6 +145,11 @@ namespace GovConnect.Controllers
         }
         [HttpGet]
         public IActionResult Login(string? returnUrl) {
+            if (User.Identity.IsAuthenticated)
+            {
+                // Redirect to a different page (e.g., Home or Dashboard)
+                return RedirectToAction("Index", "Home");
+            }
             return View();
         }
         [HttpPost]
@@ -124,17 +162,7 @@ namespace GovConnect.Controllers
                 {
                     if (user.EmailConfirmed == false)
                     {
-                        var token = await citizenManager.GenerateEmailConfirmationTokenAsync(user);
-                        var callbackUrl = Url.Action(
-                            "ConfirmEmail", "Account",
-                            new { token, email = user.Email },
-                            protocol: HttpContext.Request.Scheme);
-
-                        await emailSender.SendEmailAsync(
-                            model.Email,
-                            "Email Confirmation",
-                            $"Please confirm your email by clicking here: <a href='{callbackUrl}'>link</a>");
-
+                        SendEmail(model, user);
                         TempData["Message"] = "Thank you for registering! An email has been sent to your address with a link to log in. Please check your inbox (and spam folder) to proceed with logging in.";
                         return View();
                     }
@@ -167,8 +195,27 @@ namespace GovConnect.Controllers
             }
             return View(model);
         }
+        public async void SendEmail(LoginViewModel model,Citizen user)
+        {
+            var token = await citizenManager.GenerateEmailConfirmationTokenAsync(user);
+            var callbackUrl = Url.Action(
+                "ConfirmEmail", "Account",
+                new { token, email = user.Email },
+                protocol: HttpContext.Request.Scheme);
+
+            await emailSender.SendEmailAsync(
+                model.Email,
+                "Email Confirmation",
+                $"Please confirm your email by clicking here: <a href='{callbackUrl}'>link</a>");
+        } 
+        [HttpGet]
         public IActionResult Officer_Login()
         {
+            if (User.Identity.IsAuthenticated)
+            {
+                // Redirect to a different page (e.g., Home or Dashboard)
+                return RedirectToAction("Index", "Home");
+            }
             return View();
         }
 
@@ -210,6 +257,11 @@ namespace GovConnect.Controllers
 
         [HttpGet]
         public IActionResult ForgotPassword() {
+            if (User.Identity.IsAuthenticated)
+            {
+                // Redirect to a different page (e.g., Home or Dashboard)
+                return RedirectToAction("Index", "Home");
+            }
             return View();
         }
         //[HttpPost]
@@ -284,11 +336,11 @@ namespace GovConnect.Controllers
             return RedirectToAction("Index");  // Redirect to form again
         }
 
-        [HttpPost]
+        [HttpGet]
         public async Task<IActionResult> Logout()
         {
             // Sign out the user
-            await HttpContext.SignOutAsync();
+            await signInManager.SignOutAsync();
 
             // Redirect to the homepage or login page
             return RedirectToAction("Index", "Home");

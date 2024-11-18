@@ -9,6 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<EmailSender>();
+builder.Services.AddScoped<ProfileService>();
+builder.Services.AddScoped<CitizenService>();
 var connectionString = builder.Configuration.GetConnectionString("SQLServerConnection") ?? throw new InvalidOperationException("Connection string 'SQLServerIdentityConnection' not found.");
 builder.Services.AddDbContext<SqlServerDbContext>(options =>
     options.UseSqlServer(connectionString));
@@ -24,7 +26,7 @@ builder.Services.AddIdentity<Citizen, IdentityRole>(
         options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";
         //options.Tokens.ProviderMap.Add("Default", new TokenProviderDescriptor(typeof(DataProtectorTokenProvider<Citizen>)));
     })
-    .AddEntityFrameworkStores<SqlServerDbContext>().AddDefaultTokenProviders(); ;
+    .AddEntityFrameworkStores<SqlServerDbContext>().AddDefaultTokenProviders();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

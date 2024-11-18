@@ -57,6 +57,10 @@ body {
     align-items: center; /* Align items vertically to the center */
     margin-left: auto; /* This will push the menu to the right */
 }
+.header .header-menu .no-link {
+    text-decoration: none; /* Removes underline */
+    color: inherit; /* Inherits color from parent, or set a specific color if needed */
+}
 
 /* Individual Menu Items */
 .header .menu-item {
