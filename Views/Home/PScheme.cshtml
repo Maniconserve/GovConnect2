@@ -1,12 +1,14 @@
-﻿@{
+﻿@model GovConnect.Models.Scheme
+
+@{
     Layout = "_Gov_Layout";
 }
-<!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sanction of Laptops - Andhra Pradesh</title>
+    <title>Scheme Details - Andhra Pradesh</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -16,58 +18,33 @@
         }
     </style>
 </head>
-<body class="bg-light p-5">
-    <div class="container bg-white p-5 shadow rounded">
-        <h1 class="text-2xl font-weight-bold mb-4">Sanction of Laptops - Andhra Pradesh</h1>
+<body>
+    <div class="bg-light p-5 mb-5 container shadow rounded w-auto">
+        <h1 class="text-2xl font-weight-bold mb-4">Scheme Details</h1>
         <p class="text-muted mb-4">Andhra Pradesh</p>
 
-        <!-- Tags -->
+        <!-- Tags (if applicable, you can customize based on the scheme) -->
         <div class="mb-5">
             <span class="badge bg-success">Empowerment</span>
-            <span class="badge bg-success">Orthopedically</span>
-            <span class="badge bg-success">Speech Impaired</span>
-            <span class="badge bg-success">Source</span>
+            <span class="badge bg-success">Differently Abled</span>
         </div>
 
-        <!-- Details Section -->
+        <!-- Scheme Details Section -->
         <h2 class="h4 font-weight-bold mb-2">Details</h2>
-        <p class="text-muted mb-4">
-            The Department for the Welfare of Differently Abled & Senior Citizens launched the "Sanction of Laptops" scheme to distribute free laptops to visually challenged, hearing impairments, speech impairments, and orthopedic challenges students pursuing professional courses. The A.P. Differently Abled & Senior Citizens Assistance Corporation proposes to procure 200 laptops at ₹50,000/- each.
-        </p>
+        <p class="text-muted mb-4">@Model.Details</p>
+
+        <!-- Eligibility Section -->
+        <h2 class="h4 font-weight-bold mb-2">Eligibility</h2>
+        <pre class="text-muted mb-4">@Model.Eligibility</pre>
 
         <!-- Application Process Section -->
         <h2 class="h4 font-weight-bold mb-2">Application Process</h2>
-        <h3 class="h5 font-weight-medium mb-2">Online</h3>
-        <ol class="list-group list-group mb-4">
-            <li class="list-group-item">Step 01: The interested student needs to visit the official <a href="#" class="text-decoration-none text-primary">website</a>.</li>
-            <li class="list-group-item">Step 02: Click on the "Online Applications" on the home page.</li>
-            <li class="list-group-item">Step 03: Select the category "Click here to apply for differently abled schemes".</li>
-            <li class="list-group-item">Step 04: Now click on "Apply Online" next to the scheme name.</li>
-            <li class="list-group-item">Step 05: Confirm your registration.</li>
-        </ol>
-        <p><i>If applicant has not registered earlier:</i></p>
-        <ol class="list-group list-group mb-4">
-            <li class="list-group-item">Step 06: Answer the new registration question as "No".</li>
-            <li class="list-group-item">Step 07: Fill in your Aadhaar card name, Aadhaar number, Mobile number, and email ID.</li>
-            <li class="list-group-item">Step 08: Create a new password for this application.</li>
-            <li class="list-group-item">Step 09: Click on "Register" and get the registration number.</li>
-        </ol>
-        <p><i>After registration:</i></p>
-        <ol class="list-group list-group mb-4">
-            <li class="list-group-item">Step 10: Click here to Login.</li>
-        </ol>
+        <pre class="text-muted mb-4">@Model.ApplicationProcess</pre>
 
         <!-- Documents Required Section -->
         <h2 class="h4 font-weight-bold mb-2">Documents Required <i class="fas fa-link"></i></h2>
-        <ul class="list-group mb-4">
-            <li class="list-group-item">Bonafide Certificate (issued from the recognized School/College).</li>
-            <li class="list-group-item">Parents Income Certificate.</li>
-            <li class="list-group-item">Sadarem/Disability Certificate.</li>
-            <li class="list-group-item">Aadhaar Card.</li>
-            <li class="list-group-item">Mobile Number.</li>
-        </ul>
+        <pre class="text-muted mb-4">@Model.DocsRequired</pre>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html>

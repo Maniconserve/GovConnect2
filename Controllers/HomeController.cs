@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using GovConnect.Models;
+using GovConnect.Repository;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GovConnect.Controllers
@@ -7,10 +8,12 @@ namespace GovConnect.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private SchemeRepository _schemeRepository;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, SchemeRepository schemeRepository)
         {
             _logger = logger;
+            _schemeRepository = schemeRepository;
         }
 
         public IActionResult Index()
@@ -28,8 +31,18 @@ namespace GovConnect.Controllers
             return View();
         }
         [HttpGet]
-        public IActionResult PScheme() {
-            return View();
+        public async Task<IActionResult> PScheme(int schemeId) {
+
+            var scheme = await _schemeRepository.GetSchemeByIdAsync(schemeId);
+
+            // If the scheme is not found, return a not found error
+            if (scheme == null)
+            {
+                return NotFound();
+            }
+
+            // Pass the scheme data to the view
+            return View(scheme);
         }
         public IActionResult Privacy()
         {
