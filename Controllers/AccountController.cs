@@ -1,7 +1,9 @@
-﻿using GovConnect.Data;
+﻿using System.Security.Claims;
+using GovConnect.Data;
 using GovConnect.Models;
 using GovConnect.Services;
 using GovConnect.ViewModels;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +30,6 @@ namespace GovConnect.Controllers
         {
             try
             {
-                //Get the currently logged-in user asynchronously
                 var user = await citizenManager.GetUserAsync(User);
 
                 if (user == null)
@@ -144,13 +145,17 @@ namespace GovConnect.Controllers
             return View(model);
         }
         [HttpGet]
-        public IActionResult Login(string? returnUrl) {
+        public async Task<IActionResult> Login(string? returnUrl) {
             if (User.Identity.IsAuthenticated)
             {
                 // Redirect to a different page (e.g., Home or Dashboard)
                 return RedirectToAction("Index", "Home");
             }
-            return View();
+            var loginVM = new LoginViewModel()
+            {
+                Schemes = await signInManager.GetExternalAuthenticationSchemesAsync()
+            };
+            return View(loginVM);
         }
         [HttpPost]
         public async  Task<IActionResult> Login(LoginViewModel model, string? returnUrl) {
@@ -219,6 +224,39 @@ namespace GovConnect.Controllers
             return View();
         }
 
+        [HttpGet]
+        public IActionResult GoogleLogin(String provider,String returnUrl="")
+        {
+            var redirectUrl = Url.Action("GoogleLoginCallBack", "Account", new { ReturnUrl = returnUrl });
+            var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            properties.Items["prompt"] = "select_account";
+            return new ChallengeResult(provider, properties);
+        }
+
+        public async Task<IActionResult> GoogleLoginCallBack(string remoteError,String returnUrl = "" )
+        {
+            var loginVM = new LoginViewModel()
+            {
+                Schemes = await signInManager.GetExternalAuthenticationSchemesAsync()
+            };
+            if (remoteError != null)
+            {
+                ModelState.AddModelError("", $"Error from google login provider : {remoteError}");
+                return View("Login", loginVM);
+            }
+            var info = await signInManager.GetExternalLoginInfoAsync();
+            if (info == null)
+            {
+                ModelState.AddModelError("", $"Error from google login provider : {remoteError}");
+                return View("Login", loginVM);
+            }
+            var user = await citizenManager.FindByEmailAsync(info.Principal?.FindFirst(ClaimTypes.Email)?.Value);
+            await signInManager.SignInAsync(user, isPersistent: false);
+            return RedirectToAction("Index", "Home");
+        }
+
+
+
         private async Task<byte[]> ConvertFileToByteArray(IFormFile file)
         {
             if (file == null || file.Length == 0)
@@ -264,11 +302,6 @@ namespace GovConnect.Controllers
             }
             return View();
         }
-        //[HttpPost]
-        //public IActionResult ForgotPassword()
-        //{
-        //    return View();
-        //}
         [HttpPost]
         public async Task<IActionResult> SendOtp(string email)
         {

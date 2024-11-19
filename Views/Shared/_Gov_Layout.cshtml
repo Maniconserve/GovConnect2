@@ -22,7 +22,7 @@
             <div class="menu-item"><a class="no-link">Lodge</a></div>
             <div class="menu-item"><a class="no-link">status</a></div>
             <div class="menu-item"><a class="no-link">Services</a></div>
-            <div class="menu-item"><a class="no-link">Schemes</a></div>
+            <div class="menu-item"><a asp-controller="Home" asp-action="Schemes" class="no-link">Schemes</a></div>
         </div>
         @if (SignInManager.IsSignedIn(User))
         {

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authentication;
 namespace GovConnect.ViewModels
 {
     public class LoginViewModel
@@ -13,6 +14,8 @@ namespace GovConnect.ViewModels
 
         [Display(Name = "Remember Me")]
         public bool RememberMe { get; set; }
+
+        public IEnumerable<AuthenticationScheme> Schemes { get; set; }
     }
 
 }

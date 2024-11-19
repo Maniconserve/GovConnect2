@@ -1,0 +1,168 @@
+﻿@{
+    ViewData["Title"] = "Scheme Finder";
+    Layout = "_Gov_Layout"; // Use the layout that contains the header, footer, and other common elements.
+}
+
+<style>
+    .btn-check:checked + .btn {
+        background-color: #28a745; 
+        color: white;
+    }
+    .btn-check:checked + .btn i {
+        color: white;
+    }
+    .list-group .list-group-item {
+        cursor: pointer;
+    }
+
+    .btn-check:checked + .list-group-item {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .btn-check:checked + .btn {
+        background-color: #28a745;
+        color: white;
+    }
+</style>
+
+@* Main content starts here *@
+<div class="container mt-5 mb-5">
+    <div class="p-4 mx-auto" style="max-width: 600px;">
+        <h2 class="text-center mb-4">Help us find the best schemes for you</h2>
+
+        <form asp-action="Search" method="get">
+            <!-- Gender Selection -->
+            <div class="mb-3">
+                <label class="form-label">
+                    <span class="text-danger">*</span> Tell us about yourself, you are a...
+                </label>
+                <div class="btn-group w-100" role="group" id="gender-options">
+                    <!-- Male Option -->
+                    <input type="radio" class="btn-check" name="gender" id="male" autocomplete="off">
+                    <label class="btn btn-outline-secondary w-100 d-flex flex-column align-items-center" for="male">
+                        <i class="fas fa-mars mb-2"></i> Male
+                    </label>
+
+                    <!-- Female Option -->
+                    <input type="radio" class="btn-check" name="gender" id="female" autocomplete="off">
+                    <label class="btn btn-outline-secondary w-100 d-flex flex-column align-items-center" for="female">
+                        <i class="fas fa-venus mb-2"></i> Female
+                    </label>
+
+                    <!-- Transgender Option -->
+                    <input type="radio" class="btn-check" name="gender" id="transgender" autocomplete="off">
+                    <label class="btn btn-outline-secondary w-100 d-flex flex-column align-items-center" for="transgender">
+                        <i class="fas fa-transgender-alt mb-2"></i> Transgender
+                    </label>
+                </div>
+            </div>
+
+            <!-- Age Selection -->
+            <div class="mb-3">
+                <label class="form-label">
+                    <span class="text-danger">*</span> and your age is
+                </label>
+                <div class="d-flex align-items-center">
+                    <input type="number" class="form-control w-25" placeholder="Enter age" min="1" max="120">
+                    <span class="ms-2">years</span>
+                </div>
+            </div>
+
+            <!-- Caste Selection -->
+            <div class="mb-3">
+                <label class="form-label">
+                    <span class="text-danger">*</span> You belong to...
+                </label>
+                <div class="list-group" id="caste-options">
+                    <!-- Caste options as radio buttons -->
+                    <input type="radio" class="btn-check" name="caste" id="general" autocomplete="off">
+                    <label class="list-group-item list-group-item-action" for="general">
+                        General
+                    </label>
+
+                    <input type="radio" class="btn-check" name="caste" id="obc" autocomplete="off">
+                    <label class="list-group-item list-group-item-action" for="obc">
+                        Other Backward Class (OBC)
+                    </label>
+
+                    <input type="radio" class="btn-check" name="caste" id="pvtg" autocomplete="off">
+                    <label class="list-group-item list-group-item-action" for="pvtg">
+                        Particularly Vulnerable Tribal Group (PVTG)
+                    </label>
+
+                    <input type="radio" class="btn-check" name="caste" id="sc" autocomplete="off">
+                    <label class="list-group-item list-group-item-action" for="sc">
+                        Scheduled Caste (SC)
+                    </label>
+
+                    <input type="radio" class="btn-check" name="caste" id="st" autocomplete="off">
+                    <label class="list-group-item list-group-item-action" for="st">
+                        Scheduled Tribe (ST)
+                    </label>
+                </div>
+            </div>
+
+            <!-- Differently Abled -->
+            <div class="mb-3">
+                <label class="form-label">
+                    <span class="text-danger">*</span> Are you differently abled?
+                </label>
+                <div class="btn-group w-100" role="group" id="differently-abled-options">
+                    <!-- Yes/No as radio buttons -->
+                    <input type="radio" class="btn-check" name="differentlyAbled" id="yesD" autocomplete="off">
+                    <label class="btn btn-outline-secondary w-50" for="yesD">
+                        Yes
+                    </label>
+                    <input type="radio" class="btn-check" name="differentlyAbled" id="noD" autocomplete="off">
+                    <label class="btn btn-outline-secondary w-50" for="noD">
+                        No
+                    </label>
+                </div>
+            </div>
+
+            <!-- Student Selection -->
+            <div class="mb-3">
+                <label class="form-label">
+                    <span class="text-danger">*</span> Are you a student?
+                </label>
+                <div class="btn-group w-100" role="group" id="student-options">
+                    <!-- Yes/No as radio buttons -->
+                    <input type="radio" class="btn-check" name="student" id="yesS" autocomplete="off">
+                    <label class="btn btn-outline-secondary w-50" for="yesS">
+                        Yes
+                    </label>
+                    <input type="radio" class="btn-check" name="student" id="noS" autocomplete="off">
+                    <label class="btn btn-outline-secondary w-50" for="noS">
+                        No
+                    </label>
+                </div>
+            </div>
+
+            <!-- BPL Category -->
+            <div class="mb-3">
+                <label class="form-label">
+                    <span class="text-danger">*</span> Do you belong to BPL category?
+                </label>
+                <div class="btn-group w-100" role="group" id="bpl-options">
+                    <!-- Yes/No as radio buttons -->
+                    <input type="radio" class="btn-check" name="bpl" id="yesBPL" autocomplete="off">
+                    <label class="btn btn-outline-secondary w-50" for="yesBPL">
+                        Yes
+                    </label>
+                    <input type="radio" class="btn-check" name="bpl" id="noBPL" autocomplete="off">
+                    <label class="btn btn-outline-secondary w-50" for="noBPL">
+                        No
+                    </label>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="text-center">
+                <button type="submit" class="btn btn-success w-100">
+                    Submit <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

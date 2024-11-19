@@ -17,7 +17,20 @@ namespace GovConnect.Controllers
         {
             return View();
         }
-
+        [HttpGet]
+        public IActionResult Schemes()
+        {
+            return View();
+        }
+        [HttpGet]
+        public IActionResult Search()
+        {
+            return View();
+        }
+        [HttpGet]
+        public IActionResult PScheme() {
+            return View();
+        }
         public IActionResult Privacy()
         {
             return View();
