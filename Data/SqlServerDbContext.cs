@@ -22,6 +22,7 @@ namespace GovConnect.Data
                 .Property(u => u.UserName)
                 .HasColumnName("FirstName");
         }
-        public DbSet<Scheme> Schemes { get; set; }
+        public DbSet<Scheme> GovSchemes { get; set; }
+        public DbSet<Eligibility> SchemeEligibilities { get; set; }
     }
 }

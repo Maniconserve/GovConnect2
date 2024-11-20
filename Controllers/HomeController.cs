@@ -23,7 +23,18 @@ namespace GovConnect.Controllers
         [HttpGet]
         public IActionResult Schemes()
         {
-            return View();
+            var eligibility = new Eligibility();
+            return View(eligibility);
+
+        }
+        [HttpPost]
+        public async Task<IActionResult> Schemes(Eligibility eligibility)
+        {
+            var schemes = await _schemeRepository.GetSchemesByEligibilityAsync(eligibility);
+
+
+            // Return the view with the eligibility and schemes data
+            return View("Search",schemes);
         }
         [HttpGet]
         public IActionResult Search()
@@ -32,16 +43,8 @@ namespace GovConnect.Controllers
         }
         [HttpGet]
         public async Task<IActionResult> PScheme(int schemeId) {
-
-            var scheme = await _schemeRepository.GetSchemeByIdAsync(schemeId);
-
-            // If the scheme is not found, return a not found error
-            if (scheme == null)
-            {
-                return NotFound();
-            }
-
             // Pass the scheme data to the view
+            var scheme = await _schemeRepository.GetSchemeByIdAsync(schemeId);
             return View(scheme);
         }
         public IActionResult Privacy()

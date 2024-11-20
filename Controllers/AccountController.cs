@@ -3,7 +3,6 @@ using GovConnect.Data;
 using GovConnect.Models;
 using GovConnect.Services;
 using GovConnect.ViewModels;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
