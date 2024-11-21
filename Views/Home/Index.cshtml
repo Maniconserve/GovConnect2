@@ -1,5 +1,5 @@
 ﻿@{
-    Layout = "_Gov_Layout"; 
+    Layout = "_Gov_Layout"; // Reference the layout file
 }
 <style>
     .custom-bg {
@@ -8,16 +8,20 @@
     }
     .custom-border {
         border-radius: 15px;
-        transition: transform 0.3s ease, box-shadow 0.3s ease; 
-    }
-
-    .custom-border:hover {
-        transform: scale(1.05); 
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
     }
 
     .custom-border {
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        
+    }
+
+        .custom-border:hover {
+            transform: scale(1.05); /* Slightly enlarges the element to create a "coming forward" effect */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Adds a shadow to make it look like it's lifted */
+        }
+
+    /* Optional: Add a default light shadow for better visibility */
+    .custom-border {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Light shadow by default */
     }
  </style>
     

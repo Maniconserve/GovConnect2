@@ -132,8 +132,7 @@ namespace GovConnect.Controllers
 
                 if (result.Succeeded)
                 {
-                    await signInManager.SignInAsync(citizen, isPersistent: false);
-                    return RedirectToAction("Index", "Home"); 
+                    return RedirectToAction("Login", "Account"); 
                 }
 
                 foreach (var error in result.Errors)
@@ -147,7 +146,6 @@ namespace GovConnect.Controllers
         public async Task<IActionResult> Login(string? returnUrl) {
             if (User.Identity.IsAuthenticated)
             {
-                // Redirect to a different page (e.g., Home or Dashboard)
                 return RedirectToAction("Index", "Home");
             }
             var loginVM = new LoginViewModel()
@@ -168,7 +166,8 @@ namespace GovConnect.Controllers
                     {
                         SendEmail(model, user);
                         TempData["Message"] = "Thank you for registering! An email has been sent to your address with a link to log in. Please check your inbox (and spam folder) to proceed with logging in.";
-                        return View();
+                        model.Schemes = await signInManager.GetExternalAuthenticationSchemesAsync();
+                        return View(model);
                     }
                     else
                     {
@@ -284,7 +283,7 @@ namespace GovConnect.Controllers
             var result = await citizenManager.ConfirmEmailAsync(user, token);
             if (result.Succeeded)
             {
-                return View("Login");
+                return View("Login",new LoginViewModel { Schemes = await signInManager.GetExternalAuthenticationSchemesAsync() });
             }
             else
             {
@@ -294,12 +293,7 @@ namespace GovConnect.Controllers
 
         [HttpGet]
         public IActionResult ForgotPassword() {
-            if (User.Identity.IsAuthenticated)
-            {
-                // Redirect to a different page (e.g., Home or Dashboard)
-                return RedirectToAction("Index", "Home");
-            }
-            return View();
+            return View(new ForgotPasswordViewModel());
         }
         [HttpPost]
         public async Task<IActionResult> SendOtp(string email)
@@ -309,7 +303,7 @@ namespace GovConnect.Controllers
             if (user == null)
             {
                 TempData["OtpMessage"] = "No user found with this email.";
-                return View("ForgotPassword");
+                return View("ForgotPassword",new ForgotPasswordViewModel { Email = email});
             }
 
             // Generate a random OTP
@@ -324,41 +318,36 @@ namespace GovConnect.Controllers
                 await emailSender.SendEmailAsync(email, subject, body);
 
                 // Save OTP in TempData for use in subsequent form submissions
-                TempData["OtpMessage"] = "OTP has been sent to your email. Please check your inbox (and spam folder).";
+                TempData["EmailMessage"] = "OTP has been sent to your email. Please check your inbox (and spam folder).";
             }
             catch (Exception)
             {
-                TempData["OtpMessage"] = "Failed to send OTP. Please try again later.";
-            }
-            ViewBag.Email = email;  
-            return View("ForgotPassword");
+                TempData["EmailMessage"] = "Failed to send OTP. Please try again later.";
+            } 
+            return View("ForgotPassword", new ForgotPasswordViewModel { Email = email });
         }
 
         [HttpPost]
-        public async Task<IActionResult> VerifyOtp(string email, string otp, string password, string confirmPassword)
+        public async Task<IActionResult> VerifyOtp(ForgotPasswordViewModel forgotPasswordViewModel)
         {
-            // Verify OTP
-            if (otp != originalotp)  // Example check, you can use a more secure approach
+            if (!forgotPasswordViewModel.Otp.Equals(originalotp))
             {
-                TempData["OtpMessage"] = "Invalid OTP.";
-                return RedirectToAction("ForgotPassword");  // Or wherever you want to redirect
+                TempData["OtpMessage"] = "OTP is invalid";
+                return View("ForgotPassword", forgotPasswordViewModel);
             }
-
-            // Ensure passwords match
-            if (password != confirmPassword)
+            if (!ModelState.IsValid)
             {
-                TempData["OtpMessage"] = "Passwords do not match.";
-                return RedirectToAction("ForgotPassword");
+                return View("ForgotPassword",forgotPasswordViewModel);
             }
 
             // Update the user's password
-            var user = await citizenManager.FindByEmailAsync(email);
+            var user = await citizenManager.FindByEmailAsync(forgotPasswordViewModel.Email);
             if (user != null)
             {
                 var result = await citizenManager.RemovePasswordAsync(user);  // Remove current password
                 if (result.Succeeded)
                 {
-                    result = await citizenManager.AddPasswordAsync(user, password);  // Add new password
+                    result = await citizenManager.AddPasswordAsync(user,forgotPasswordViewModel.Password);  // Add new password
                     if (result.Succeeded)
                     {
                         return RedirectToAction("Login");  // Redirect to login or wherever needed

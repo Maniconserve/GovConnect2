@@ -30,6 +30,13 @@
                     </div>
                     <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
+                <!-- TempData Message Display -->
+                @if (TempData["Message"] != null)
+                {
+                    <div class="alert alert-info alert-dismissible fade show" role="alert">
+                        @TempData["Message"]
+                    </div>
+                }
 
                 <!-- Password Field -->
                 <div class="mb-3">

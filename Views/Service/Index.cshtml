@@ -1,0 +1,151 @@
+﻿@model IEnumerable<GovConnect.Models.Service> 
+@{
+    Layout = "_Gov_Layout";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Andhra Pradesh Doorstep Delivery of Public Services</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEJ6v3vVf6gE4o8adqaaN84kgk5u50p3m85y9tn9WlmRExkudlfdYZLh8Lyz2" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        /* Custom Card Styles */
+        .service-card {
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+            min-height: 320px; /* Fixed height for all cards */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Ensures content is spaced out evenly */
+        }
+        
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .service-card .icon {
+            color: #6c757d;
+            font-size: 3rem;
+            transition: color 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .service-card:hover .icon {
+            color: #f39c12;
+        }
+
+        .service-card h2 {
+            font-size: 1.25rem;
+            color: #343a40;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .service-card p {
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .service-card .btn {
+            background-color: #f39c12;
+            color: #fff;
+            border-radius: 25px;
+            padding: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease;
+        }
+
+        .service-card .btn:hover {
+            background-color: #e67e22;
+        }
+
+        .service-card .fee {
+            color: #27ae60;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        /* Ensures that all cards maintain the same height */
+        .service-card .service-info {
+            flex-grow: 1; /* Makes the service info area grow and take up available space */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container my-4">
+        <h1 class="text-center mb-4">Welcome to Andhra Pradesh Doorstep Delivery of Public Services</h1>
+        <p class="text-center mb-8">
+            The broad modus operandi of the project is that one representative (Mobile Sahayak) shall visit the residence of citizen who has requested to the call centre for availing the public service. The Mobile Sahayak shall facilitate citizen in applying for public service and also collect the physical documents, if required for availing the said service/services, deposit the physical documents to respective Departments and deliver the service/certificate of citizen at his door step. Government shall allow representative to collect facilitation fee / service charges of Rs.50/- directly from the citizen for each service.
+        </p>
+
+        <!-- Sort By Dropdown -->
+        <div class="mb-4 d-flex justify-content-end">
+            <form method="get" action="@Url.Action("GetDepartmentWithServicesByName", "Service")">
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        Sort By
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="sortDropdown">
+                        <li><a class="dropdown-item" data-deptname="Revenue Department">Revenue</a></li>
+                        <li><a class="dropdown-item" data-deptname="Ministry of Road Transport (MoRT)">Transport</a></li>
+                        <li><a class="dropdown-item" data-deptname="Department of Food & Supplies">Food and Civil Supplies</a></li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <!-- Service Cards -->
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+            @foreach (var service in Model)  
+            {
+                var totalFee = service.FeeDetails.GovFee + service.FeeDetails.ServiceFee + service.FeeDetails.Tax;
+                <div class="col">
+                    <div class="service-card p-4 shadow-sm text-center">
+                        <div class="service-info">
+                            <i class="fas fa-file-alt icon mb-3"></i>
+                            <h2 class="h5 mb-2">@service.ServiceName</h2>  <!-- Service Name -->
+                            <p class="fee">INR @totalFee</p>  <!-- Display the total fee -->
+                        </div>
+                        <a href="@Url.Action("Apply", "Service", new { id = service.ServiceId })" class="btn w-100 mb-2">Apply</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+    <script>
+        // JavaScript to handle department selection
+        document.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', function (e) {
+                e.preventDefault();  // Prevent the default link behavior
+                var deptName = this.getAttribute('data-deptname');  // Get the department name
+
+                // Get the form and create a hidden input field to pass the deptName to the server
+                var form = this.closest('form');
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'deptName';  // This matches the method parameter in the controller
+                input.value = deptName;
+                form.appendChild(input);
+
+                // Submit the form
+                form.submit();
+            });
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pzjw8f+ua7Kw1TIq0aU2pIRJraWo2iV5nvZY9S4tSOauGRrbX8EWSz30g2pQriM1" crossorigin="anonymous"></script>
+</body>
+</html>
