@@ -22,6 +22,13 @@
 
     <div class="p-8 w-full">
         <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="bg-green-100 text-green-800 p-4 rounded-md mb-4">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    @TempData["SuccessMessage"]
+                </div>
+            }
             <div class="flex justify-between items-center mb-6">
                 <h1 class="text-2xl font-bold text-gray-800">@Model.ServiceName</h1>  <!-- Service Name -->
 

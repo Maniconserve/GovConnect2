@@ -1,16 +1,20 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using GovConnect.Data;
+using Microsoft.AspNetCore.Identity;
+using GovConnect.Models;
 
 namespace GovConnect.Controllers
 {
     public class ServiceController : Controller
     {
         private readonly SqlServerDbContext _context; // Your DbContext
+        private readonly UserManager<Citizen> _userManager;
 
-        public ServiceController(SqlServerDbContext context)
+        public ServiceController(SqlServerDbContext context, UserManager<Citizen> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // Action method to retrieve all services from the database
@@ -36,10 +40,10 @@ namespace GovConnect.Controllers
             }
 
             // Return the department with its related services
-            return View("Index",departmentWithServices.Services);
+            return View("Index", departmentWithServices.Services);
         }
 
-        public IActionResult Apply(int? id)
+        public IActionResult PService(int? id)
         {
             // Retrieve the service with the given id from the database
             var service = _context.DServices
@@ -54,6 +58,48 @@ namespace GovConnect.Controllers
 
             // Pass the service to the view
             return View(service);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Apply(ServiceApplication model)
+        {
+            // Get the logged-in user
+            var user = await _userManager.GetUserAsync(User);  // This will fetch the logged-in user
+
+            if (user == null)
+            {
+                // If no user is logged in, redirect to login page or show an error
+                return RedirectToAction("Login", "Account");  // Or handle the error as needed
+            }
+
+            // Validate if model state is valid
+            if (ModelState.IsValid)
+            {
+                // Create a new ServiceApplication instance
+                var serviceApplication = new ServiceApplication
+                {
+                    UserID = user.Id,  // Set the UserID dynamically from the logged-in user
+                    ServiceID = model.ServiceID,
+                    ApplicationDate = model.ApplicationDate,
+                    Status = "Pending",  // Default status, can be updated based on logic
+                    OfficerID = null     // OfficerID will be null initially
+                };
+
+                // Save the new application to the database
+                _context.ServiceApplications.Add(serviceApplication);
+                await _context.SaveChangesAsync();  // Use async method for better performance
+
+                TempData["SuccessMessage"] = "You have successfully applied for the service!";
+                return View(model); // Return the same view
+            }
+
+            // If model state is invalid, return to the current page
+            return View(model);
+        }
+        [HttpGet]
+        public IActionResult MyServices()
+        {
+            return View();
         }
     }
 }

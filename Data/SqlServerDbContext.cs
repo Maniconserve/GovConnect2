@@ -33,11 +33,25 @@ namespace GovConnect.Data
                 fee.Property(f => f.ServiceFee).HasColumnName("ServiceFee");
                 fee.Property(f => f.Tax).HasColumnName("Tax");
             });
+
+            modelBuilder.Entity<ServiceApplication>()
+                .HasOne<Citizen>() // Assuming Citizen is the related model for UserID
+                .WithMany()        // Add the appropriate relationship configuration
+                .HasForeignKey(s => s.UserID)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ServiceApplication>()
+                .HasOne<Service>() // Assuming Service is the related model for ServiceID
+                .WithMany()         // Add the appropriate relationship configuration
+                .HasForeignKey(s => s.ServiceID)
+                .OnDelete(DeleteBehavior.Cascade);
         }
         public DbSet<Scheme> GovSchemes { get; set; }
         public DbSet<Eligibility> SchemeEligibilities { get; set; }
 
         public DbSet<Department> DDepartments { get; set; } // Table for Departments
         public DbSet<Service> DServices { get; set; }       // Table for Services
+
+        public DbSet<ServiceApplication> ServiceApplications { get; set; }
     }
 }
