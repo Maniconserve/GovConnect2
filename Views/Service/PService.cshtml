@@ -22,13 +22,6 @@
 
     <div class="p-8 w-full">
         <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-lg">
-            @if (TempData["SuccessMessage"] != null)
-            {
-                <div class="bg-green-100 text-green-800 p-4 rounded-md mb-4">
-                    <i class="fas fa-check-circle mr-2"></i>
-                    @TempData["SuccessMessage"]
-                </div>
-            }
             <div class="flex justify-between items-center mb-6">
                 <h1 class="text-2xl font-bold text-gray-800">@Model.ServiceName</h1>  <!-- Service Name -->
 
@@ -36,15 +29,17 @@
                     @* Hidden fields to send service details in the form *@
                     <input type="hidden" name="ServiceID" value="@Model.ServiceId" />
                     <input type="hidden" name="ApplicationDate" value="@DateTime.Now" />
+                    <input type="hidden" name="ServiceName" value="@Model.ServiceName"/>
                     <div class="flex items-center space-x-2">
                         <button type="submit" class="bg-orange-500 text-white px-3 py-2 rounded-md hover:bg-orange-600 transition">Apply</button>
                         @* Calculate the total fee *@
                         @{
                             var totalFee = Model.FeeDetails.GovFee + Model.FeeDetails.ServiceFee + Model.FeeDetails.Tax;
-                        }
+                        
                         <div class="bg-orange-200 text-orange-600 px-2 py-2 rounded-md flex items-center justify-center">
                             INR @totalFee
                         </div>
+                        }
                     </div>
                 </form>
             </div>
@@ -57,8 +52,10 @@
                 <ul class="space-y-2">
                     <li>Government Fees = Rs @Model.FeeDetails.GovFee</li>
                     <li>Service Fees = Rs @Model.FeeDetails.ServiceFee</li>
-                    <li>Tax = Rs @Model.FeeDetails.Tax</li>
-                    <li class="font-semibold text-orange-700">Total Fees = Rs @totalFee</li>
+                    @{
+                        var tFee = Model.FeeDetails.GovFee + Model.FeeDetails.ServiceFee + Model.FeeDetails.Tax;
+                    <li class="font-semibold text-orange-700">Total Fees = Rs @tFee</li>
+                    }
                 </ul>
             </div>
 

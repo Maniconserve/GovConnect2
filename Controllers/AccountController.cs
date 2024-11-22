@@ -24,6 +24,24 @@ namespace GovConnect.Controllers
             SqlServerDbContext = _SqlServerDbContext;
             citizenService = _citizenService;
         }
+
+        [Route("Account/HandleError")]
+        public IActionResult HandleError(int statusCode)
+        {
+            if (statusCode == 404)
+            {
+                return View("NotFound");
+            }
+
+            // Return a generic error page
+            return View("Error");
+        }
+
+        [HttpGet]
+        public IActionResult OfficerDashBoard()
+        {
+            return View();
+        }
         [HttpGet]
         public async Task<IActionResult> Edit()
         {
@@ -98,19 +116,20 @@ namespace GovConnect.Controllers
             return View(model);
         }
         [HttpPost]
-        public async Task<IActionResult> Register(RegisterViewModel model) {
+        public async Task<IActionResult> Register(RegisterViewModel model)
+        {
             if (ModelState.IsValid)
             {
                 var existingEmail = await citizenManager.FindByEmailAsync(model.Email);
-                if(existingEmail != null)
+                if (existingEmail != null)
                 {
-                    ModelState.AddModelError("Email","This email address is already taken.");
+                    ModelState.AddModelError("Email", "This email address is already taken.");
                     return View(model);
                 }
                 var existingMobile = await citizenManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == model.Mobile);
-                if(existingMobile != null)
+                if (existingMobile != null)
                 {
-                    ModelState.AddModelError("Mobile","This mobile number is already taken.");
+                    ModelState.AddModelError("Mobile", "This mobile number is already taken.");
                     return View(model);
                 }
                 var citizen = new Citizen
@@ -125,14 +144,14 @@ namespace GovConnect.Controllers
                     District = model.District,
                     City = model.City,
                     Village = model.Village,
-                    Profilepic = await ConvertFileToByteArray(model.ProfilePic) 
+                    Profilepic = await ConvertFileToByteArray(model.ProfilePic)
                 };
 
                 var result = await citizenManager.CreateAsync(citizen, model.Password);
 
                 if (result.Succeeded)
                 {
-                    return RedirectToAction("Login", "Account"); 
+                    return RedirectToAction("Login", "Account");
                 }
 
                 foreach (var error in result.Errors)
@@ -142,6 +161,7 @@ namespace GovConnect.Controllers
             }
             return View(model);
         }
+
         [HttpGet]
         public async Task<IActionResult> Login(string? returnUrl) {
             if (User.Identity.IsAuthenticated)

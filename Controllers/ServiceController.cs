@@ -21,7 +21,7 @@ namespace GovConnect.Controllers
         public async Task<IActionResult> Index()
         {
             // Fetch all services, including the related department data if needed
-            var services = await _context.DServices
+            var services = await _context.Services
                                         .ToListAsync();
 
             return View(services);  // Passing services to the View
@@ -30,7 +30,7 @@ namespace GovConnect.Controllers
         public async Task<IActionResult> GetDepartmentWithServicesByName(string deptName)
         {
             // Find department by name and eagerly load related services
-            var departmentWithServices = await _context.DDepartments
+            var departmentWithServices = await _context.Departments
                 .Include(d => d.Services)  // Eagerly load related services
                 .FirstOrDefaultAsync(d => d.DeptName == deptName);  // Search by DeptName
 
@@ -46,7 +46,7 @@ namespace GovConnect.Controllers
         public IActionResult PService(int? id)
         {
             // Retrieve the service with the given id from the database
-            var service = _context.DServices
+            var service = _context.Services
                 .Include(s => s.FeeDetails)  // Make sure to include related FeeDetails if necessary
                 .FirstOrDefault(s => s.ServiceId == id);
 
@@ -71,35 +71,72 @@ namespace GovConnect.Controllers
                 // If no user is logged in, redirect to login page or show an error
                 return RedirectToAction("Login", "Account");  // Or handle the error as needed
             }
-
-            // Validate if model state is valid
-            if (ModelState.IsValid)
-            {
-                // Create a new ServiceApplication instance
-                var serviceApplication = new ServiceApplication
-                {
-                    UserID = user.Id,  // Set the UserID dynamically from the logged-in user
-                    ServiceID = model.ServiceID,
-                    ApplicationDate = model.ApplicationDate,
-                    Status = "Pending",  // Default status, can be updated based on logic
-                    OfficerID = null     // OfficerID will be null initially
-                };
-
+            model.Status = "Pending";
+            model.UserID = user.Id;
                 // Save the new application to the database
-                _context.ServiceApplications.Add(serviceApplication);
-                await _context.SaveChangesAsync();  // Use async method for better performance
+            _context.ServiceApplications.Add(model);
+            await _context.SaveChangesAsync();  // Use async method for better performance
 
-                TempData["SuccessMessage"] = "You have successfully applied for the service!";
-                return View(model); // Return the same view
-            }
-
-            // If model state is invalid, return to the current page
-            return View(model);
+            return View(); 
         }
         [HttpGet]
-        public IActionResult MyServices()
+        public async Task<IActionResult> MyServices(string statusFilter = "All")  // Default to "In Progress"
         {
-            return View();
+            // Get the logged-in user
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                // If no user is logged in, redirect to the login page
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Query the database for services applied by the logged-in user and filter by status
+            var appliedServicesQuery = _context.ServiceApplications
+                .Where(s => s.UserID == user.Id);  // Filter by the logged-in user
+
+            // Apply status filter
+            if (statusFilter != "All")
+            {
+                appliedServicesQuery = appliedServicesQuery.Where(s => s.Status == statusFilter);
+            }
+
+            var appliedServices = await appliedServicesQuery.ToListAsync();
+
+            // Pass the data to the view
+            return View(appliedServices);
         }
+
+
+        [HttpGet]
+        public async Task<IActionResult> Withdraw(int id)
+        {
+            // Get the logged-in user
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Find the service application by ID
+            var serviceApplication = await _context.ServiceApplications
+                .FirstOrDefaultAsync(s => s.ApplicationID == id && s.UserID == user.Id); // Ensure only the logged-in user can withdraw their application
+
+            if (serviceApplication == null)
+            {
+                // If the application is not found or the user doesn't have permission, return an error view or redirect
+                return NotFound(); // Or you could redirect to an error page
+            }
+
+            // Change the status of the application to "Withdrawn"
+            serviceApplication.Status = "Withdrawn";
+
+            // Save the changes to the database
+            _context.Update(serviceApplication);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("MyServices");
+        }
+
+
     }
 }

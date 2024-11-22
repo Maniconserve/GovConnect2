@@ -49,9 +49,11 @@ namespace GovConnect.Data
         public DbSet<Scheme> GovSchemes { get; set; }
         public DbSet<Eligibility> SchemeEligibilities { get; set; }
 
-        public DbSet<Department> DDepartments { get; set; } // Table for Departments
-        public DbSet<Service> DServices { get; set; }       // Table for Services
+        public DbSet<Department> Departments { get; set; } // Table for Departments
+        public DbSet<Service> Services { get; set; }       // Table for Services
 
         public DbSet<ServiceApplication> ServiceApplications { get; set; }
+
+        public DbSet<Grievance> DGrievances { get; set; }
     }
 }

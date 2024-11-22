@@ -19,8 +19,8 @@
         </div>
         <div class="header-menu">
             <div class="menu-item"><a asp-action="Index" asp-controller="Home" class="no-link">Home</a></div>
-            <div class="menu-item"><a class="no-link">Lodge</a></div>
-            <div class="menu-item"><a class="no-link">status</a></div>
+            <div class="menu-item"><a asp-controller="Grievance" asp-action="Lodge" class="no-link">Lodge</a></div>
+            <div class="menu-item"><a asp-controller="Grievance" asp-action="Status" class="no-link">status</a></div>
             <div class="menu-item"><a asp-controller="Service" asp-action="Index" class="no-link">Services</a></div>
             <div class="menu-item"><a asp-controller="Home" asp-action="Schemes" class="no-link">Schemes</a></div>
         </div>
@@ -37,7 +37,7 @@
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
                     <li><a class="dropdown-item" asp-controller="Account" asp-action="Edit">My Profile</a></li>
                     <li><a class="dropdown-item" asp-controller="Service" asp-action="MyServices">My Services</a></li>
-                    <li><a class="dropdown-item" asp-controller="Account" asp-action="">My Grievances</a></li>
+                    <li><a class="dropdown-item" asp-controller="Grievance" asp-action="MyGrievances">My Grievances</a></li>
                     <li><a class="dropdown-item" asp-controller="Account" asp-action="Logout">Logout</a></li>
                 </ul>
             </div>

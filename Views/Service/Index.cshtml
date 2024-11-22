@@ -120,7 +120,7 @@
                             <h2 class="h5 mb-2">@service.ServiceName</h2>  <!-- Service Name -->
                             <p class="fee">INR @totalFee</p>  <!-- Display the total fee -->
                         </div>
-                        <a href="@Url.Action("Apply", "Service", new { id = service.ServiceId })" class="btn w-100 mb-2">Apply</a>
+                        <a href="@Url.Action("PService", "Service", new { id = service.ServiceId })" class="btn w-100 mb-2">Apply</a>
                     </div>
                 </div>
             }
