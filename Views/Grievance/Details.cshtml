@@ -1,0 +1,56 @@
+﻿@model GovConnect.Models.Grievance
+
+@{
+    Layout = "_Gov_Layout";
+}
+
+<div class="container mt-4 min-vh-100">
+    <div class="card shadow-lg">
+        <div class="card-header bg-success text-white">
+            <h2>Grievance Details</h2>
+        </div>
+        <div class="card-body">
+            <h4 class="card-title">@Model.Title</h4>
+            <p class="text-muted">Posted on: @Model.CreatedAt.ToString("MMMM dd, yyyy")</p>
+
+            <hr />
+
+            <div class="mb-3">
+                <h5>Status:</h5>
+                <p class="badge bg-primary">@Model.Status</p>
+            </div>
+
+            <div class="mb-3">
+                <h5>Department:</h5>
+                <p>@Model.DepartmentID</p> <!-- Replace with the department name if available -->
+            </div>
+
+            <div class="mb-3">
+                <h5>Description:</h5>
+                <p>@Model.Description</p>
+            </div>
+
+            @if (Model.FilesUploaded != null && Model.FilesUploaded.Length > 0)
+            {
+                <div class="mb-3">
+                    <h5>Attached File:</h5>
+                    <a href="@Url.Action("DownloadFile", "Grievance", new { id = Model.GrievanceID })" class="btn btn-secondary">
+                        Download File
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="mb-3">
+                    <h5>Upload File:</h5>
+                    <form method="post" enctype="multipart/form-data" asp-action="UploadFile" asp-route-id="@Model.GrievanceID">
+                        <input type="file" class="form-control" name="fileUpload" />
+                        <button type="submit" class="btn btn-primary mt-3">Upload File</button>
+                    </form>
+                </div>
+            }
+
+            <a href="@Url.Action("MyGrievances", "Grievance")" class="btn btn-success mt-3">Back to My Grievances</a>
+        </div>
+    </div>
+</div>

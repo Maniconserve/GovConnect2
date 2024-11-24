@@ -13,6 +13,7 @@ builder.Services.AddScoped<EmailSender>();
 builder.Services.AddScoped<ProfileService>();
 builder.Services.AddScoped<CitizenService>();
 builder.Services.AddScoped<SchemeRepository>();
+builder.Services.AddScoped<DashboardService>();
 var connectionString = builder.Configuration.GetConnectionString("SQLServerConnection") ?? throw new InvalidOperationException("Connection string 'SQLServerIdentityConnection' not found.");
 builder.Services.AddDbContext<SqlServerDbContext>(options =>
     options.UseSqlServer(connectionString));

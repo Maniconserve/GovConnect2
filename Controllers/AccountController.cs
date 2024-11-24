@@ -15,14 +15,16 @@ namespace GovConnect.Controllers
         private SignInManager<Citizen> signInManager;
         private SqlServerDbContext SqlServerDbContext;
         private CitizenService citizenService;
+        private readonly DashboardService _dashboardService;
         private EmailSender emailSender;
         private static string originalotp;
-        public AccountController(UserManager<Citizen> _citizenManager,SignInManager<Citizen> _signInManager, EmailSender _emailSender, SqlServerDbContext _SqlServerDbContext, CitizenService _citizenService) {
+        public AccountController(UserManager<Citizen> _citizenManager,SignInManager<Citizen> _signInManager, EmailSender _emailSender, SqlServerDbContext _SqlServerDbContext, CitizenService _citizenService, DashboardService dashboardService) {
             citizenManager = _citizenManager;
             signInManager = _signInManager;
             emailSender = _emailSender;
             SqlServerDbContext = _SqlServerDbContext;
             citizenService = _citizenService;
+            _dashboardService = dashboardService;
         }
 
         [Route("Account/HandleError")]
@@ -35,12 +37,6 @@ namespace GovConnect.Controllers
 
             // Return a generic error page
             return View("Error");
-        }
-
-        [HttpGet]
-        public IActionResult OfficerDashBoard()
-        {
-            return View();
         }
         [HttpGet]
         public async Task<IActionResult> Edit()
@@ -375,6 +371,14 @@ namespace GovConnect.Controllers
                 }
             }
             return RedirectToAction("Index");  // Redirect to form again
+        }
+        [HttpGet]
+        public IActionResult OfficerDashboard(int officerId)
+        {
+            var model = _dashboardService.GetOfficerDashboard(officerId);
+            if (model == null) return NotFound();
+
+            return View(model);
         }
 
         [HttpGet]

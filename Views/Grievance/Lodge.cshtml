@@ -1,7 +1,7 @@
 ﻿@model GovConnect.Models.Grievance
 
 @{
-    Layout = "_Gov_Layout";  // Adjust if you're using a custom layout
+    Layout = "_Gov_Layout";
 }
 
 <!DOCTYPE html>
@@ -13,7 +13,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
     <style>
-        /* Custom Styles for the Grievance Form */
         body {
             background-color: #f7f9fc;
         }
@@ -81,6 +80,15 @@
 
     <div class="grievance-form-container">
         <h2>Lodge a Grievance</h2>
+
+        <!-- Alert for Grievance ID -->
+        @if (TempData["GrievanceID"] != null)
+        {
+            <div class="alert alert-success" role="alert">
+                Your Grievance ID is <strong>@TempData["GrievanceID"]</strong>. Please keep it safe to track your grievance status.
+            </div>
+        }
+
         <form method="post" enctype="multipart/form-data">
             <div class="form-group mb-4">
                 <label for="Title">Grievance Title <span class="text-danger">*</span></label>
@@ -93,10 +101,10 @@
                 <label for="Department">Select Department <span class="text-danger">*</span></label>
                 <select asp-for="DepartmentID" class="form-select form-control" id="Department">
                     <option value="" disabled selected>Select Department</option>
-                    <option value=1>Police</option>
-                    <option value=2>Revenue</option>
-                    <option value=3>Municipal</option>
-                    <option value=4>Education</option>
+                    <option value="1">Police</option>
+                    <option value="2">Revenue</option>
+                    <option value="3">Municipal</option>
+                    <option value="4">Education</option>
                 </select>
                 <span asp-validation-for="DepartmentID" class="text-danger"></span>
             </div>
@@ -111,12 +119,12 @@
             <!-- File Upload -->
             <div class="form-group mb-4">
                 <label for="FileUpload">Attach a File (Optional)</label>
-                <input type="file" class="form-control file-upload-btn" id="FileUpload" name="FileUpload" />
+                <input type="file" class="form-control file-upload-btn" id="FileUpload" name="fileUpload" />
             </div>
 
             <!-- Consent Checkbox -->
             <div class="form-group form-check mb-4">
-                <input type="checkbox" class="form-check-input" id="Consent" />
+                <input type="checkbox" class="form-check-input" id="Consent" required />
                 <label class="form-check-label" for="Consent">I agree to the terms and conditions <span class="text-danger">*</span></label>
             </div>
 
