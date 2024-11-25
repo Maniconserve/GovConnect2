@@ -371,8 +371,6 @@ namespace GovConnect.Controllers
             {
                 return View("NotFound");
             }
-
-            // Return a generic error page
             return View("Error");
         }
     }

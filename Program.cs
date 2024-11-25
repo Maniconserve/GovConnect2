@@ -2,6 +2,7 @@ using GovConnect.Data;
 using GovConnect.Models;
 using GovConnect.Repository;
 using GovConnect.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +15,13 @@ builder.Services.AddScoped<ProfileService>();
 builder.Services.AddScoped<CitizenService>();
 builder.Services.AddScoped<SchemeRepository>();
 builder.Services.AddScoped<DashboardService>();
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+        .AddCookie(options =>
+        {
+            options.LoginPath = "/Officer/Login";
+            options.LogoutPath = "/Officer/Logout";
+        });
+
 var connectionString = builder.Configuration.GetConnectionString("SQLServerConnection") ?? throw new InvalidOperationException("Connection string 'SQLServerIdentityConnection' not found.");
 builder.Services.AddDbContext<SqlServerDbContext>(options =>
     options.UseSqlServer(connectionString));
@@ -54,7 +62,7 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-app.UseStatusCodePagesWithReExecute("/Account/HandleError", "?statusCode={0}");
+app.UseStatusCodePagesWithReExecute("/Citizen/HandleError", "?statusCode={0}");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 

@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using GovConnect.Models;
+using System.Text.Json;
 
 namespace GovConnect.Controllers
 {
@@ -34,61 +37,59 @@ namespace GovConnect.Controllers
             if (ModelState.IsValid)
             {
                 // Find the officer by email
-                var officer = await _SqlServerDbContext.PoliceOfficers.FirstOrDefaultAsync(o => o.Email == model.Email);
+                var officer = await _SqlServerDbContext.PoliceOfficers
+                    .FirstOrDefaultAsync(o => o.Email != null && o.Email == model.Email);
 
-                // Check if the officer exists and password matches
-                if (officer != null)
+                // Check if the officer exists and the password matches
+                if (officer != null && officer.Password == model.Password) // In a real application, don't store plain-text passwords
                 {
-                    // Check if officer's password is not null and matches
-                    if (officer.Password != null && officer.Password == model.Password)
+                    // Define the claims for the officer
+                    var claims = new List<Claim>
                     {
-                        var claims = new List<Claim> 
-                {
-                    new Claim(ClaimTypes.Name, officer.OfficerName),
-                    new Claim(ClaimTypes.Email, officer.Email),
-                    new Claim("OfficerId", officer.OfficerId.ToString())
-                };
+                        new Claim(ClaimTypes.Name, officer.OfficerName),
+                        new Claim(ClaimTypes.Email, officer.Email),
+                        new Claim("OfficerId", officer.OfficerId.ToString())
+                    };
 
-                        var identity = new ClaimsIdentity(claims, "OfficerLogin");
-                        var principal = new ClaimsPrincipal(identity);
-                        var authProperties = new AuthenticationProperties
-                        {
-                            IsPersistent = false // Set to true if you want the login to persist across browser sessions
-                        };
+                    // Assign the 'RoleOfficer' role claim if officer has this role
+                    // You can add more logic here to check if the officer is in a specific role
+                    claims.Add(new Claim(ClaimTypes.Role, "RoleOfficer"));
 
-                        // Sign the officer in
-                        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, authProperties);
+                    var identity = new ClaimsIdentity(claims, "OfficerLogin");
+                    var principal = new ClaimsPrincipal(identity);
 
-                        // Redirect to the returnUrl or home page
-                        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                        {
-                            return Redirect(returnUrl);
-                        }
-                        else
-                        {
-                            return RedirectToAction("Index", "Home");
-                        }
+                    var authProperties = new AuthenticationProperties
+                    {
+                        IsPersistent = false // Set to true if you want the login to persist across browser sessions
+                    };
+
+                    // Sign in the officer with the cookie authentication scheme
+                    await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, principal, authProperties);
+
+                    // Redirect to the returnUrl or home page
+                    if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                    {
+                        return Redirect(returnUrl);
                     }
                     else
                     {
-                        // Add error if the officer's password is null or doesn't match
-                        ModelState.AddModelError(string.Empty, "Invalid login attempt: Password mismatch.");
-                        return View(model);
+                        return RedirectToAction("Dashboard", "Officer", new { officerId = officer.OfficerId });
                     }
                 }
                 else
                 {
-                    // Add error if the officer is not found
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt: Officer not found.");
+                    // Add error if the officer is not found or the password doesn't match
+                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                     return View(model);
                 }
             }
 
+            // If model state is not valid, return the view with the model.
             return View(model);
         }
 
 
-        [Authorize(Policy = "NotUser")]
+
         [HttpGet]
         public IActionResult Dashboard(int officerId)
         {
@@ -97,13 +98,70 @@ namespace GovConnect.Controllers
 
             return View(model);
         }
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+            var grievance = await _SqlServerDbContext.DGrievances
+                .Where(g => g.GrievanceID == id)
+                .Select(g => new Grievance
+                {
+                    GrievanceID = g.GrievanceID,
+                    Title = g.Title,
+                    CreatedAt = g.CreatedAt,
+                    Status = g.Status,
+                    DepartmentID = g.DepartmentID,
+                    Description = g.Description,
+                    FilesUploaded = g.FilesUploaded,
+                    TimeLine = g.TimeLine
+                })
+                .FirstOrDefaultAsync();
 
+            if (grievance == null)
+            {
+                return NotFound();
+            }
+
+            return View(grievance);
+        }
+
+        // Action to add a new timeline entry
         [HttpPost]
+        public async Task<IActionResult> AddTimeLineEntry(int grievanceId, DateTime date, string work)
+        {
+            var grievance = await _SqlServerDbContext.DGrievances.FindAsync(grievanceId);
+
+            if (grievance != null)
+            {
+                // Deserialize existing timeline, add the new entry, and serialize it back
+                var timeLine = string.IsNullOrEmpty(grievance.TimeLine)
+                    ? new List<TimeLineEntry>()
+                    : JsonSerializer.Deserialize<List<TimeLineEntry>>(grievance.TimeLine);
+
+                timeLine.Add(new TimeLineEntry
+                {
+                    Date = date,
+                    Work = work
+                });
+
+                // Update the timeline in the Grievance object
+                grievance.SetTimeLine(timeLine);
+
+                // Save changes to the database
+                _SqlServerDbContext.Update(grievance);
+                await _SqlServerDbContext.SaveChangesAsync();
+            }
+
+            // Redirect back to the grievance details page
+            return RedirectToAction("Details", new { id = grievanceId });
+        }
+
+
+        [HttpGet]
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync(IdentityConstants.ApplicationScheme);
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Login");
         }
 
     }

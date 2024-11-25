@@ -1,50 +1,51 @@
-﻿@model IEnumerable<Grievance>
+﻿@model IEnumerable<GrievanceViewModel>
+
 <html>
 <head>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100">
-    <div class="max-w-4xl mx-auto p-8 min-vh-100">
+<body class="bg-gray-50">
+    <div class="max-w-4xl mx-auto p-8 min-h-screen">
         <!-- Header Section -->
-        <div class="flex justify-between items-center mb-4">
-            <h1 class="text-xl font-bold">My Grievances</h1>
-             <form method="get" action="/Grievance/MyGrievances"> <!-- Adjust the action URL -->
-            <select name="statusFilter" class="border border-gray-300 rounded p-2" onchange="this.form.submit()">
-                <option value="">All</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Resolved">Resolved</option>
-                <option value="Pending">Pending</option>
-            </select>
-        </form>
+        <div class="flex justify-between items-center mb-6 bg-blue-600 p-4 rounded-lg shadow-lg text-white">
+            <h1 class="text-2xl font-semibold">My Grievances</h1>
+            <form method="get" action="/Grievance/MyGrievances">
+                <select name="statusFilter" class="border border-gray-300 rounded p-2 bg-white text-gray-700" onchange="this.form.submit()">
+                    <option value="" >All</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Resolved">Resolved</option>
+                    <option value="Pending">Pending</option>
+                </select>
+            </form>
         </div>
 
         <!-- Grievances List -->
-        <div class="bg-gray-200 p-4 rounded-lg space-y-4">
+        <div class="bg-gray-200 p-6 rounded-lg space-y-6">
             @if (Model != null && Model.Any())
             {
                 foreach (var grievance in Model)
                 {
-                    <div class="bg-gray-400 p-4 rounded-lg">
+                    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition duration-300 ease-in-out hover:bg-blue-50">
                         <a href="@Url.Action("Details", "Grievance", new { id = grievance.GrievanceID })">
                             <div class="flex justify-between">
-                            <div>
-                                <p class="font-bold">Title</p>
-                                <p class="font-bold">Status</p>
-                                <p class="font-bold">Posted on</p>
+                                <div class="space-y-3">
+                                    <p class="font-semibold text-gray-800">Title</p>
+                                    <p class="font-semibold text-gray-800">Status</p>
+                                    <p class="font-semibold text-gray-800">Posted on</p>
+                                </div>
+                                <div class="space-y-3">
+                                    <p class="text-gray-900 text-lg font-medium">@grievance.Title</p>
+                                    <p class="text-gray-500">@grievance.Status</p>
+                                    <p class="text-gray-400">@grievance.CreatedAt.ToString("MM/dd/yyyy")</p>
+                                </div>
                             </div>
-                            <div>
-                                 <p>@grievance.Title</p>
-                                <p>@grievance.Status</p>
-                                <p>@grievance.CreatedAt.ToString("MM/dd/yyyy")</p>
-                            </div>
-                        </div>
                         </a>
                     </div>
                 }
             }
             else
             {
-                <div class="text-center text-gray-500">No grievances found.</div>
+                <div class="text-center text-gray-600 font-semibold text-lg">No grievances found.</div>
             }
         </div>
     </div>

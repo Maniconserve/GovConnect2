@@ -1,8 +1,11 @@
 ﻿using GovConnect.Data;
 using GovConnect.Models;
+using GovConnect.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+
 
 namespace GovConnect.Controllers
 {
@@ -69,6 +72,31 @@ namespace GovConnect.Controllers
         {
             return View();
         }
+
+        public IActionResult Status(int? grievanceId)
+        {
+            if (grievanceId == null)
+            {
+                return NotFound(); // Grievance ID not provided
+            }
+
+            // Retrieve the grievance and its timeline from the 'TimeLine' column
+            var grievance = _context.DGrievances
+                .Where(g => g.GrievanceID == grievanceId)
+                .FirstOrDefault();
+
+            if (grievance == null)
+            {
+                return NotFound(); // Grievance not found
+            }
+
+            // Deserialize the timeline from the 'TimeLine' column (assuming it's stored as a JSON string)
+            var timeline = JsonConvert.DeserializeObject<List<TimeLineEntry>>(grievance.TimeLine);
+
+            // Pass the timeline to the view
+            return View(timeline);
+        }
+
         [HttpGet]
         public async Task<IActionResult> MyGrievances(string? statusFilter)
         {
@@ -80,9 +108,21 @@ namespace GovConnect.Controllers
                 return RedirectToAction("Login", "Account"); // Redirect to login if user is not authenticated
             }
 
-            // Retrieve grievances for the logged-in user
+            // Retrieve grievances for the logged-in user, excluding the TimeLine field
             var grievancesQuery = _context.DGrievances
-                .Where(g => g.UserID == user.Id);
+                .Where(g => g.UserID == user.Id)
+                .Select(g => new GrievanceViewModel
+                {
+                    GrievanceID = g.GrievanceID,
+                    OfficerId = g.OfficerId,
+                    DepartmentID = g.DepartmentID,
+                    Description = g.Description,
+                    FilesUploaded = g.FilesUploaded,
+                    CreatedAt = g.CreatedAt,
+                    UserID = g.UserID,
+                    Status = g.Status,
+                    Title = g.Title
+                });
 
             // Apply status filter if provided
             if (!string.IsNullOrEmpty(statusFilter))
@@ -95,8 +135,12 @@ namespace GovConnect.Controllers
                 .OrderByDescending(g => g.CreatedAt)
                 .ToListAsync();
 
-            return View(grievances); // Pass filtered grievances to the view
+            // Pass the view model list to the view
+            return View(grievances);
         }
+
+
+
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {

@@ -11,5 +11,6 @@ namespace GovConnect.Models
 
         // Navigation Property for related services
         public ICollection<Service> Services { get; set; }
+        public ICollection<PoliceOfficer> PoliceOfficers { get; internal set; }
     }
 }

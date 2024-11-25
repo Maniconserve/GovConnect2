@@ -1,0 +1,78 @@
+﻿@model Grievance
+<div class="container mt-4 min-vh-100">
+    <div class="card shadow-lg">
+        <div class="card-header bg-success text-white">
+            <h2>Grievance Details</h2>
+        </div>
+        <div class="card-body">
+            <h4 class="card-title">@Model.Title</h4>
+            <p class="text-muted">Posted on: @Model.CreatedAt.ToString("MMMM dd, yyyy")</p>
+
+            <hr />
+
+            <div class="mb-3">
+                <h5>Status:</h5>
+                <p class="badge bg-primary">@Model.Status</p>
+            </div>
+
+            <div class="mb-3">
+                <h5>Department:</h5>
+                <p>@Model.DepartmentID</p>
+            </div>
+
+            <div class="mb-3">
+                <h5>Description:</h5>
+                <p>@Model.Description</p>
+            </div>
+
+            @if (Model.FilesUploaded != null && Model.FilesUploaded.Length > 0)
+            {
+                <div class="mb-3">
+                    <h5>Attached File:</h5>
+                    <a href="@Url.Action("DownloadFile", "Grievance", new { id = Model.GrievanceID })" class="btn btn-secondary">
+                        Download File
+                    </a>
+                </div>
+            }
+
+            <!-- TimeLine Table -->
+            <div class="mb-3">
+                <h5>TimeLine:</h5>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Work</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.GetTimeLine())
+                        {
+                            <tr>
+                                <td>@item.Date.ToString("MMMM dd, yyyy")</td>
+                                <td>@item.Work</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Add TimeLine Entry Form -->
+            <div class="mb-3">
+                <h5>Add TimeLine Entry:</h5>
+                <form asp-action="AddTimeLineEntry" method="post">
+                    <div class="mb-3">
+                        <label for="Date" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="Date" name="Date" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Work" class="form-label">Work</label>
+                        <input type="text" class="form-control" id="Work" name="Work" required />
+                    </div>
+                    <input type="hidden" name="GrievanceID" value="@Model.GrievanceID" />
+                    <button type="submit" class="btn btn-primary">Add Entry</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

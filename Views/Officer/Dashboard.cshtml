@@ -63,10 +63,10 @@
                                     <tr class="@(grievance.GrievanceID % 2 == 0 ? "bg-gray-100" : "")">
                                         <td class="border border-gray-300 px-4 py-2">@grievance.GrievanceID</td>
                                         <td class="border border-gray-300 px-4 py-2">@grievance.Title</td>
-                                        <td class="border border-gray-300 px-4 py-2>@grievance.Status</td>
-                                    <td class="border border-gray-300 px-4 py-2">@grievance.CreatedAt.ToString("MM/dd/yyyy")</td>
+                                        <td class="border border-gray-300 px-4 py-2">@grievance.Status</td>
+                                        <td class="border border-gray-300 px-4 py-2">@grievance.CreatedAt.ToString("MM/dd/yyyy")</td>
                                         <td class="border border-gray-300 px-4 py-2 text-center">
-                                            <a href="#" class="text-blue-600 hover:underline">View Details</a>
+                                            <a asp-action="Details" asp-route-id="@grievance.GrievanceID" class="text-blue-600 hover:underline">View Details</a>
                                         </td>
                                     </tr>
                                 }

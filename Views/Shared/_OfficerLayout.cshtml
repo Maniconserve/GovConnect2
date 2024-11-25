@@ -1,16 +1,12 @@
 ﻿@using GovConnect.Services
 @inject GovConnect.Services.ProfileService profileService
 @{
-    // Initialize default profile picture
     string profilePic = "~/Images/Elon.png";
 
-    // Retrieve username from claims if the officer is authenticated via cookies
     var username = User.Identity.Name;
 
-    // Retrieve the profile picture if the user is authenticated
     if (User.Identity.IsAuthenticated)
     {
-        // You can fetch the officer's profile picture via a service if available
         profilePic = await profileService.GetProfilePicAsync(username);
     }
 }
@@ -37,7 +33,7 @@
             <div class="dropdown hover-dropdown">
                 <button class="btn btn-link text-decoration-none" type="button" id="profileDropdown" aria-expanded="false">
                     <!-- Show officer's profile picture -->
-                    <img src="@profilePic" alt="Profile" class="rounded-circle" width="40" height="40" />
+                    <img src="~/Images/Elon.png" alt="Profile" class="rounded-circle" width="40" height="40" />
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
                     <!-- Logout link for officer -->
