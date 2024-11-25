@@ -1,6 +1,19 @@
-﻿@using Microsoft.AspNetCore.Identity
+﻿@using GovConnect.Services
 @inject GovConnect.Services.ProfileService profileService
-@inject SignInManager<Citizen> SignInManager
+@{
+    // Initialize default profile picture
+    string profilePic = "~/Images/Elon.png";
+
+    // Retrieve username from claims if the officer is authenticated via cookies
+    var username = User.Identity.Name;
+
+    // Retrieve the profile picture if the user is authenticated
+    if (User.Identity.IsAuthenticated)
+    {
+        // You can fetch the officer's profile picture via a service if available
+        profilePic = await profileService.GetProfilePicAsync(username);
+    }
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,34 +30,25 @@
         <div class="gov-connect">
             <span class="g">G</span><span class="ov">ov</span><span class="g-5">C</span><span class="connect">onnect</span>
         </div>
-        <div class="header-menu">
-            <div class="menu-item"><a asp-action="Index" asp-controller="Home" class="no-link">Home</a></div>
-            <div class="menu-item"><a asp-controller="Grievance" asp-action="Lodge" class="no-link">Lodge</a></div>
-            <div class="menu-item"><a asp-controller="Grievance" asp-action="Status" class="no-link">status</a></div>
-            <div class="menu-item"><a asp-controller="Service" asp-action="Index" class="no-link">Services</a></div>
-            <div class="menu-item"><a asp-controller="Home" asp-action="Schemes" class="no-link">Schemes</a></div>
-        </div>
-        @if (SignInManager.IsSignedIn(User))
-        {
-            string profilePic = "/images/default-profile.jpg";
-            var username = User.Identity.Name;
-            profilePic = await profileService.GetProfilePicAsync(username);
 
+        <!-- Check if the Officer is signed in -->
+        @if (User.Identity.IsAuthenticated)
+        {
             <div class="dropdown hover-dropdown">
                 <button class="btn btn-link text-decoration-none" type="button" id="profileDropdown" aria-expanded="false">
+                    <!-- Show officer's profile picture -->
                     <img src="@profilePic" alt="Profile" class="rounded-circle" width="40" height="40" />
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-                    <li><a class="dropdown-item" asp-controller="Citizen" asp-action="Edit">My Profile</a></li>
-                    <li><a class="dropdown-item" asp-controller="Service" asp-action="MyServices">My Services</a></li>
-                    <li><a class="dropdown-item" asp-controller="Grievance" asp-action="MyGrievances">My Grievances</a></li>
-                    <li><a class="dropdown-item" asp-controller="Citizen" asp-action="Logout">Logout</a></li>
+                    <!-- Logout link for officer -->
+                    <li><a class="dropdown-item" asp-controller="Officer" asp-action="Logout">Logout</a></li>
                 </ul>
             </div>
         }
         else
         {
-            <a asp-controller="Citizen" asp-action="Login" class="button text-decoration-none"><span class="try-free">Login</span></a>
+            <!-- Show login link if the officer is not signed in -->
+            <a asp-controller="Officer" asp-action="Login" class="button text-decoration-none"><span class="try-free">Login</span></a>
         }
     </div>
 

@@ -9,97 +9,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GovConnect.Controllers
 {
-    public class AccountController : Controller
+    public class CitizenController : Controller
     {
         private UserManager<Citizen> citizenManager;
         private SignInManager<Citizen> signInManager;
         private SqlServerDbContext SqlServerDbContext;
         private CitizenService citizenService;
-        private readonly DashboardService _dashboardService;
         private EmailSender emailSender;
         private static string originalotp;
-        public AccountController(UserManager<Citizen> _citizenManager,SignInManager<Citizen> _signInManager, EmailSender _emailSender, SqlServerDbContext _SqlServerDbContext, CitizenService _citizenService, DashboardService dashboardService) {
+        public CitizenController(UserManager<Citizen> _citizenManager,SignInManager<Citizen> _signInManager, EmailSender _emailSender, SqlServerDbContext _SqlServerDbContext, CitizenService _citizenService) {
             citizenManager = _citizenManager;
             signInManager = _signInManager;
             emailSender = _emailSender;
             SqlServerDbContext = _SqlServerDbContext;
             citizenService = _citizenService;
-            _dashboardService = dashboardService;
+            
         }
-
-        [Route("Account/HandleError")]
-        public IActionResult HandleError(int statusCode)
-        {
-            if (statusCode == 404)
-            {
-                return View("NotFound");
-            }
-
-            // Return a generic error page
-            return View("Error");
-        }
-        [HttpGet]
-        public async Task<IActionResult> Edit()
-        {
-            try
-            {
-                var user = await citizenManager.GetUserAsync(User);
-
-                if (user == null)
-                {
-                    return NotFound(); // Return an error if the user is not found
-                }
-                // Map user data to the Citizen model
-                var model = new Citizen
-                {
-                    UserName = user.UserName,
-                    LastName = user.LastName,
-                    Gender = user.Gender,
-                    PhoneNumber = user.PhoneNumber,
-                    City = user.City,
-                    Email = user.Email,
-                    Profilepic = user.Profilepic,
-                    Pincode = user.Pincode,
-                    Mandal = user.Mandal,
-                    District = user.District,
-                    Village = user.Village
-                };
-                return View(model); // Return the view with the model
-            }
-            catch (Exception ex)
-            {
-                // Log the exception (e.g., use a logging framework like Serilog or NLog)
-                Console.WriteLine(ex.Message);
-                return StatusCode(500, "Internal server error");
-            }
-        }
-        [HttpPost]
-        public async Task<IActionResult> Edit(Citizen citizen)
-        {
-            Citizen user = await citizenManager.GetUserAsync(User);
-            // Step 2: Compare the current email with the new email from the form
-            if (citizen.Email != user.Email)
-            {
-                // Update the email and set EmailConfirmed to false
-                user.Email = citizen.Email;
-                user.EmailConfirmed = false;
-                
-            }
-            user.UserName = citizen.UserName == null ? user.UserName : citizen.UserName;
-            user.LastName = citizen.LastName == null ? user.LastName : citizen.LastName;
-            user.PhoneNumber = citizen.PhoneNumber == null ? user.PhoneNumber : citizen.PhoneNumber;
-            user.City = citizen.City == null ? user.City : citizen.City;
-            user.Gender = citizen.Gender == null ? user.Gender : citizen.Gender;
-            user.District = citizen.District == null ? user.District : citizen.District;
-            user.Pincode = citizen.Pincode == null ? user.Pincode : citizen.Pincode;
-            user.Mandal = citizen.Mandal == null ? user.Mandal : citizen.Mandal;
-            user.Village = citizen.Village == null ? user.Village : citizen.Village;
-            user.Profilepic = citizen.Profilepic == null ? user.Profilepic : citizen.Profilepic;
-            await citizenManager.UpdateAsync(user);
-            return RedirectToAction("Edit"); // Redirect to the profile page or wherever appropriate
-        }
-
-
         [HttpGet]
         public IActionResult Register()
         {
@@ -111,6 +36,7 @@ namespace GovConnect.Controllers
             var model = new RegisterViewModel();
             return View(model);
         }
+
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
@@ -157,9 +83,45 @@ namespace GovConnect.Controllers
             }
             return View(model);
         }
+        [HttpGet]
+        public async Task<IActionResult> Edit()
+        {
+            try
+            {
+                var user = await citizenManager.GetUserAsync(User);
+
+                if (user == null)
+                {
+                    return NotFound(); // Return an error if the user is not found
+                }
+                // Map user data to the Citizen model
+                var model = new Citizen
+                {
+                    UserName = user.UserName,
+                    LastName = user.LastName,
+                    Gender = user.Gender,
+                    PhoneNumber = user.PhoneNumber,
+                    City = user.City,
+                    Email = user.Email,
+                    Profilepic = user.Profilepic,
+                    Pincode = user.Pincode,
+                    Mandal = user.Mandal,
+                    District = user.District,
+                    Village = user.Village
+                };
+                return View(model); // Return the view with the model
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (e.g., use a logging framework like Serilog or NLog)
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, "Internal server error");
+            }
+        }
 
         [HttpGet]
-        public async Task<IActionResult> Login(string? returnUrl) {
+        public async Task<IActionResult> Login(string? returnUrl)
+        {
             if (User.Identity.IsAuthenticated)
             {
                 return RedirectToAction("Index", "Home");
@@ -171,7 +133,8 @@ namespace GovConnect.Controllers
             return View(loginVM);
         }
         [HttpPost]
-        public async  Task<IActionResult> Login(LoginViewModel model, string? returnUrl) {
+        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl)
+        {
             if (ModelState.IsValid)
             {
                 var user = await citizenManager.FindByEmailAsync(model.Email);
@@ -214,7 +177,8 @@ namespace GovConnect.Controllers
             }
             return View(model);
         }
-        public async void SendEmail(LoginViewModel model,Citizen user)
+
+        public async void SendEmail(LoginViewModel model, Citizen user)
         {
             var token = await citizenManager.GenerateEmailConfirmationTokenAsync(user);
             var callbackUrl = Url.Action(
@@ -226,16 +190,57 @@ namespace GovConnect.Controllers
                 model.Email,
                 "Email Confirmation",
                 $"Please confirm your email by clicking here: <a href='{callbackUrl}'>link</a>");
-        } 
+        }
+
         [HttpGet]
-        public IActionResult Officer_Login()
+        public async Task<IActionResult> ConfirmEmail(string email, string token)
         {
-            if (User.Identity.IsAuthenticated)
+            if (email == null || token == null)
             {
-                // Redirect to a different page (e.g., Home or Dashboard)
                 return RedirectToAction("Index", "Home");
             }
-            return View();
+
+            var user = await citizenManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var result = await citizenManager.ConfirmEmailAsync(user, token);
+            if (result.Succeeded)
+            {
+                return View("Login", new LoginViewModel { Schemes = await signInManager.GetExternalAuthenticationSchemesAsync() });
+            }
+            else
+            {
+                return RedirectToAction("Index", "Home");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(Citizen citizen)
+        {
+            Citizen user = await citizenManager.GetUserAsync(User);
+            // Step 2: Compare the current email with the new email from the form
+            if (citizen.Email != user.Email)
+            {
+                // Update the email and set EmailConfirmed to false
+                user.Email = citizen.Email;
+                user.EmailConfirmed = false;
+                
+            }
+            user.UserName = citizen.UserName == null ? user.UserName : citizen.UserName;
+            user.LastName = citizen.LastName == null ? user.LastName : citizen.LastName;
+            user.PhoneNumber = citizen.PhoneNumber == null ? user.PhoneNumber : citizen.PhoneNumber;
+            user.City = citizen.City == null ? user.City : citizen.City;
+            user.Gender = citizen.Gender == null ? user.Gender : citizen.Gender;
+            user.District = citizen.District == null ? user.District : citizen.District;
+            user.Pincode = citizen.Pincode == null ? user.Pincode : citizen.Pincode;
+            user.Mandal = citizen.Mandal == null ? user.Mandal : citizen.Mandal;
+            user.Village = citizen.Village == null ? user.Village : citizen.Village;
+            user.Profilepic = citizen.Profilepic == null ? user.Profilepic : citizen.Profilepic;
+            await citizenManager.UpdateAsync(user);
+            return RedirectToAction("Edit"); // Redirect to the profile page or wherever appropriate
         }
 
         [HttpGet]
@@ -280,30 +285,6 @@ namespace GovConnect.Controllers
             {
                 await file.CopyToAsync(memoryStream);
                 return memoryStream.ToArray();
-            }
-        }
-        [HttpGet]
-        public async Task<IActionResult> ConfirmEmail(string email, string token)
-        {
-            if (email == null || token == null)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-
-            var user = await citizenManager.FindByEmailAsync(email);
-            if (user == null)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-
-            var result = await citizenManager.ConfirmEmailAsync(user, token);
-            if (result.Succeeded)
-            {
-                return View("Login",new LoginViewModel { Schemes = await signInManager.GetExternalAuthenticationSchemesAsync() });
-            }
-            else
-            {
-                return RedirectToAction("Index", "Home");
             }
         }
 
@@ -372,14 +353,6 @@ namespace GovConnect.Controllers
             }
             return RedirectToAction("Index");  // Redirect to form again
         }
-        [HttpGet]
-        public IActionResult OfficerDashboard(int officerId)
-        {
-            var model = _dashboardService.GetOfficerDashboard(officerId);
-            if (model == null) return NotFound();
-
-            return View(model);
-        }
 
         [HttpGet]
         public async Task<IActionResult> Logout()
@@ -389,6 +362,18 @@ namespace GovConnect.Controllers
 
             // Redirect to the homepage or login page
             return RedirectToAction("Index", "Home");
+        }
+
+        [Route("Account/HandleError")]
+        public IActionResult HandleError(int statusCode)
+        {
+            if (statusCode == 404)
+            {
+                return View("NotFound");
+            }
+
+            // Return a generic error page
+            return View("Error");
         }
     }
 }

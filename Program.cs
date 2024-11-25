@@ -35,6 +35,16 @@ builder.Services.AddAuthentication()
     options.ClientId = builder.Configuration["Google:ClientId"];
     options.ClientSecret = builder.Configuration["Google:ClientSecret"];
 });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("Officer", policy => policy.RequireRole("Officer"));
+    options.AddPolicy("User", policy => policy.RequireRole("User"));
+    options.AddPolicy("NotUser", policy =>
+        policy.RequireAssertion(context =>
+            !context.User.IsInRole("User")));
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -1,10 +1,4 @@
-﻿@model GovConnect.ViewModels.LoginViewModel
-@{
-    Layout = "_Gov_Layout";
-}
-
-<!DOCTYPE html>
-<html lang="en">
+﻿@model LoginViewModel
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,8 +12,8 @@
     <div class="container d-flex justify-content-center align-items-center min-vh-100">
         <div class="bg-white rounded-lg shadow-lg p-5 w-100" style="max-width: 500px;">
             <div class="d-flex justify-content-between mb-4">
-                <a class="btn btn-primary w-48">Officer</a>
-                <a asp-Action="Login" class="btn btn-outline-secondary w-48">Citizen</a>
+                <a asp-controller="Officer" asp-action="Login" class="btn btn-primary w-48">Officer</a>
+                <a asp-controller="Citizen" asp-Action="Login" class="btn btn-outline-secondary w-48">Citizen</a>
             </div>
 
             <form asp-action="Login" method="post">
@@ -54,7 +48,7 @@
 
                 <!-- Forgot Password Link -->
                 <div class="small d-flex justify-content-end">
-                    <a asp-action="ForgotPassword" class="text-decoration-none">Forgot Password?</a>
+                    <a asp-controller="Citizen" asp-action="ForgotPassword" class="text-decoration-none">Forgot Password?</a>
                 </div>
             </form>
         </div>

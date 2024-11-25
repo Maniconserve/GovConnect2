@@ -10,5 +10,11 @@ namespace GovConnect.Models
         public string OfficerDesignation { get; set; }
         public int? SuperiorId { get; set; }
         public int DeptId { get; set; }
+
+        public string Email { get; set; }
+
+        public String Password { get; set; }
+
+        public byte[] Photo { get; set; }
     }
 }

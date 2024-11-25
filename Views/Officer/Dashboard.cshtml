@@ -1,10 +1,4 @@
-﻿@model GovConnect.ViewModels.OfficerDashboardViewModel
-@{
-    Layout = "_Gov_Layout";
-}
-
-<!DOCTYPE html>
-<html lang="en">
+﻿@model OfficerDashboardViewModel
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,10 +13,6 @@
                 <!-- Navbar -->
                 <nav class="flex justify-between items-center mb-8">
                     <h1 class="text-2xl font-bold text-blue-600">Officer Dashboard</h1>
-                    <div class="flex items-center space-x-4">
-                        <!-- Officer Profile Image -->
-                        <img src="@Model.OfficerImage" alt="Officer Profile" class="w-12 h-12 rounded-full border-2 border-blue-600">
-                    </div>
                 </nav>
 
                 <!-- Welcome Message -->
@@ -74,7 +64,7 @@
                                         <td class="border border-gray-300 px-4 py-2">@grievance.GrievanceID</td>
                                         <td class="border border-gray-300 px-4 py-2">@grievance.Title</td>
                                         <td class="border border-gray-300 px-4 py-2>@grievance.Status</td>
-                                        <td class="border border-gray-300 px-4 py-2">@grievance.CreatedAt.ToString("MM/dd/yyyy")</td>
+                                    <td class="border border-gray-300 px-4 py-2">@grievance.CreatedAt.ToString("MM/dd/yyyy")</td>
                                         <td class="border border-gray-300 px-4 py-2 text-center">
                                             <a href="#" class="text-blue-600 hover:underline">View Details</a>
                                         </td>
