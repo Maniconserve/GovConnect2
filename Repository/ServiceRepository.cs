@@ -24,8 +24,9 @@ namespace GovConnect.Repository
                 .Include(d => d.Services)
                 .FirstOrDefaultAsync(d => d.DeptName == deptName);
 
-            return (List<Service>)(departmentWithServices?.Services ?? new List<Service>());
+            return departmentWithServices?.Services?.ToList() ?? new List<Service>();
         }
+
 
         public async Task<Service> GetServiceByIdAsync(int id)
         {

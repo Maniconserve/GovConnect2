@@ -88,15 +88,15 @@
 
         <!-- Sort By Dropdown -->
         <div class="mb-4 d-flex justify-content-end">
-            <form method="get" action="@Url.Action("GetDepartmentWithServicesByName", "Service")">
+            <form method="get" action="@Url.Action("DeptServices", "Service")">
                 <div class="dropdown">
                     <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                         Sort By
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="sortDropdown">
-                        <li><a class="dropdown-item" data-deptname="Revenue Department">Revenue</a></li>
-                        <li><a class="dropdown-item" data-deptname="Ministry of Road Transport (MoRT)">Transport</a></li>
-                        <li><a class="dropdown-item" data-deptname="Department of Food & Supplies">Food and Civil Supplies</a></li>
+                        <li><a class="dropdown-item" data-deptname="1">Revenue</a></li>
+                        <li><a class="dropdown-item" data-deptname="2">Transport</a></li>
+                        <li><a class="dropdown-item" data-deptname="3">Food and Civil Supplies</a></li>
                     </ul>
                 </div>
             </form>
