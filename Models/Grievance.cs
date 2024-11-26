@@ -25,10 +25,10 @@ namespace GovConnect.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.Now; // Automatically set the current timestamp
 
-        public string TimeLine { get; set; } = "[]"; // Default is an empty JSON array
+        public string? TimeLine { get; set; } = "[]"; // Default is an empty JSON array
 
         // Method to get Timeline as a list of key-value pairs (Date, Work)
-        public List<TimeLineEntry> GetTimeLine()
+        public List<TimeLineEntry>? GetTimeLine()
         {
             return string.IsNullOrEmpty(TimeLine)
                 ? new List<TimeLineEntry>()

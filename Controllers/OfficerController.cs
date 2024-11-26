@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using GovConnect.Models;
 using System.Text.Json;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace GovConnect.Controllers
 {
@@ -17,16 +18,19 @@ namespace GovConnect.Controllers
     {
         private DashboardService _dashboardService;
         private SqlServerDbContext _SqlServerDbContext;
-        public OfficerController(DashboardService dashboardService, SqlServerDbContext sqlServerDbContext) {
+        private EmailSender _emailSender;
+        private static string originalOtp;
+        public OfficerController(DashboardService dashboardService, SqlServerDbContext sqlServerDbContext,EmailSender emailSender) {
             _dashboardService = dashboardService;
             _SqlServerDbContext = sqlServerDbContext;
+            _emailSender = emailSender;
         }
         [HttpGet]
         public IActionResult Login()
         {
             if (User.Identity.IsAuthenticated)
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "Scheme");
             }
             return View();
         }
@@ -41,52 +45,63 @@ namespace GovConnect.Controllers
                     .FirstOrDefaultAsync(o => o.Email != null && o.Email == model.Email);
 
                 // Check if the officer exists and the password matches
-                if (officer != null && officer.Password == model.Password) // In a real application, don't store plain-text passwords
+                if (officer != null)
                 {
-                    // Define the claims for the officer
-                    var claims = new List<Claim>
+                    // Check if the entered password matches the stored password
+                    if (officer.Password == model.Password)
                     {
-                        new Claim(ClaimTypes.Name, officer.OfficerName),
-                        new Claim(ClaimTypes.Email, officer.Email),
-                        new Claim("OfficerId", officer.OfficerId.ToString())
-                    };
+                        // Define the claims for the officer
+                        var claims = new List<Claim>
+                        {
+                            new Claim(ClaimTypes.Name, officer.OfficerName),
+                            new Claim(ClaimTypes.Email, officer.Email),
+                            new Claim("OfficerId", officer.OfficerId.ToString())
+                        };
 
-                    // Assign the 'RoleOfficer' role claim if officer has this role
-                    // You can add more logic here to check if the officer is in a specific role
-                    claims.Add(new Claim(ClaimTypes.Role, "RoleOfficer"));
+                        // Assign the 'RoleOfficer' role claim if officer has this role
+                        claims.Add(new Claim(ClaimTypes.Role, "RoleOfficer"));
 
-                    var identity = new ClaimsIdentity(claims, "OfficerLogin");
-                    var principal = new ClaimsPrincipal(identity);
+                        var identity = new ClaimsIdentity(claims, "OfficerLogin");
+                        var principal = new ClaimsPrincipal(identity);
 
-                    var authProperties = new AuthenticationProperties
-                    {
-                        IsPersistent = false // Set to true if you want the login to persist across browser sessions
-                    };
+                        var authProperties = new AuthenticationProperties
+                        {
+                            IsPersistent = false // Set to true if you want the login to persist across browser sessions
+                        };
 
-                    // Sign in the officer with the cookie authentication scheme
-                    await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, principal, authProperties);
+                        // Sign in the officer with the cookie authentication scheme
+                        await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, principal, authProperties);
 
-                    // Redirect to the returnUrl or home page
-                    if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                    {
-                        return Redirect(returnUrl);
+                        // Redirect to the returnUrl or home page
+                        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                        {
+                            return Redirect(returnUrl);
+                        }
+                        else
+                        {
+                            return RedirectToAction("Dashboard", "Officer", new { officerId = officer.OfficerId });
+                        }
                     }
                     else
                     {
-                        return RedirectToAction("Dashboard", "Officer", new { officerId = officer.OfficerId });
+                        // If the password is incorrect, add a model error
+                        ModelState.AddModelError(string.Empty, "The password is incorrect.");
                     }
                 }
                 else
                 {
-                    // Add error if the officer is not found or the password doesn't match
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    return View(model);
+                    // If no officer is found with the provided email
+                    ModelState.AddModelError(string.Empty, "Officer doesn't exist.");
                 }
+
+                // If we reach here, it means either the officer doesn't exist or the password is incorrect
+                return View(model);
             }
 
             // If model state is not valid, return the view with the model.
             return View(model);
         }
+
 
 
 
@@ -153,6 +168,89 @@ namespace GovConnect.Controllers
 
             // Redirect back to the grievance details page
             return RedirectToAction("Details", new { id = grievanceId });
+        }
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View(new ForgotPasswordViewModel());
+        }
+        [HttpPost]
+        public async Task<IActionResult> SendOtp(string email)
+        {
+            // Check if the email exists
+            var user = await _SqlServerDbContext.PoliceOfficers.FirstOrDefaultAsync(u => u.Email == email); ;
+            if (user == null)
+            {
+                TempData["EmailMessage"] = "No user found with this email.";
+                return View("ForgotPassword", new ForgotPasswordViewModel { Email = email });
+            }
+
+            // Generate a random OTP
+            originalOtp = new Random().Next(100000, 999999).ToString();  // Generate a 6-digit OTP
+
+            // Send OTP via email
+            var subject = "Reset Password";
+            var body = $"Your OTP code resetting password is: {originalOtp}";
+
+            try
+            {
+                await _emailSender.SendEmailAsync(email, subject, body);
+
+                // Save OTP in TempData for use in subsequent form submissions
+                TempData["EmailMessage"] = "OTP has been sent to your email. Please check your inbox (and spam folder).";
+            }
+            catch (Exception)
+            {
+                TempData["EmailMessage"] = "Failed to send OTP. Please try again later.";
+            }
+            return View("ForgotPassword", new ForgotPasswordViewModel { Email = email });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> VerifyOtp(ForgotPasswordViewModel forgotPasswordViewModel)
+        {
+            // Check if the OTP is correct
+            if (!forgotPasswordViewModel.Otp.Equals(originalOtp))
+            {
+                TempData["OtpMessage"] = "OTP is invalid";
+                return View("ForgotPassword", forgotPasswordViewModel);
+            }
+
+            // Check if model state is valid
+            if (!ModelState.IsValid)
+            {
+                return View("ForgotPassword", forgotPasswordViewModel);
+            }
+
+            // Retrieve the user from the database using SqlServerDbContext
+            var user = await _SqlServerDbContext.PoliceOfficers
+                                               .FirstOrDefaultAsync(u => u.Email == forgotPasswordViewModel.Email);
+
+            if (user != null)
+            {
+                // Assuming you have a Password field in your PoliceOfficers table.
+                user.Password = forgotPasswordViewModel.Password;  // Set the new password
+
+                // Update the user in the database
+                _SqlServerDbContext.PoliceOfficers.Update(user);
+
+                // Save the changes
+                var saveResult = await _SqlServerDbContext.SaveChangesAsync();
+
+                if (saveResult > 0)
+                {
+                    // Successfully updated the password, redirect to Login
+                    return RedirectToAction("Login");
+                }
+                else
+                {
+                    // If saving fails, you might want to show an error message.
+                    TempData["ErrorMessage"] = "Failed to update the password.";
+                }
+            }
+
+            // If user is not found or update fails, redirect to the form again
+            return RedirectToAction("Index");
         }
 
 

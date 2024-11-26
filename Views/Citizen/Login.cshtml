@@ -15,7 +15,13 @@
                 <a asp-controller="Officer" asp-Action="Login" class="btn btn-outline-secondary w-48">Officer</a>
                 <a asp-controller="Citizen" asp-action="Login" class="btn btn-primary w-48">Citizen</a>
             </div>
-
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger alert-dismissible fade show d-flex justify-content-start align-items-center" role="alert">
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                </div>
+            }
+            
             <form asp-action="Login" method="post">
                 <!-- Email Field -->
                 <div class="mb-3">
@@ -55,7 +61,7 @@
 
                 <!-- Forgot Password & Sign Up Links -->
                 <div class="d-flex justify-content-between small mb-3">
-                    <a asp-Action="Register" class="text-decoration-none">Don't have an account? Sign Up</a>
+                    <a asp-action="Register" class="text-decoration-none">Don't have an account? Sign Up</a>
                     <a asp-action="ForgotPassword" class="text-decoration-none">Forgot Password?</a>
                 </div>
                 

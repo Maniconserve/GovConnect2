@@ -105,7 +105,7 @@ namespace GovConnect.Controllers
 
             if (user == null)
             {
-                return RedirectToAction("Login", "Account"); // Redirect to login if user is not authenticated
+                return RedirectToAction("Login", "Citizen"); // Redirect to login if user is not authenticated
             }
 
             // Retrieve grievances for the logged-in user, excluding the TimeLine field
@@ -149,7 +149,7 @@ namespace GovConnect.Controllers
 
             if (grievance == null)
             {
-                return NotFound(); // Return a 404 if the grievance is not found
+                return NotFound();
             }
 
             return View(grievance);

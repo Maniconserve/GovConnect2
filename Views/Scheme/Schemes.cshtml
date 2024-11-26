@@ -4,7 +4,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
-    <div class="max-w-4xl mx-auto py-10">
+    <div class="max-w-4xl mx-auto py-10 ">
         <h1 class="text-2xl font-semibold text-center mb-8">Schemes you are eligible for</h1>
 
         @if (Model != null && Model.Any())
@@ -12,7 +12,7 @@
             foreach (var scheme in Model)
             {
                 <div class="bg-white p-6 w-100 rounded-lg shadow mb-6">
-                    <a href="@Url.Action("PScheme", "Home", new { schemeId = scheme.SchemeID })" class="text-blue-600 hover:text-blue-700">
+                    <a href="@Url.Action("PScheme", "Scheme", new { schemeId = scheme.SchemeID })" class="text-blue-600 hover:text-blue-700">
                         @scheme.SchemeName
                     </a>
                     <p class="text-gray-600 mb-2">Andhra Pradesh</p>

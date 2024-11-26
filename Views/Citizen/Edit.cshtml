@@ -1,6 +1,9 @@
 ﻿@model Citizen
 
-<!-- Main Content Section -->
+<head>
+    <title>Profile</title>
+</head>
+
 <div class="container">
     <div class="row justify-content-center min-vh-100">
         <div class="col-md-8">
@@ -10,7 +13,6 @@
                 </div>
                 <div class="card-body">
                     <form asp-action="Edit" method="post" enctype="multipart/form-data">
-
                         <!-- Profile Picture Upload -->
                         @{
                             string imageSrc = ""; // Declare the variable once at the top
@@ -28,7 +30,7 @@
                                 <!-- Custom Upload Button -->
                                 <button type="button" class="btn btn-secondary" id="uploadButton">Upload</button>
                                 <!-- Hidden File Input -->
-                                <input type="file" id="Profilepic" name="Profilepic" class="form-control visually-hidden" asp-for="Profilepic"/>
+                                <input type="file" id="Profilepic" name="Profilepic" class="form-control visually-hidden" asp-for="Profilepic" />
                             </div>
                         </div>
 
@@ -130,6 +132,7 @@
         </div>
     </div>
 </div>
+
 <script>
     // Get the file input and custom button elements
     const uploadButton = document.getElementById("uploadButton");
@@ -154,4 +157,3 @@
         }
     });
 </script>
-

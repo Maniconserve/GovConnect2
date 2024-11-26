@@ -3,6 +3,7 @@ using GovConnect.Data;
 using GovConnect.Models;
 using GovConnect.Services;
 using GovConnect.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -30,8 +31,7 @@ namespace GovConnect.Controllers
         {
             if (User.Identity.IsAuthenticated)
             {
-                // Redirect to a different page (e.g., Home or Dashboard)
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "Scheme");
             }
             var model = new RegisterViewModel();
             return View(model);
@@ -73,7 +73,7 @@ namespace GovConnect.Controllers
 
                 if (result.Succeeded)
                 {
-                    return RedirectToAction("Login", "Account");
+                    return RedirectToAction("Login", "Citizen");
                 }
 
                 foreach (var error in result.Errors)
@@ -83,6 +83,108 @@ namespace GovConnect.Controllers
             }
             return View(model);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Login(string? returnUrl)
+        {
+            if (User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index", "Scheme");
+            }
+            var loginVM = new LoginViewModel()
+            {
+                Schemes = await signInManager.GetExternalAuthenticationSchemesAsync()
+            };
+            return View(loginVM);
+        }
+        [HttpPost]
+        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await citizenManager.FindByEmailAsync(model.Email);
+
+                if (user != null)
+                {
+                    if (user.EmailConfirmed == false)
+                    {
+                        SendEmail(model, user);
+                        TempData["Message"] = "Thank you for registering! An email has been sent to your address with a link to log in. Please check your inbox (and spam folder) to proceed with logging in.";
+                        model.Schemes = await signInManager.GetExternalAuthenticationSchemesAsync();
+                        return View(model);
+                    }
+                    else
+                    {
+                        var result = await signInManager.PasswordSignInAsync(user, model.Password, false, lockoutOnFailure: false);
+                        if (result.Succeeded)
+                        {
+                            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                            {
+                                return Redirect(returnUrl);
+                            }
+                            else
+                            {
+                                return RedirectToAction("Index", "Scheme");
+                            }
+                        }
+                        else
+                        {
+                            ModelState.AddModelError(string.Empty, "Invalid login attempt");
+                            model.Schemes = await signInManager.GetExternalAuthenticationSchemesAsync();
+                            return View(model);
+                        }
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Citizen doesn't exist");
+                    model.Schemes = await signInManager.GetExternalAuthenticationSchemesAsync();
+                    return View(model);
+                }
+            }
+            return View(model);
+        }
+
+        private async void SendEmail(LoginViewModel model, Citizen user)
+        {
+            var token = await citizenManager.GenerateEmailConfirmationTokenAsync(user);
+            var callbackUrl = Url.Action(
+                "ConfirmEmail", "Citizen",
+                new { token, email = user.Email },
+                protocol: HttpContext.Request.Scheme);
+
+            await emailSender.SendEmailAsync(
+                model.Email,
+                "Email Confirmation",
+                $"Please confirm your email by clicking here: <a href='{callbackUrl}'>link</a>");
+        }
+
+        [HttpGet]
+        private async Task<IActionResult> ConfirmEmail(string email, string token)
+        {
+            if (email == null || token == null)
+            {
+                return RedirectToAction("Index", "Scheme");
+            }
+
+            var user = await citizenManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return RedirectToAction("Index", "Scheme");
+            }
+
+            var result = await citizenManager.ConfirmEmailAsync(user, token);
+            if (result.Succeeded)
+            {
+                return View("Login", new LoginViewModel { Schemes = await signInManager.GetExternalAuthenticationSchemesAsync() });
+            }
+            else
+            {
+                return RedirectToAction("Index", "Scheme");
+            }
+        }
+
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Edit()
         {
@@ -119,134 +221,46 @@ namespace GovConnect.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Login(string? returnUrl)
-        {
-            if (User.Identity.IsAuthenticated)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-            var loginVM = new LoginViewModel()
-            {
-                Schemes = await signInManager.GetExternalAuthenticationSchemesAsync()
-            };
-            return View(loginVM);
-        }
         [HttpPost]
-        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl)
-        {
-            if (ModelState.IsValid)
-            {
-                var user = await citizenManager.FindByEmailAsync(model.Email);
-
-                if (user != null)
-                {
-                    if (user.EmailConfirmed == false)
-                    {
-                        SendEmail(model, user);
-                        TempData["Message"] = "Thank you for registering! An email has been sent to your address with a link to log in. Please check your inbox (and spam folder) to proceed with logging in.";
-                        model.Schemes = await signInManager.GetExternalAuthenticationSchemesAsync();
-                        return View(model);
-                    }
-                    else
-                    {
-                        var result = await signInManager.PasswordSignInAsync(user, model.Password, false, lockoutOnFailure: false);
-                        if (result.Succeeded)
-                        {
-                            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                            {
-                                return Redirect(returnUrl);
-                            }
-                            else
-                            {
-                                return RedirectToAction("Index", "Home");
-                            }
-                        }
-                        else
-                        {
-                            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                            return View(model);
-                        }
-                    }
-                }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Citizen doesn't exist");
-                    return View(model);
-                }
-            }
-            return View(model);
-        }
-
-        public async void SendEmail(LoginViewModel model, Citizen user)
-        {
-            var token = await citizenManager.GenerateEmailConfirmationTokenAsync(user);
-            var callbackUrl = Url.Action(
-                "ConfirmEmail", "Account",
-                new { token, email = user.Email },
-                protocol: HttpContext.Request.Scheme);
-
-            await emailSender.SendEmailAsync(
-                model.Email,
-                "Email Confirmation",
-                $"Please confirm your email by clicking here: <a href='{callbackUrl}'>link</a>");
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> ConfirmEmail(string email, string token)
-        {
-            if (email == null || token == null)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-
-            var user = await citizenManager.FindByEmailAsync(email);
-            if (user == null)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-
-            var result = await citizenManager.ConfirmEmailAsync(user, token);
-            if (result.Succeeded)
-            {
-                return View("Login", new LoginViewModel { Schemes = await signInManager.GetExternalAuthenticationSchemesAsync() });
-            }
-            else
-            {
-                return RedirectToAction("Index", "Home");
-            }
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Edit(Citizen citizen)
+        public async Task<IActionResult> Edit(Citizen citizen, IFormFile Profilepic)
         {
             Citizen user = await citizenManager.GetUserAsync(User);
-            // Step 2: Compare the current email with the new email from the form
+
+            if (Profilepic != null && Profilepic.Length > 0)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await Profilepic.CopyToAsync(memoryStream);
+                    user.Profilepic = memoryStream.ToArray(); // Save the profile picture as byte[]
+                }
+            }
+
+            // Update other fields if they are not null
             if (citizen.Email != user.Email)
             {
                 // Update the email and set EmailConfirmed to false
                 user.Email = citizen.Email;
                 user.EmailConfirmed = false;
-                
             }
-            user.UserName = citizen.UserName == null ? user.UserName : citizen.UserName;
-            user.LastName = citizen.LastName == null ? user.LastName : citizen.LastName;
-            user.PhoneNumber = citizen.PhoneNumber == null ? user.PhoneNumber : citizen.PhoneNumber;
-            user.City = citizen.City == null ? user.City : citizen.City;
-            user.Gender = citizen.Gender == null ? user.Gender : citizen.Gender;
-            user.District = citizen.District == null ? user.District : citizen.District;
-            user.Pincode = citizen.Pincode == null ? user.Pincode : citizen.Pincode;
-            user.Mandal = citizen.Mandal == null ? user.Mandal : citizen.Mandal;
-            user.Village = citizen.Village == null ? user.Village : citizen.Village;
-            user.Profilepic = citizen.Profilepic == null ? user.Profilepic : citizen.Profilepic;
+            user.UserName = citizen.UserName ?? user.UserName;
+            user.LastName = citizen.LastName ?? user.LastName;
+            user.PhoneNumber = citizen.PhoneNumber ?? user.PhoneNumber;
+            user.City = citizen.City ?? user.City;
+            user.Gender = citizen.Gender ?? user.Gender;
+            user.District = citizen.District ?? user.District;
+            user.Pincode = citizen.Pincode != 0 ? citizen.Pincode : user.Pincode;
+            user.Mandal = citizen.Mandal ?? user.Mandal;
+            user.Village = citizen.Village ?? user.Village;
+
             await citizenManager.UpdateAsync(user);
             return RedirectToAction("Edit"); // Redirect to the profile page or wherever appropriate
         }
 
+
         [HttpGet]
         public IActionResult GoogleLogin(String provider,String returnUrl="")
         {
-            var redirectUrl = Url.Action("GoogleLoginCallBack", "Account", new { ReturnUrl = returnUrl });
+            var redirectUrl = Url.Action("GoogleLoginCallBack", "Citizen", new { ReturnUrl = returnUrl });
             var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             properties.Items["prompt"] = "select_account";
             return new ChallengeResult(provider, properties);
@@ -271,7 +285,7 @@ namespace GovConnect.Controllers
             }
             var user = await citizenManager.FindByEmailAsync(info.Principal?.FindFirst(ClaimTypes.Email)?.Value);
             await signInManager.SignInAsync(user, isPersistent: false);
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Scheme");
         }
 
 
@@ -299,7 +313,7 @@ namespace GovConnect.Controllers
             var user = await citizenManager.FindByEmailAsync(email);
             if (user == null)
             {
-                TempData["OtpMessage"] = "No user found with this email.";
+                TempData["EmailMessage"] = "No user found with this email.";
                 return View("ForgotPassword",new ForgotPasswordViewModel { Email = email});
             }
 
@@ -353,7 +367,7 @@ namespace GovConnect.Controllers
             }
             return RedirectToAction("Index");  // Redirect to form again
         }
-
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
@@ -361,10 +375,10 @@ namespace GovConnect.Controllers
             await signInManager.SignOutAsync();
 
             // Redirect to the homepage or login page
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Scheme");
         }
 
-        [Route("Account/HandleError")]
+        [Route("Citizen/HandleError")]
         public IActionResult HandleError(int statusCode)
         {
             if (statusCode == 404)

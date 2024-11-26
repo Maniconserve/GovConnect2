@@ -12,16 +12,17 @@
     }
 
         .custom-border:hover {
-            transform: scale(1.05); /* Slightly enlarges the element to create a "coming forward" effect */
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Adds a shadow to make it look like it's lifted */
+            transform: scale(1.05); 
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); 
         }
 
-    /* Optional: Add a default light shadow for better visibility */
     .custom-border {
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Light shadow by default */
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); 
     }
  </style>
-    
+ <head>
+     <title>Home</title>
+</head>
 <!-- Grievance Information Section -->
 <div class="custom-bg  p-5 shadow-sm d-flex flex-row justify-content-between align-items-center">
     <div>
@@ -35,7 +36,7 @@
         </ul>
     </div>
     <div class="text-center">
-        <img alt="Hon'ble Chief Minister Government of Andhra Pradesh" class="rounded-rectangle" height="100" src="~/Images/Elon.png" width="150" height="150"/>
+        <img alt="Hon'ble Chief Minister Government of Andhra Pradesh" class="rounded-rectangle" src="~/Images/Elon.png" width="135" height="130"/>
         <p class="text-muted mt-3">
             Hon'ble Chief Minister<br />
             Government of Andhra Pradesh
@@ -70,30 +71,6 @@
     </div>
 </div>
 
-<!-- Grievance Stats Section (Vertically Centered) -->
-<div class="custom-bg p-5 rounded-lg shadow-sm mt-5 mb-5  d-flex justify-content-center align-items-center">
-    <div class="text-center w-100">
-        <h2 class="text-primary font-weight-bold">Grievance Stats Effects from 19-10-2024</h2>
-        <div class="row mt-4">
-            <div class="col-md-4">
-                <div class="bg-danger text-white p-4 rounded-lg shadow-sm">
-                    <p class="h3 font-weight-bold">1,10,353</p>
-                    <p>Grievances Registered</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="bg-success text-white p-4 rounded-lg shadow-sm">
-                    <p class="h3 font-weight-bold">81,394</p>
-                    <p>Grievances Resolved</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="bg-warning text-white p-4 rounded-lg shadow-sm">
-                    <p class="h3 font-weight-bold">28,959</p>
-                    <p>Grievances Pending</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+@await Component.InvokeAsync("GrievanceStats")
+
 
