@@ -42,7 +42,7 @@
                 <div class="mb-3">
                     <h5>Upload File:</h5>
                     <form method="post" enctype="multipart/form-data" asp-action="UploadFile" asp-route-id="@Model.GrievanceID">
-                        <input type="file" class="form-control" name="fileUpload" />
+                        <input type="file" class="form-control" name="fileUpload" accept=".pdf"/>
                         <button type="submit" class="btn btn-primary mt-3">Upload File</button>
                     </form>
                 </div>

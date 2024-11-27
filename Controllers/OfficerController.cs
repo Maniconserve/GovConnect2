@@ -2,15 +2,12 @@
 using GovConnect.Data;
 using GovConnect.Services;
 using GovConnect.ViewModels;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using GovConnect.Models;
 using System.Text.Json;
-using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace GovConnect.Controllers
 {
@@ -122,6 +119,7 @@ namespace GovConnect.Controllers
                 {
                     GrievanceID = g.GrievanceID,
                     Title = g.Title,
+                    OfficerId = g.OfficerId,
                     CreatedAt = g.CreatedAt,
                     Status = g.Status,
                     DepartmentID = g.DepartmentID,

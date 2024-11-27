@@ -17,16 +17,6 @@ namespace GovConnect.Services
             return await _serviceRepository.GetAllServicesAsync();
         }
 
-        public async Task<List<Service>> GetServicesByDepartmentAsync(string deptName)
-        {
-            return await _serviceRepository.GetServicesByDepartmentAsync(deptName);
-        }
-
-        public async Task<Service> GetServiceByIdAsync(int id)
-        {
-            return await _serviceRepository.GetServiceByIdAsync(id);
-        }
-
         public async Task<bool> ApplyForServiceAsync(ServiceApplication model, string userId)
         {
             model.UserID = userId;

@@ -18,7 +18,7 @@ namespace GovConnect.ViewComponents
             // Get the count of grievances by status
             var pendingCount = await _dbContext.DGrievances.CountAsync(g => g.Status == "Pending");
             var resolvedCount = await _dbContext.DGrievances.CountAsync(g => g.Status == "Resolved");
-            var inProgressCount = await _dbContext.DGrievances.CountAsync(g => g.Status == "InProgress");
+            var inProgressCount = await _dbContext.DGrievances.CountAsync(g => g.Status == "In Progress");
 
             // Create a ViewModel to pass to the view
             var model = new GrievanceStatsViewModel

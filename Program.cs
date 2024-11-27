@@ -1,5 +1,4 @@
 using GovConnect.Data;
-using GovConnect.Migrations;
 using GovConnect.Models;
 using GovConnect.Repository;
 using GovConnect.Services;
@@ -8,16 +7,16 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddScoped<EmailSender>();
-builder.Services.AddScoped<ProfileService>();
-builder.Services.AddScoped<CitizenService>();
 builder.Services.AddScoped<ISchemeService,SchemeService>();
 builder.Services.AddScoped<SchemeRepository>();
 builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
+builder.Services.AddScoped<IGrievanceRepository, GrievanceRepository>();
+builder.Services.AddScoped<IGrievanceService, GrievanceService>();
 builder.Services.AddScoped<DashboardService>();
+builder.Services.AddScoped<EmailSender>();
+builder.Services.AddScoped<ProfileService>();
 var connectionString = builder.Configuration.GetConnectionString("SQLServerConnection") ?? throw new InvalidOperationException("Connection string 'SQLServerIdentityConnection' not found.");
 builder.Services.AddDbContext<SqlServerDbContext>(options =>
     options.UseSqlServer(connectionString));

@@ -1,23 +1,22 @@
-﻿using GovConnect.Data;
-using GovConnect.Models;
-using GovConnect.ViewModels;
+﻿using GovConnect.Models;
+using GovConnect.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-
 
 namespace GovConnect.Controllers
 {
     public class GrievanceController : Controller
     {
-        private readonly SqlServerDbContext _context;
+        private readonly IGrievanceService _grievanceService;
         private readonly UserManager<Citizen> _citizenManager;
-        public GrievanceController(SqlServerDbContext context, UserManager<Citizen> citizenManager)
+
+        public GrievanceController(IGrievanceService grievanceService, UserManager<Citizen> citizenManager)
         {
-            _context = context;
+            _grievanceService = grievanceService;
             _citizenManager = citizenManager;
         }
+
         public IActionResult Index()
         {
             return View();
@@ -34,165 +33,113 @@ namespace GovConnect.Controllers
         {
             if (ModelState.IsValid)
             {
-                var random = new Random();
-                int randomGrievanceId;
-                do
-                {
-                    randomGrievanceId = random.Next(100000, 999999); // Generates a 6-digit number
-                } while (_context.DGrievances.Any(g => g.GrievanceID == randomGrievanceId));
-                grievance.GrievanceID = randomGrievanceId;
-                if (fileUpload != null && fileUpload.Length > 0)
-                {
-                    // Convert the file to a byte array
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        await fileUpload.CopyToAsync(memoryStream);
-                        grievance.FilesUploaded = memoryStream.ToArray();
-                    }
-                }
-                // Save the grievance to the database (example)
-                // Assuming you have a DbContext and a Grievances DbSet
                 var user = await _citizenManager.GetUserAsync(User);
-                grievance.UserID = user.Id;
-                _context.DGrievances.Add(grievance);
-                _context.SaveChanges();
+                if (user == null)
+                {
+                    return RedirectToAction("Login", "Citizen");
+                }
 
-                TempData["GrievanceID"] = randomGrievanceId;
+                bool success = await _grievanceService.LodgeGrievanceAsync(grievance, user.Id, fileUpload);
 
-                // Redirect back to the form or confirmation page
-                return RedirectToAction("Lodge");
+                if (success)
+                {
+                    TempData["GrievanceID"] = grievance.GrievanceID;
+                    return RedirectToAction("Lodge");
+                }
+                ModelState.AddModelError(string.Empty, "Error lodging grievance.");
             }
 
-            // If the model is not valid, redisplay the form with error messages
             return View(grievance);
         }
-
         [HttpGet]
         public IActionResult Status()
         {
             return View();
         }
-
+        [HttpPost]
         public IActionResult Status(int? grievanceId)
         {
-            if (grievanceId == null)
+            if (!grievanceId.HasValue)
             {
-                return NotFound(); // Grievance ID not provided
+                return NotFound();
             }
 
-            // Retrieve the grievance and its timeline from the 'TimeLine' column
-            var grievance = _context.DGrievances
-                .Where(g => g.GrievanceID == grievanceId)
-                .FirstOrDefault();
+            var grievance = _grievanceService.GetGrievanceByIdAsync(grievanceId.Value).Result;
 
             if (grievance == null)
             {
-                return NotFound(); // Grievance not found
+                return NotFound();
             }
 
-            // Deserialize the timeline from the 'TimeLine' column (assuming it's stored as a JSON string)
-            var timeline = JsonConvert.DeserializeObject<List<TimeLineEntry>>(grievance.TimeLine);
+            var timeline = _grievanceService.GetGrievanceTimelineAsync(grievanceId.Value).Result;
 
-            // Pass the timeline to the view
             return View(timeline);
         }
-
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> MyGrievances(string? statusFilter)
         {
-            // Get the currently logged-in user
             var user = await _citizenManager.GetUserAsync(User);
-
             if (user == null)
             {
-                return RedirectToAction("Login", "Citizen"); // Redirect to login if user is not authenticated
+                return RedirectToAction("Login", "Citizen");
             }
 
-            // Retrieve grievances for the logged-in user, excluding the TimeLine field
-            var grievancesQuery = _context.DGrievances
-                .Where(g => g.UserID == user.Id)
-                .Select(g => new GrievanceViewModel
-                {
-                    GrievanceID = g.GrievanceID,
-                    OfficerId = g.OfficerId,
-                    DepartmentID = g.DepartmentID,
-                    Description = g.Description,
-                    FilesUploaded = g.FilesUploaded,
-                    CreatedAt = g.CreatedAt,
-                    UserID = g.UserID,
-                    Status = g.Status,
-                    Title = g.Title
-                });
-
-            // Apply status filter if provided
-            if (!string.IsNullOrEmpty(statusFilter))
-            {
-                grievancesQuery = grievancesQuery.Where(g => g.Status == statusFilter);
-            }
-
-            // Apply ordering after filtering
-            var grievances = await grievancesQuery
-                .OrderByDescending(g => g.CreatedAt)
-                .ToListAsync();
-
-            // Pass the view model list to the view
+            var grievances = await _grievanceService.GetGrievancesByUserAsync(user.Id, statusFilter);
             return View(grievances);
         }
-
-
-
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
-            // Retrieve the grievance from the database
-            var grievance = await _context.DGrievances.FirstOrDefaultAsync(g => g.GrievanceID == id);
-
+            var grievance = await _grievanceService.GetGrievanceByIdAsync(id);
             if (grievance == null)
             {
                 return NotFound();
             }
-
             return View(grievance);
-        }
-        public async Task<IActionResult> DownloadFile(int id)
-        {
-            var grievance = await _context.DGrievances.FirstOrDefaultAsync(g => g.GrievanceID == id);
-
-            if (grievance == null || grievance.FilesUploaded == null)
-            {
-                return NotFound();
-            }
-
-            // Return the file for download
-            return File(grievance.FilesUploaded, "application/octet-stream", "GrievanceFile");
         }
 
         [HttpPost]
         public async Task<IActionResult> UploadFile(int id, IFormFile fileUpload)
         {
-            var grievance = await _context.DGrievances.FirstOrDefaultAsync(g => g.GrievanceID == id);
-
-            if (grievance == null)
+            var success = await _grievanceService.UpdateGrievanceFilesAsync(id, fileUpload);
+            if (success)
             {
-                return NotFound();
+                return RedirectToAction("Details", new { id });
             }
 
-            if (fileUpload != null && fileUpload.Length > 0)
-            {
-                // Convert the uploaded file to a byte array
-                using (var memoryStream = new MemoryStream())
-                {
-                    await fileUpload.CopyToAsync(memoryStream);
-                    grievance.FilesUploaded = memoryStream.ToArray();
-                }
+            return NotFound();
+        }
 
-                // Save the file to the database
-                _context.Update(grievance);
-                await _context.SaveChangesAsync();
+        [HttpPost]
+        public async Task<IActionResult> EscalateGrievance(int grievanceId,int OfficerId)
+        {
+            var result = await _grievanceService.EscalateGrievanceAsync(grievanceId);
+
+            if (result)
+            {
+                TempData["EscalateMessage"] = "Grievance successfully escalated!";
+                return RedirectToAction("Dashboard", "Officer", new { officerId = OfficerId });
             }
 
-            // Redirect back to the details view with the updated grievance
-            return RedirectToAction("Details", new { id = grievance.GrievanceID });
+            TempData["EscalateMessage"] = "No superior officer found for the department!";
+            return RedirectToAction("Dashboard","Officer", new { officerId = OfficerId });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> DownloadFile(int id)
+        {
+            var fileData = await _grievanceService.GetGrievanceFileAsync(id);
+
+            if (fileData == null)
+            {
+                return NotFound(); 
+            }
+            string fileName = "GrievanceFile.pdf"; 
+            string mimeType = "application/pdf";   
+
+            return File(fileData, mimeType, fileName);
         }
 
     }

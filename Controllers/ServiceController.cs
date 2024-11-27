@@ -34,6 +34,7 @@ namespace GovConnect.Controllers
             if (TempData.ContainsKey("Services"))
             {
                 services = JsonConvert.DeserializeObject<List<Service>>(TempData["Services"].ToString());
+                TempData.Keep();
             }
 
             services = services?.FindAll(s => s.DeptId == deptId);
@@ -53,6 +54,7 @@ namespace GovConnect.Controllers
             if (TempData.ContainsKey("Services"))
             {
                 services = JsonConvert.DeserializeObject<List<Service>>(TempData["Services"].ToString());
+                TempData.Keep();
             }
             var service = services?.FirstOrDefault(s => s.ServiceId == id);
             return View(service);

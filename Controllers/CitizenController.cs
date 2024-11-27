@@ -15,15 +15,13 @@ namespace GovConnect.Controllers
         private UserManager<Citizen> citizenManager;
         private SignInManager<Citizen> signInManager;
         private SqlServerDbContext SqlServerDbContext;
-        private CitizenService citizenService;
         private EmailSender emailSender;
         private static string originalotp;
-        public CitizenController(UserManager<Citizen> _citizenManager,SignInManager<Citizen> _signInManager, EmailSender _emailSender, SqlServerDbContext _SqlServerDbContext, CitizenService _citizenService) {
+        public CitizenController(UserManager<Citizen> _citizenManager,SignInManager<Citizen> _signInManager, EmailSender _emailSender, SqlServerDbContext _SqlServerDbContext) {
             citizenManager = _citizenManager;
             signInManager = _signInManager;
             emailSender = _emailSender;
             SqlServerDbContext = _SqlServerDbContext;
-            citizenService = _citizenService;
             
         }
         [HttpGet]

@@ -94,9 +94,9 @@
                         Sort By
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="sortDropdown">
-                        <li><a class="dropdown-item" data-deptname="1">Revenue</a></li>
-                        <li><a class="dropdown-item" data-deptname="2">Transport</a></li>
-                        <li><a class="dropdown-item" data-deptname="3">Food and Civil Supplies</a></li>
+                        <li><a class="dropdown-item" data-deptId="1">Revenue</a></li>
+                        <li><a class="dropdown-item" data-deptId="2">Transport</a></li>
+                        <li><a class="dropdown-item" data-deptId="3">Food and Civil Supplies</a></li>
                     </ul>
                 </div>
             </form>
@@ -125,14 +125,14 @@
         document.querySelectorAll('.dropdown-item').forEach(item => {
             item.addEventListener('click', function (e) {
                 e.preventDefault();  // Prevent the default link behavior
-                var deptName = this.getAttribute('data-deptname');  // Get the department name
+                var deptId = this.getAttribute('data-deptId');  // Get the department name
 
                 // Get the form and create a hidden input field to pass the deptName to the server
                 var form = this.closest('form');
                 var input = document.createElement('input');
                 input.type = 'hidden';
-                input.name = 'deptName';  // This matches the method parameter in the controller
-                input.value = deptName;
+                input.name = 'deptId';  // This matches the method parameter in the controller
+                input.value = deptId;
                 form.appendChild(input);
 
                 // Submit the form

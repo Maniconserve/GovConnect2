@@ -18,23 +18,6 @@ namespace GovConnect.Repository
             return await _context.Services.ToListAsync();
         }
 
-        public async Task<List<Service>> GetServicesByDepartmentAsync(string deptName)
-        {
-            var departmentWithServices = await _context.Departments
-                .Include(d => d.Services)
-                .FirstOrDefaultAsync(d => d.DeptName == deptName);
-
-            return departmentWithServices?.Services?.ToList() ?? new List<Service>();
-        }
-
-
-        public async Task<Service> GetServiceByIdAsync(int id)
-        {
-            return await _context.Services
-                .Include(s => s.FeeDetails)
-                .FirstOrDefaultAsync(s => s.ServiceId == id);
-        }
-
         public async Task<ServiceApplication> GetServiceApplicationByIdAsync(int applicationId, string userId)
         {
             return await _context.ServiceApplications

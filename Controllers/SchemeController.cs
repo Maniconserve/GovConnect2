@@ -49,6 +49,7 @@ namespace GovConnect.Controllers
             if (TempData.ContainsKey("Schemes"))
             {
                 schemes = JsonConvert.DeserializeObject<List<Scheme>>(TempData["Schemes"].ToString());
+                TempData.Keep();
             }
 
             var scheme = schemes?.FirstOrDefault(s => s.SchemeID == schemeId);
