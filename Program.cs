@@ -2,6 +2,7 @@ using GovConnect.Data;
 using GovConnect.Models;
 using GovConnect.Repository;
 using GovConnect.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,10 +33,12 @@ builder.Services.AddIdentity<Citizen, IdentityRole>(
         options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";
     })
     .AddEntityFrameworkStores<SqlServerDbContext>().AddDefaultTokenProviders();
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.LoginPath = "/Citizen/Login/";
-});
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Citizen/Login/";
+    });
+
 
 builder.Services.AddAuthentication()
 .AddGoogle(options =>
@@ -46,8 +49,6 @@ builder.Services.AddAuthentication()
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
-    options.AddPolicy("Officer", policy => policy.RequireRole("Officer"));
     options.AddPolicy("User", policy => policy.RequireRole("User"));
     options.AddPolicy("NotUser", policy =>
         policy.RequireAssertion(context =>
@@ -72,8 +73,9 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
+
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Scheme}/{action=Index}");
+    pattern: "{controller=Citizen}/{action=Route}");
 
 app.Run();

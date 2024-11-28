@@ -56,7 +56,7 @@ namespace GovConnect.Controllers
                         };
 
                         // Assign the 'RoleOfficer' role claim if officer has this role
-                        claims.Add(new Claim(ClaimTypes.Role, "RoleOfficer"));
+                        claims.Add(new Claim(ClaimTypes.Role, "NotUser"));
 
                         var identity = new ClaimsIdentity(claims, "OfficerLogin");
                         var principal = new ClaimsPrincipal(identity);
@@ -167,6 +167,48 @@ namespace GovConnect.Controllers
             // Redirect back to the grievance details page
             return RedirectToAction("Details", new { id = grievanceId });
         }
+
+        [HttpPost]
+        public async Task<IActionResult> AddReason(int grievanceId, DateTime date, string work)
+        {
+            try
+            {
+                // Fetch the grievance from the database
+                var grievance = await _SqlServerDbContext.DGrievances.FindAsync(grievanceId);
+
+                if (grievance == null)
+                {
+                    return Json(new { success = false, message = "Grievance not found." });
+                }
+
+                // Deserialize the existing timeline or create a new one
+                var timeLine = string.IsNullOrEmpty(grievance.TimeLine)
+                    ? new List<TimeLineEntry>()
+                    : JsonSerializer.Deserialize<List<TimeLineEntry>>(grievance.TimeLine);
+
+                // Add the new timeline entry
+                timeLine.Add(new TimeLineEntry
+                {
+                    Date = date,
+                    Work = work
+                });
+
+                // Set the updated timeline
+                grievance.SetTimeLine(timeLine);
+
+                // Save changes to the database
+                _SqlServerDbContext.Update(grievance);
+                await _SqlServerDbContext.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Timeline entry added successfully." });
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (if necessary) and return a failure response
+                return Json(new { success = false, message = "An error occurred while adding the timeline entry.", error = ex.Message });
+            }
+        }
+
         [HttpGet]
         public IActionResult ForgotPassword()
         {

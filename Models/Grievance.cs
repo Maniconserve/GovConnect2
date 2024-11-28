@@ -38,7 +38,7 @@ namespace GovConnect.Models
         // Method to set Timeline from a list of key-value pairs (Date, Work)
         public void SetTimeLine(List<TimeLineEntry> timeLine)
         {
-            TimeLine = JsonSerializer.Serialize(timeLine);
+            this.TimeLine = JsonSerializer.Serialize(timeLine);
         }
     }
 

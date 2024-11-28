@@ -24,6 +24,28 @@ namespace GovConnect.Controllers
             SqlServerDbContext = _SqlServerDbContext;
             
         }
+
+        public IActionResult Route()
+        
+        {
+            var userRoles = User.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList();
+
+         
+            if (userRoles.Contains("NotUser"))
+            {
+                // Get the officerId from the claims (assuming it's stored as a claim)
+                var officeId = User.FindFirst("OfficerId")?.Value;
+
+                if (officeId != null)
+                {
+                    // Redirect to the Officer Dashboard and pass the officerId as a route parameter
+                    return RedirectToAction("Dashboard", "Officer", new { officerId = officeId });
+                }
+            }
+            return RedirectToAction("Index", "Scheme");
+        }
+
+
         [HttpGet]
         public IActionResult Register()
         {

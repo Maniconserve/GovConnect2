@@ -1,16 +1,47 @@
 ﻿@model Grievance
+<head>
+    <!-- Bootstrap CSS (add this in the <head> section of your layout) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+</head>
+<body>
 <div class="container mt-4 min-vh-100">
     <div class="card shadow-lg">
         <div class="card-header bg-success text-white">
             <h2 class="card-title d-inline">@Model.Title</h2>
-            <!-- Escalate Button to the Right of the Title -->
-            <form method="post" asp-controller="Grievance" asp-action="EscalateGrievance" class="d-inline float-end">
-                <!-- Hidden fields to pass grievanceId and OfficerId -->
-                <input type="hidden" name="grievanceId" value="@Model.GrievanceID" />
-                <input type="hidden" name="OfficerId" value="@Model.OfficerId" />
+                <form id="escalateForm" method="post" asp-controller="Grievance" asp-action="EscalateGrievance" class="d-inline float-end">
+                    <!-- Hidden fields to pass grievanceId and OfficerId -->
+                    <input type="hidden" name="grievanceId" value="@Model.GrievanceID" />
+                    <input type="hidden" name="OfficerId" value="@Model.OfficerId" />
+                    <button type="button" id="escalateButton" class="btn btn-danger ms-3" data-bs-toggle="modal" data-bs-target="#timelineModal">Escalate</button>
+                </form>
 
-                <button type="submit" class="btn btn-danger ms-3">Escalate</button>
-            </form>
+                <!-- Bootstrap Modal for Add TimeLine Entry -->
+                <div class="modal fade" id="timelineModal" tabindex="-1" aria-labelledby="timelineModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="timelineModalLabel">Add TimeLine Entry</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="timelineEntryForm" asp-action="AddReason" method="post">
+                                    <div class="mb-3">
+                                        <label for="Date" class="form-label">Date</label>
+                                        <input type="date" class="form-control" id="Date" name="Date" required />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="Work" class="form-label">Work</label>
+                                        <input type="text" class="form-control" id="Work" name="Work" required />
+                                    </div>
+                                    <input type="hidden" name="GrievanceID" value="@Model.GrievanceID" />
+                                    <button type="submit" class="btn btn-primary">Add Entry</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
 
         </div>
         <div class="card-body">
@@ -84,3 +115,38 @@
         </div>
     </div>
 </div>
+    <!-- Bootstrap JS (add this before the closing </body> tag) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Get references to form and button elements
+    const escalateButton = document.getElementById('escalateButton');
+    const escalateForm = document.getElementById('escalateForm');
+    const timelineEntryForm = document.getElementById('timelineEntryForm');
+    
+    // Prevent the "Escalate" button from submitting the form immediately
+    escalateButton.addEventListener('click', function(event) {
+        // Just show the modal, no form submission yet
+        event.preventDefault();
+    });
+
+    timelineEntryForm.addEventListener('submit', function(event) {
+        // First, allow the timeline entry form to be submitted
+        event.preventDefault();  // Prevent the default form submission for timeline entry
+        const formData = new FormData(timelineEntryForm);
+
+        // Send the timeline entry form data (for example, using AJAX)
+        fetch(timelineEntryForm.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())  // Assuming a JSON response
+        .then(data => {
+            // After timeline entry is successfully added, submit the escalate form
+            escalateForm.submit();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+</script>
+</body>
