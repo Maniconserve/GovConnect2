@@ -46,7 +46,7 @@ namespace GovConnect.Controllers
         {
             List<Scheme>? schemes = null;
 
-            if (TempData.ContainsKey("Schemes"))
+            if (TempData.ContainsKey("Schemes"))   
             {
                 schemes = JsonConvert.DeserializeObject<List<Scheme>>(TempData["Schemes"].ToString());
                 TempData.Keep();
