@@ -1,6 +1,4 @@
-﻿using GovConnect.Models;
-
-namespace GovConnect.ViewModels
+﻿namespace GovConnect.ViewModels
 {
     public class OfficerDashboardViewModel
     {

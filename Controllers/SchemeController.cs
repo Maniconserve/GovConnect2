@@ -1,8 +1,4 @@
-using GovConnect.Models;
-using GovConnect.Services;
-using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-
 namespace GovConnect.Controllers
 {
     public class SchemeController : Controller

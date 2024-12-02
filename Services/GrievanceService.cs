@@ -1,7 +1,4 @@
-﻿using GovConnect.Models;
-using GovConnect.ViewModels;
-using GovConnect.Repository;
-
+﻿
 namespace GovConnect.Services
 {
     public class GrievanceService : IGrievanceService

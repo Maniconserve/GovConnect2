@@ -1,7 +1,4 @@
-﻿using GovConnect.Data;
-using GovConnect.Models;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace GovConnect.Repository
 {

@@ -1,10 +1,4 @@
-﻿using GovConnect.Models;
-using GovConnect.Services;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-
-namespace GovConnect.Controllers
+﻿namespace GovConnect.Controllers
 {
     public class GrievanceController : Controller
     {
@@ -36,7 +30,7 @@ namespace GovConnect.Controllers
                 var user = await _citizenManager.GetUserAsync(User);
                 if (user == null)
                 {
-                    return RedirectToAction("Login", "Citizen");
+                    return RedirectToAction("Login","Citizen");
                 }
 
                 bool success = await _grievanceService.LodgeGrievanceAsync(grievance, user.Id, fileUpload);

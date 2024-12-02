@@ -4,59 +4,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="~/Images/ap-logo.png" />
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/footer.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/header.css" asp-append-version="true" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEJ6H5f6O5Q9w6YF7L1h8wL2Zw8z57ZyD6gDqg6uJek1V5dq5de1lfdJgn1F9" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="icon" href="~/Images/ap-logo.png" />
+	<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="~/css/footer.css" asp-append-version="true" />
+	<link rel="stylesheet" href="~/css/header.css" asp-append-version="true" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEJ6H5f6O5Q9w6YF7L1h8wL2Zw8z57ZyD6gDqg6uJek1V5dq5de1lfdJgn1F9" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
 
-    <div class="header">
-        <div class="gov-connect">
-            <a asp-action="Index" asp-controller="Scheme" style="text-decoration:none;color:black"><span class="g">G</span><span class="ov">ov</span><span class="g-5">C</span><span class="connect">onnect</span></a>
-        </div>
-        <div class="header-menu">
-            <div class="menu-item"><a asp-action="Index" asp-controller="Scheme" class="no-link">Home</a></div>
-            <div class="menu-item"><a asp-controller="Grievance" asp-action="Lodge" class="no-link">Lodge</a></div>
-            <div class="menu-item"><a asp-controller="Grievance" asp-action="Status" class="no-link">Status</a></div>
-            <div class="menu-item"><a asp-controller="Service" asp-action="Index" class="no-link">Services</a></div>
-            <div class="menu-item"><a asp-controller="Scheme" asp-action="Search" class="no-link">Schemes</a></div>
-        </div>
-        @if (SignInManager.IsSignedIn(User))
-        {
-            string profilePic = "/images/default-profile.jpg";
-            var username = User.Identity.Name;
-            profilePic = await profileService.GetProfilePicAsync(username);
+	<div class="header">
+		<div class="gov-connect">
+			<a asp-action="Index" asp-controller="Scheme" style="text-decoration:none;color:black"><span class="g">G</span><span class="ov">ov</span><span class="g-5">C</span><span class="connect">onnect</span></a>
+		</div>
+		<div class="header-menu">
+			<div class="menu-item"><a asp-action="Index" asp-controller="Scheme" class="no-link">Home</a></div>
+			<div class="menu-item"><a asp-controller="Grievance" asp-action="Lodge" class="no-link">Lodge</a></div>
+			<div class="menu-item"><a asp-controller="Grievance" asp-action="Status" class="no-link">Status</a></div>
+			<div class="menu-item"><a asp-controller="Service" asp-action="Index" class="no-link">Services</a></div>
+			<div class="menu-item"><a asp-controller="Scheme" asp-action="Search" class="no-link">Schemes</a></div>
+		</div>
+		@if (SignInManager.IsSignedIn(User))
+		{
+			string profilePic = "/images/default-profile.jpg";
+			var username = User.Identity.Name;
+			profilePic = await profileService.GetProfilePicAsync(username);
 
-            <div class="dropdown hover-dropdown">
-                <button class="btn btn-link text-decoration-none" type="button" id="profileDropdown" aria-expanded="false">
-                    <img src="@profilePic" alt="Profile" class="rounded-circle" width="40" height="40" />
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-                    <li><a class="dropdown-item" asp-controller="Citizen" asp-action="Edit">My Profile</a></li>
-                    <li><a class="dropdown-item" asp-controller="Service" asp-action="MyServices">My Services</a></li>
-                    <li><a class="dropdown-item" asp-controller="Grievance" asp-action="MyGrievances">My Grievances</a></li>
-                    <li><a class="dropdown-item" asp-controller="Citizen" asp-action="Logout">Logout</a></li>
-                </ul>
-            </div>
-        }
-        else
-        {
-            <a asp-controller="Citizen" asp-action="Login" class="button text-decoration-none"><span class="try-free">Login</span></a>
-        }
-    </div>
+			<div class="dropdown hover-dropdown">
+				<button class="btn btn-link text-decoration-none" type="button" id="profileDropdown" aria-expanded="false">
+					<img src="@profilePic" alt="Profile" class="rounded-circle" width="40" height="40" />
+				</button>
+				<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+					<li><a class="dropdown-item" asp-controller="Citizen" asp-action="Edit">My Profile</a></li>
+					<li><a class="dropdown-item" asp-controller="Service" asp-action="MyServices">My Services</a></li>
+					<li><a class="dropdown-item" asp-controller="Grievance" asp-action="MyGrievances">My Grievances</a></li>
+					<li><a class="dropdown-item" asp-controller="Citizen" asp-action="Logout">Logout</a></li>
+				</ul>
+			</div>
+		}
+		else
+		{
+			<a asp-controller="Citizen" asp-action="Login" class="button text-decoration-none"><span class="try-free">Login</span></a>
+		}
+	</div>
 
-    <!-- Content Body -->
-    <div class="container mt-4 flex-grow-1">
-        @RenderBody()
-    </div>
+	<!-- Content Body -->
+	<div class="container mt-4 flex-grow-1">
+		@RenderBody()
+	</div>
 
-    @{ await Html.RenderPartialAsync("_footerPartial"); }
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+<footer>
+	@{
+		await Html.RenderPartialAsync("_footerPartial");
+	}
+</footer>
 </html>

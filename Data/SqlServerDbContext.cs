@@ -1,6 +1,4 @@
-﻿using GovConnect.Models;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 namespace GovConnect.Data
 {
     public class SqlServerDbContext : IdentityDbContext<Citizen>

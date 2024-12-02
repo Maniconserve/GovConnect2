@@ -1,8 +1,4 @@
-﻿using GovConnect.Data;
-using GovConnect.Models;
-using Microsoft.EntityFrameworkCore;
-
-namespace GovConnect.Repository
+﻿namespace GovConnect.Repository
 {
     public class ServiceRepository : IServiceRepository
     {

@@ -1,0 +1,22 @@
+﻿.btn-check:checked + .btn {
+    background-color: #28a745;
+    color: white;
+}
+
+    .btn-check:checked + .btn i {
+        color: white;
+    }
+
+.list-group .list-group-item {
+    cursor: pointer;
+}
+
+.btn-check:checked + .list-group-item {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-check:checked + .btn {
+    background-color: #28a745;
+    color: white;
+}

@@ -1,10 +1,4 @@
-using GovConnect.Data;
-using GovConnect.Models;
-using GovConnect.Repository;
-using GovConnect.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,17 +30,12 @@ builder.Services.AddIdentity<Citizen, IdentityRole>(
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath = "/Citizen/Login/";
+        options.LoginPath = "/Citizen/Login";
+    }).AddGoogle(options =>
+    {
+        options.ClientId = builder.Configuration["Google:ClientId"];
+        options.ClientSecret = builder.Configuration["Google:ClientSecret"];
     });
-
-
-builder.Services.AddAuthentication()
-.AddGoogle(options =>
-{
-    options.ClientId = builder.Configuration["Google:ClientId"];
-    options.ClientSecret = builder.Configuration["Google:ClientSecret"];
-});
-
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("User", policy => policy.RequireRole("User"));

@@ -1,12 +1,4 @@
 ﻿using System.Security.Claims;
-using GovConnect.Data;
-using GovConnect.Services;
-using GovConnect.ViewModels;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
-using GovConnect.Models;
 using System.Text.Json;
 
 namespace GovConnect.Controllers

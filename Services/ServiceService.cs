@@ -1,7 +1,4 @@
-﻿using GovConnect.Models;
-using GovConnect.Repository;
-
-namespace GovConnect.Services
+﻿namespace GovConnect.Services
 {
     public class ServiceService : IServiceService
     {

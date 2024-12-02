@@ -1,6 +1,4 @@
-﻿using GovConnect.Data;
-using Microsoft.EntityFrameworkCore;
-namespace GovConnect.Services
+﻿namespace GovConnect.Services
 {
     public class ProfileService 
     {

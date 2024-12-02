@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace GovConnect.Models
+﻿namespace GovConnect.Models
 {
     public class PoliceOfficer
     {

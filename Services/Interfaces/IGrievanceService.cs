@@ -1,7 +1,4 @@
-﻿using GovConnect.Models;
-using GovConnect.ViewModels;
-
-namespace GovConnect.Services
+﻿namespace GovConnect.Services
 {
     public interface IGrievanceService
     {

@@ -1,10 +1,4 @@
-﻿using GovConnect.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
-using GovConnect.Models;
-using Microsoft.AspNetCore.Authorization;
-using Newtonsoft.Json;
-
+﻿using Newtonsoft.Json;
 namespace GovConnect.Controllers
 {
     public class ServiceController : Controller
@@ -41,7 +35,6 @@ namespace GovConnect.Controllers
             return View("Index", services);
         }
 
-        // Action method to view a specific service
         public IActionResult PService(int? id)
         {
             if (id == null)
@@ -60,8 +53,6 @@ namespace GovConnect.Controllers
             return View(service);
         }
 
-        // Action method to apply for a service
-        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Apply(ServiceApplication model)
         {
@@ -115,7 +106,7 @@ namespace GovConnect.Controllers
                 return RedirectToAction("MyServices");
             }
 
-            return NotFound();  // Or handle this case differently
+            return NotFound(); 
         }
     }
 }

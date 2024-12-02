@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-
-namespace GovConnect.Models
+﻿namespace GovConnect.Models
 {
     public class Citizen : IdentityUser
     {

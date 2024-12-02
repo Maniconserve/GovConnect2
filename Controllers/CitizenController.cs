@@ -1,13 +1,4 @@
 ﻿using System.Security.Claims;
-using GovConnect.Data;
-using GovConnect.Models;
-using GovConnect.Services;
-using GovConnect.ViewModels;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-
 namespace GovConnect.Controllers
 {
     public class CitizenController : Controller
@@ -17,28 +8,27 @@ namespace GovConnect.Controllers
         private SqlServerDbContext SqlServerDbContext;
         private EmailSender emailSender;
         private static string originalotp;
-        public CitizenController(UserManager<Citizen> _citizenManager,SignInManager<Citizen> _signInManager, EmailSender _emailSender, SqlServerDbContext _SqlServerDbContext) {
+        public CitizenController(UserManager<Citizen> _citizenManager, SignInManager<Citizen> _signInManager, EmailSender _emailSender, SqlServerDbContext _SqlServerDbContext)
+        {
             citizenManager = _citizenManager;
             signInManager = _signInManager;
             emailSender = _emailSender;
             SqlServerDbContext = _SqlServerDbContext;
-            
+
         }
 
         public IActionResult Route()
-        
+
         {
             var userRoles = User.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList();
 
-         
+
             if (userRoles.Contains("NotUser"))
             {
-                // Get the officerId from the claims (assuming it's stored as a claim)
                 var officeId = User.FindFirst("OfficerId")?.Value;
 
                 if (officeId != null)
                 {
-                    // Redirect to the Officer Dashboard and pass the officerId as a route parameter
                     return RedirectToAction("Dashboard", "Officer", new { officerId = officeId });
                 }
             }
@@ -214,9 +204,8 @@ namespace GovConnect.Controllers
 
                 if (user == null)
                 {
-                    return NotFound(); // Return an error if the user is not found
+                    return NotFound();
                 }
-                // Map user data to the Citizen model
                 var model = new Citizen
                 {
                     UserName = user.UserName,
@@ -231,11 +220,10 @@ namespace GovConnect.Controllers
                     District = user.District,
                     Village = user.Village
                 };
-                return View(model); // Return the view with the model
+                return View(model);
             }
             catch (Exception ex)
             {
-                // Log the exception (e.g., use a logging framework like Serilog or NLog)
                 Console.WriteLine(ex.Message);
                 return StatusCode(500, "Internal server error");
             }
@@ -251,14 +239,12 @@ namespace GovConnect.Controllers
                 using (var memoryStream = new MemoryStream())
                 {
                     await Profilepic.CopyToAsync(memoryStream);
-                    user.Profilepic = memoryStream.ToArray(); // Save the profile picture as byte[]
+                    user.Profilepic = memoryStream.ToArray();
                 }
             }
 
-            // Update other fields if they are not null
             if (citizen.Email != user.Email)
             {
-                // Update the email and set EmailConfirmed to false
                 user.Email = citizen.Email;
                 user.EmailConfirmed = false;
             }
@@ -273,12 +259,12 @@ namespace GovConnect.Controllers
             user.Village = citizen.Village ?? user.Village;
 
             await citizenManager.UpdateAsync(user);
-            return RedirectToAction("Edit"); // Redirect to the profile page or wherever appropriate
+            return RedirectToAction("Edit");
         }
 
 
         [HttpGet]
-        public IActionResult GoogleLogin(String provider,String returnUrl="")
+        public IActionResult GoogleLogin(String provider, String returnUrl = "")
         {
             var redirectUrl = Url.Action("GoogleLoginCallBack", "Citizen", new { ReturnUrl = returnUrl });
             var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
@@ -286,7 +272,7 @@ namespace GovConnect.Controllers
             return new ChallengeResult(provider, properties);
         }
 
-        public async Task<IActionResult> GoogleLoginCallBack(string remoteError,String returnUrl = "" )
+        public async Task<IActionResult> GoogleLoginCallBack(string remoteError, String returnUrl = "")
         {
             var loginVM = new LoginViewModel()
             {
@@ -323,24 +309,21 @@ namespace GovConnect.Controllers
         }
 
         [HttpGet]
-        public IActionResult ForgotPassword() {
+        public IActionResult ForgotPassword()
+        {
             return View(new ForgotPasswordViewModel());
         }
         [HttpPost]
         public async Task<IActionResult> SendOtp(string email)
         {
-            // Check if the email exists
             var user = await citizenManager.FindByEmailAsync(email);
             if (user == null)
             {
                 TempData["EmailMessage"] = "No user found with this email.";
-                return View("ForgotPassword",new ForgotPasswordViewModel { Email = email});
+                return View("ForgotPassword", new ForgotPasswordViewModel { Email = email });
             }
 
-            // Generate a random OTP
-            originalotp = new Random().Next(100000, 999999).ToString();  // Generate a 6-digit OTP
-
-            // Send OTP via email
+            originalotp = new Random().Next(100000, 999999).ToString();
             var subject = "Reset Password";
             var body = $"Your OTP code resetting password is: {originalotp}";
 
@@ -348,13 +331,12 @@ namespace GovConnect.Controllers
             {
                 await emailSender.SendEmailAsync(email, subject, body);
 
-                // Save OTP in TempData for use in subsequent form submissions
                 TempData["EmailMessage"] = "OTP has been sent to your email. Please check your inbox (and spam folder).";
             }
             catch (Exception)
             {
                 TempData["EmailMessage"] = "Failed to send OTP. Please try again later.";
-            } 
+            }
             return View("ForgotPassword", new ForgotPasswordViewModel { Email = email });
         }
 
@@ -368,33 +350,28 @@ namespace GovConnect.Controllers
             }
             if (!ModelState.IsValid)
             {
-                return View("ForgotPassword",forgotPasswordViewModel);
+                return View("ForgotPassword", forgotPasswordViewModel);
             }
 
-            // Update the user's password
             var user = await citizenManager.FindByEmailAsync(forgotPasswordViewModel.Email);
             if (user != null)
             {
-                var result = await citizenManager.RemovePasswordAsync(user);  // Remove current password
-                if (result.Succeeded)
+                var result = await citizenManager.RemovePasswordAsync(user); if (result.Succeeded)
                 {
-                    result = await citizenManager.AddPasswordAsync(user,forgotPasswordViewModel.Password);  // Add new password
-                    if (result.Succeeded)
+                    result = await citizenManager.AddPasswordAsync(user, forgotPasswordViewModel.Password); if (result.Succeeded)
                     {
-                        return RedirectToAction("Login");  // Redirect to login or wherever needed
+                        return RedirectToAction("Login");
                     }
                 }
             }
-            return RedirectToAction("Index");  // Redirect to form again
+            return RedirectToAction("Index");
         }
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
-            // Sign out the user
             await signInManager.SignOutAsync();
 
-            // Redirect to the homepage or login page
             return RedirectToAction("Index", "Scheme");
         }
 

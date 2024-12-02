@@ -1,0 +1,68 @@
+﻿.service-card {
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+    min-height: 320px; /* Fixed height for all cards */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Ensures content is spaced out evenly */
+}
+
+    .service-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .service-card .icon {
+        color: #6c757d;
+        font-size: 3rem;
+        transition: color 0.3s ease;
+        margin-bottom: 20px;
+    }
+
+    .service-card:hover .icon {
+        color: #f39c12;
+    }
+
+    .service-card h2 {
+        font-size: 1.25rem;
+        color: #343a40;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    .service-card p {
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    .service-card .btn {
+        background-color: #f39c12;
+        color: #fff;
+        border-radius: 25px;
+        padding: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        transition: background-color 0.3s ease;
+    }
+
+        .service-card .btn:hover {
+            background-color: #e67e22;
+        }
+
+    .service-card .fee {
+        color: #27ae60;
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin-bottom: 20px;
+    }
+
+    /* Ensures that all cards maintain the same height */
+    .service-card .service-info {
+        flex-grow: 1; /* Makes the service info area grow and take up available space */
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }

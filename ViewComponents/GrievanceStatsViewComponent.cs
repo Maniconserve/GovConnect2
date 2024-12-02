@@ -1,8 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using GovConnect.Data;
-using Microsoft.EntityFrameworkCore;
-using GovConnect.ViewModels;
-namespace GovConnect.ViewComponents
+﻿namespace GovConnect.ViewComponents
 { 
     public class GrievanceStatsViewComponent : ViewComponent
     {

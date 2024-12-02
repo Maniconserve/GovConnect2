@@ -1,6 +1,4 @@
-﻿using GovConnect.Models;
-
-namespace GovConnect.Repository
+﻿namespace GovConnect.Repository
 {
     public interface IServiceRepository
     {

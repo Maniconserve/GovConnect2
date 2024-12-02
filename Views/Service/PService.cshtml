@@ -1,32 +1,22 @@
 ﻿@model Service
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@Model.ServiceName - Service Details</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-        }
-    </style>
 </head>
-<body class="bg-gray-100">
-
+<body class="bg-gray-100" style="font-family:'Roboto',sans-serif">
     <div class="p-8 w-full">
         <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-lg">
             <div class="flex justify-between items-center mb-6">
-                <h1 class="text-2xl font-bold text-gray-800">@Model.ServiceName</h1>  <!-- Service Name -->
+                <h1 class="text-2xl font-bold text-gray-800">@Model.ServiceName</h1>
 
                 <form method="post" action="@Url.Action("Apply", "Service")">
-                    @* Hidden fields to send service details in the form *@
                     <input type="hidden" name="ServiceID" value="@Model.ServiceId" />
                     <input type="hidden" name="ApplicationDate" value="@DateTime.Now" />
                     <input type="hidden" name="ServiceName" value="@Model.ServiceName"/>
                     <div class="flex items-center space-x-2">
                         <button type="submit" class="bg-orange-500 text-white px-3 py-2 rounded-md hover:bg-orange-600 transition">Apply</button>
-                        @* Calculate the total fee *@
+                    
                         @{
                             var totalFee = Model.FeeDetails.GovFee + Model.FeeDetails.ServiceFee + Model.FeeDetails.Tax;
                         
@@ -40,7 +30,6 @@
 
             <hr class="border-gray-300 mb-4">
 
-            <!-- Fees Section -->
             <div class="mb-4">
                 <h2 class="text-lg font-bold text-orange-600">Fees Breakdown</h2>
                 <ul class="space-y-2">
@@ -55,7 +44,6 @@
 
             <hr class="border-gray-300 mb-4">
 
-            <!-- Documents Required Section -->
             <div class="mb-4">
                 <h2 class="text-lg font-bold text-orange-600">Documents Required</h2>
                 <pre class="text-gray-700">@Model.DocsRequires</pre>
@@ -63,13 +51,10 @@
 
             <hr class="border-gray-300 mb-4">
 
-            <!-- Processing Time Section -->
             <div>
                 <h2 class="text-lg font-bold text-orange-600">Processing Time</h2>
                 <p class="text-gray-700">@Model.ProcessingTime</p>
             </div>
         </div>
     </div>
-
 </body>
-</html>

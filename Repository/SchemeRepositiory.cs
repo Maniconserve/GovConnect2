@@ -1,11 +1,7 @@
 ﻿using System.Text;
-using GovConnect.Data;
-using GovConnect.Models;
-using Microsoft.EntityFrameworkCore;
-
 namespace GovConnect.Repository
 {
-    public class SchemeRepository
+    public class SchemeRepository : ISchemeRepository
     {
         private readonly SqlServerDbContext _context;
 
@@ -35,7 +31,7 @@ namespace GovConnect.Repository
 
             return schemes;
         }
-        public static string FormatText(string text, int maxLineLength)
+        public string FormatText(string text, int maxLineLength)
         {
             var words = text.Split(' ');
             var lines = new List<string>();

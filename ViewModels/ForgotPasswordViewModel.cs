@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace GovConnect.ViewModels
+﻿namespace GovConnect.ViewModels
 {
     public class ForgotPasswordViewModel
     {

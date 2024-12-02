@@ -1,159 +1,153 @@
 ﻿@model Citizen
-
 <head>
     <title>Profile</title>
 </head>
-
-<div class="container">
-    <div class="row justify-content-center min-vh-100">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header text-center">
-                    <h3>Profile</h3>
-                </div>
-                <div class="card-body">
-                    <form asp-action="Edit" method="post" enctype="multipart/form-data">
-                        <!-- Profile Picture Upload -->
-                        @{
-                            string imageSrc = ""; // Declare the variable once at the top
-                            if (Model.Profilepic != null && Model.Profilepic.Length > 0)
-                            {
-                                // Convert byte[] to Base64 string
-                                var base64String = Convert.ToBase64String(Model.Profilepic);
-                                imageSrc = $"data:image/jpeg;base64,{base64String}"; // Assign the Base64 string
+<body>
+    <div class="container">
+        <div class="row justify-content-center min-vh-100">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header text-center">
+                        <h3>Profile</h3>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                            <!-- Profile Picture Upload -->
+                            @{
+                                string imageSrc = ""; // Declare the variable once at the top
+                                if (Model.Profilepic != null && Model.Profilepic.Length > 0)
+                                {
+                                    // Convert byte[] to Base64 string
+                                    var base64String = Convert.ToBase64String(Model.Profilepic);
+                                    imageSrc = $"data:image/jpeg;base64,{base64String}"; // Assign the Base64 string
+                                }
                             }
-                        }
 
-                        <div class="text-center mb-4">
-                            <img id="profilePicPreview" src="@imageSrc" alt="Profile Picture" class="profile-img rounded-circle" style="width: 100px; height: 130px; object-fit: cover;" />
-                            <div class="mt-2">
-                                <!-- Custom Upload Button -->
-                                <button type="button" class="btn btn-secondary" id="uploadButton">Upload</button>
-                                <!-- Hidden File Input -->
-                                <input type="file" id="Profilepic" name="Profilepic" class="form-control visually-hidden" asp-for="Profilepic" />
+                            <div class="text-center mb-4">
+                                <img id="profilePicPreview" src="@imageSrc" alt="Profile Picture" class="profile-img rounded-circle" style="width: 100px; height: 130px; object-fit: cover;" />
+                                <div class="mt-2">
+                                    <!-- Custom Upload Button -->
+                                    <button type="button" class="btn btn-secondary" id="uploadButton">Upload</button>
+                                    <!-- Hidden File Input -->
+                                    <input type="file" id="Profilepic" name="Profilepic" class="form-control visually-hidden" asp-for="Profilepic" />
+                                </div>
                             </div>
-                        </div>
 
-                        <!-- Name Fields -->
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="FirstName" class="form-label">First Name</label>
-                                    <input type="text" id="FirstName" name="FirstName" class="form-control"
-                                           placeholder="Enter First Name" asp-for="UserName" />
+                            <!-- Name Fields -->
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="FirstName" class="form-label">First Name</label>
+                                        <input type="text" id="FirstName" name="FirstName" class="form-control"
+                                               placeholder="Enter First Name" asp-for="UserName" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="LastName" class="form-label">Last Name</label>
+                                        <input type="text" id="LastName" name="LastName" class="form-control"
+                                               placeholder="Enter Last Name" asp-for="LastName" />
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="LastName" class="form-label">Last Name</label>
-                                    <input type="text" id="LastName" name="LastName" class="form-control"
-                                           placeholder="Enter Last Name" asp-for="LastName" />
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- Gender and Phone Number Fields -->
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="Gender" class="form-label">Gender</label>
-                                    <select id="Gender" name="Gender" class="form-select">
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
-                                        <option value="Other">Other</option>
-                                    </select>
+                            <!-- Gender and Phone Number Fields -->
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="Gender" class="form-label">Gender</label>
+                                        <select id="Gender" name="Gender" class="form-select">
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="PhoneNumber" class="form-label">Mobile</label>
+                                        <input type="text" id="PhoneNumber" name="PhoneNumber" class="form-control"
+                                               placeholder="Enter Mobile Number" asp-for="PhoneNumber" />
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="PhoneNumber" class="form-label">Mobile</label>
-                                    <input type="text" id="PhoneNumber" name="PhoneNumber" class="form-control"
-                                           placeholder="Enter Mobile Number" asp-for="PhoneNumber" />
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- Address Fields -->
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="Pincode" class="form-label">Pincode</label>
-                                    <input type="text" id="Pincode" name="Pincode" class="form-control"
-                                           placeholder="Enter Pincode" asp-for="Pincode" />
+                            <!-- Address Fields -->
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="Pincode" class="form-label">Pincode</label>
+                                        <input type="text" id="Pincode" name="Pincode" class="form-control"
+                                               placeholder="Enter Pincode" asp-for="Pincode" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="Mandal" class="form-label">Mandal</label>
+                                        <input type="text" id="Mandal" name="Mandal" class="form-control"
+                                               placeholder="Enter Mandal" asp-for="Mandal" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="District" class="form-label">District</label>
+                                        <input type="text" id="District" name="District" class="form-control"
+                                               placeholder="Enter District" asp-for="District" />
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="Mandal" class="form-label">Mandal</label>
-                                    <input type="text" id="Mandal" name="Mandal" class="form-control"
-                                           placeholder="Enter Mandal" asp-for="Mandal" />
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="District" class="form-label">District</label>
-                                    <input type="text" id="District" name="District" class="form-control"
-                                           placeholder="Enter District" asp-for="District" />
-                                </div>
-                            </div>
-                        </div>
 
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="City" class="form-label">City</label>
-                                    <input type="text" id="City" name="City" class="form-control"
-                                           placeholder="Enter City" asp-for="City" />
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="City" class="form-label">City</label>
+                                        <input type="text" id="City" name="City" class="form-control"
+                                               placeholder="Enter City" asp-for="City" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="Village" class="form-label">Village</label>
+                                        <input type="text" id="Village" name="Village" class="form-control"
+                                               placeholder="Enter Village" asp-for="Village" />
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="Village" class="form-label">Village</label>
-                                    <input type="text" id="Village" name="Village" class="form-control"
-                                           placeholder="Enter Village" asp-for="Village" />
-                                </div>
+
+                            <!-- Email Field -->
+                            <div class="form-group">
+                                <label for="Email" class="form-label">Email</label>
+                                <input type="email" id="Email" name="Email" class="form-control"
+                                       placeholder="Enter Email" asp-for="Email" />
                             </div>
-                        </div>
 
-                        <!-- Email Field -->
-                        <div class="form-group">
-                            <label for="Email" class="form-label">Email</label>
-                            <input type="email" id="Email" name="Email" class="form-control"
-                                   placeholder="Enter Email" asp-for="Email" />
-                        </div>
-
-                        <!-- Submit Button -->
-                        <div class="text-center mt-4">
-                            <button type="submit" class="btn btn-primary px-5">Save Changes</button>
-                        </div>
-                    </form>
+                            <!-- Submit Button -->
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-primary px-5">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+    <script>
+        const uploadButton = document.getElementById("uploadButton");
+        const fileInput = document.getElementById("Profilepic");
+        uploadButton.addEventListener("click", function () {
+            fileInput.click();
+        });
+        fileInput.addEventListener("change", function (event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onloadend = function () {
+                    document.getElementById("profilePicPreview").src = reader.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
 
-<script>
-    // Get the file input and custom button elements
-    const uploadButton = document.getElementById("uploadButton");
-    const fileInput = document.getElementById("Profilepic");
 
-    // Add an event listener to the custom button
-    uploadButton.addEventListener("click", function () {
-        // Trigger the file input's click event
-        fileInput.click();
-    });
-
-    // Optional: Show a preview of the image when a file is selected
-    fileInput.addEventListener("change", function (event) {
-        const file = event.target.files[0]; // Get the first file selected
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = function () {
-                // Show the selected image in the preview
-                document.getElementById("profilePicPreview").src = reader.result;
-            };
-            reader.readAsDataURL(file); // Read the file as Data URL (Base64)
-        }
-    });
-</script>

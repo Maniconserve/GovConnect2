@@ -1,0 +1,41 @@
+﻿body {
+    background-color: #f4f6f9;
+}
+
+.head {
+    background: linear-gradient(to right, #fd7e14, #fcb400);
+    padding: 30px;
+    color: white;
+}
+
+    .head h1 {
+        font-size: 2.5rem;
+        text-align: center;
+        font-weight: 700;
+    }
+
+.card {
+    border-radius: 15px;
+}
+
+.table {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+    .table th, .table td {
+        vertical-align: middle;
+    }
+
+.form-control {
+    border-radius: 10px;
+}
+
+.btn-get-details {
+    border-radius: 10px;
+}
+
+.captcha-img {
+    border-radius: 10px;
+}
