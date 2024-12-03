@@ -3,19 +3,19 @@ namespace GovConnect.Services
 {
     public class GrievanceService : IGrievanceService
     {
-        private readonly IGrievanceRepository _grievanceRepository;
+        private readonly IGrievanceRepository<Grievance> _grievanceRepository;
 
-        public GrievanceService(IGrievanceRepository grievanceRepository)
+        public GrievanceService(IGrievanceRepository<Grievance> grievanceRepository)
         {
             _grievanceRepository = grievanceRepository;
         }
 
-        public async Task<Grievance> GetGrievanceByIdAsync(int grievanceId)
+        public async Task<Grievance?> GetGrievanceByIdAsync(int grievanceId)
         {
             return await _grievanceRepository.GetGrievanceByIdAsync(grievanceId);
         }
 
-        public async Task<List<Grievance>> GetGrievancesByUserAsync(string userId, string statusFilter="All")
+        public async Task<List<Grievance>?> GetGrievancesByUserAsync(string userId, string statusFilter="All")
         {
             return await _grievanceRepository.GetGrievancesByUserAsync(userId, statusFilter);
         }
@@ -46,7 +46,7 @@ namespace GovConnect.Services
             return await _grievanceRepository.LodgeGrievanceAsync(grievance);
         }
 
-        public async Task<List<TimeLineEntry>> GetGrievanceTimelineAsync(int grievanceId)
+        public async Task<List<TimeLineEntry>?> GetGrievanceTimelineAsync(int grievanceId)
         {
             return await _grievanceRepository.GetGrievanceTimelineAsync(grievanceId);
         }
@@ -56,7 +56,7 @@ namespace GovConnect.Services
             return await _grievanceRepository.UpdateGrievanceFilesAsync(grievanceId, fileUpload);
         }
 
-        public async Task<byte[]> GetGrievanceFileAsync(int grievanceId)
+        public async Task<byte[]?> GetGrievanceFileAsync(int grievanceId)
         {
             return await _grievanceRepository.GetGrievanceFileAsync(grievanceId);
         }

@@ -1,20 +1,48 @@
-﻿.custom-bg {
+﻿.custom-home-bg {
     background-color: #E5E7EB;
     border-radius: 15px;
 }
 
-.custom-border {
+.custom-process-bg {
+    background-color: #E5E7EB;
     border-radius: 15px;
 }
 
-.custom-border {
+.custom-rounded-rectangle {
+    border-radius: 10px;
 }
 
-    .custom-border:hover {
+.custom-list-group {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.custom-process-border {
+    border-radius: 15px;
+}
+
+.custom-process-border:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.custom-process-border {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+.custom-stats-bg {
+    background-color: #E5E7EB;
+    border-radius: 15px;
+}
+
+.custom-stat-card {
+    border-radius: 15px;
+}
+
+    .custom-stat-card:hover {
         transform: scale(1.05);
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
     }
 
-.custom-border {
+.custom-stat-card {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }

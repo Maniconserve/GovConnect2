@@ -2,9 +2,9 @@
 {
     public class SchemeService : ISchemeService
     {
-        private readonly SchemeRepository _schemeRepository;
+        private readonly ISchemeRepository<Scheme> _schemeRepository;
 
-        public SchemeService(SchemeRepository schemeRepository)
+        public SchemeService(ISchemeRepository<Scheme> schemeRepository)
         {
             _schemeRepository = schemeRepository;
         }

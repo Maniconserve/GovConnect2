@@ -2,9 +2,9 @@
 {
     public class ServiceService : IServiceService
     {
-        private readonly IServiceRepository _serviceRepository;
+        private readonly IServiceRepository<Service> _serviceRepository;
 
-        public ServiceService(IServiceRepository serviceRepository)
+        public ServiceService(IServiceRepository<Service> serviceRepository)
         {
             _serviceRepository = serviceRepository;
         }

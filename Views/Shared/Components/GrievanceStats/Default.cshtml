@@ -1,22 +1,22 @@
 ﻿@model GrievanceStatsViewModel
-<div class="custom-bg p-5 rounded-lg shadow-sm mt-5 mb-5  d-flex justify-content-center align-items-center">
+<div class="custom-stats-bg p-5 rounded-lg shadow-sm mt-5 mb-5 d-flex justify-content-center align-items-center">
     <div class="text-center w-100">
         <h2 class="text-primary font-weight-bold">Grievance Stats Effects from 19-10-2024</h2>
         <div class="row mt-4">
             <div class="col-md-4">
-                <div class="bg-danger text-white p-4 rounded-lg shadow-sm">
+                <div class="bg-danger text-white p-4 rounded-lg shadow-sm custom-stat-card">
                     <p class="h3 font-weight-bold">@Model.PendingCount</p>
                     <p>Grievances Pending</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="bg-success text-white p-4 rounded-lg shadow-sm">
+                <div class="bg-success text-white p-4 rounded-lg shadow-sm custom-stat-card">
                     <p class="h3 font-weight-bold">@Model.ResolvedCount</p>
                     <p>Grievances Resolved</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="bg-warning text-white p-4 rounded-lg shadow-sm">
+                <div class="bg-warning text-white p-4 rounded-lg shadow-sm custom-stat-card">
                     <p class="h3 font-weight-bold">@Model.InProgressCount</p>
                     <p>Grievances In Progress</p>
                 </div>

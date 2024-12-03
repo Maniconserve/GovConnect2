@@ -16,7 +16,6 @@ namespace GovConnect.Controllers
             SqlServerDbContext = _SqlServerDbContext;
 
         }
-
         public IActionResult Route()
 
         {

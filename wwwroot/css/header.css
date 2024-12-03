@@ -15,7 +15,7 @@ body {
 }
 
 /* Header Styles */
-.header {
+.custom-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -29,7 +29,7 @@ body {
 }
 
     /* GovConnect Text */
-    .header .gov-connect {
+    .custom-header .custom-gov-connect {
         font-size: 24px;
         font-weight: 700;
         display: flex;
@@ -39,31 +39,32 @@ body {
     }
 
     /* Individual GovConnect parts */
-    .header .g,
-    .header .g-5 {
+    .custom-header .custom-g,
+    .custom-header .custom-g-5 {
         font-weight: 700;
     }
 
-    .header .ov,
-    .header .connect {
+    .custom-header .custom-ov,
+    .custom-header .custom-connect {
         font-weight: 400;
     }
 
 /* Header Menu - Align right */
-.header-menu {
+.custom-header-menu {
     display: flex;
     flex-direction: row; /* Arrange items in a row */
     gap: 12px; /* Reduced space between menu items */
     align-items: center; /* Align items vertically to the center */
     margin-left: auto; /* This will push the menu to the right */
 }
-.header .header-menu .no-link {
+
+.custom-header .custom-header-menu .custom-no-link {
     text-decoration: none; /* Removes underline */
     color: inherit; /* Inherits color from parent, or set a specific color if needed */
 }
 
 /* Individual Menu Items */
-.header .menu-item {
+.custom-header .custom-menu-item {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -73,12 +74,12 @@ body {
 }
 
     /* On hover, change the text color (but no border or background) */
-    .header .menu-item:hover {
+    .custom-header .custom-menu-item:hover {
         color: #171a1f; /* Change text color */
     }
 
     /* Text styles for each menu item */
-    .header .menu-item span {
+    .custom-header .custom-menu-item span {
         font-family: Inter, var(--default-font-family);
         font-size: 14px;
         font-weight: 400;
@@ -87,26 +88,27 @@ body {
     }
 
 /* Login Button */
-.header .button {
+.custom-header .custom-button {
     background-color: #171a1f;
     color: #fff;
     padding: 8px 18px;
-    margin:6px;
+    margin: 6px;
     border-radius: 18px;
     border: none;
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
 
-    .header .button:hover {
+    .custom-header .custom-button:hover {
         background-color: #333;
     }
 
 /* Optional: Style for the button text */
-.header .try-free {
+.custom-header .custom-try-free {
     font-size: 14px;
     font-weight: 700;
 }
-.dropdown:hover .dropdown-menu {
+
+.custom-dropdown:hover .dropdown-menu {
     display: block;
 }

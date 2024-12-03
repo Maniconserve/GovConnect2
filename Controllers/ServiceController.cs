@@ -35,8 +35,9 @@ namespace GovConnect.Controllers
             return View("Index", services);
         }
 
-        public IActionResult PService(int? id)
+        public async Task<IActionResult> PService(int? id)
         {
+            var user = await _userManager.GetUserAsync(User);
             if (id == null)
             {
                 return NotFound();
@@ -50,6 +51,14 @@ namespace GovConnect.Controllers
                 TempData.Keep();
             }
             var service = services?.FirstOrDefault(s => s.ServiceId == id);
+            var appliedServices = await _serviceService.GetMyServicesAsync(user.Id, "All");
+            bool alreadyApplied = appliedServices.Any(s => s.ServiceID == id);
+
+            if (alreadyApplied)
+            {
+                ViewBag.Error = "You have already applied for this service.";
+            }
+
             return View(service);
         }
 
@@ -69,7 +78,6 @@ namespace GovConnect.Controllers
                 return RedirectToAction("MyServices");
             }
 
-            // Handle failure case, e.g., show an error message
             return View(model);
         }
 

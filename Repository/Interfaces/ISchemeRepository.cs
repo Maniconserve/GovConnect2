@@ -1,11 +1,10 @@
-﻿namespace GovConnect.Repository
-{
-    public interface ISchemeRepository
-    {
-        // Asynchronous method to get a list of schemes based on eligibility criteria
-        Task<List<Scheme>> GetSchemesByEligibilityAsync(Eligibility eligibility);
+﻿using GovConnect.Repository.Interfaces;
 
-        // Method to format text based on the max line length
+namespace GovConnect.Repository
+{
+    public interface ISchemeRepository<T> : IGenericRepository<T> where T : class
+    {
+        Task<List<Scheme>> GetSchemesByEligibilityAsync(Eligibility eligibility);
         string FormatText(string text, int maxLineLength);
     }
 }

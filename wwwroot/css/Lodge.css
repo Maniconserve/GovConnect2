@@ -1,7 +1,9 @@
 ﻿body {
     background-color: #f7f9fc;
+    font-family: Arial, sans-serif; /* Default font */
 }
 
+/* Form Container */
 .grievance-form-container {
     max-width: 800px;
     margin: 50px auto;
@@ -11,51 +13,110 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
+    /* Heading */
     .grievance-form-container h2 {
         text-align: center;
         color: #4CAF50;
+        margin-bottom: 20px;
     }
 
+/* Label Styling */
 .form-group label {
     font-weight: bold;
+    font-size: 1rem;
+    color: #333;
 }
 
-.submit-btn {
-    background-color: #4CAF50;
-    border-color: #4CAF50;
-    color: #fff;
-    font-weight: bold;
-    padding: 12px 20px;
-    width: 100%;
-}
-
-    .submit-btn:hover {
-        background-color: #45a049;
-        border-color: #45a049;
-        cursor: pointer;
-    }
-
-.form-control:focus {
+/* Input and Select Fields */
+.grievance-input:focus, .grievance-select:focus, .grievance-textarea:focus {
     border-color: #4CAF50;
     box-shadow: 0 0 5px #e2e2e2;
 }
 
-.form-control {
+.grievance-input, .grievance-select, .grievance-textarea {
     border-radius: 8px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    width: 100%;
 }
 
-.file-upload-btn {
+.grievance-textarea {
+    resize: vertical;
+}
+
+.grievance-file-upload-btn {
     background-color: #f0f0f0;
     border: 1px solid #ccc;
     padding: 10px;
     border-radius: 5px;
 }
 
-    .file-upload-btn:hover {
+    .grievance-file-upload-btn:hover {
         background-color: #e2e2e2;
         cursor: pointer;
     }
 
+/* Submit Button */
+.grievance-submit-btn {
+    background-color: #4CAF50;
+    font-weight: bold;
+    padding: 12px 20px;
+    width: 100%;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+    .grievance-submit-btn:hover {
+        background-color: #45a049;
+        border-color: #45a049;
+    }
+
+/* Validation Error */
+.text-danger {
+    font-size: 0.875rem;
+    color: #d9534f;
+}
+
+/* File Upload */
+.grievance-file-upload-btn {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+    .grievance-file-upload-btn:hover {
+        background-color: #e2e2e2;
+        cursor: pointer;
+    }
+
+/* Checkbox Consent */
+.grievance-consent:checked + .form-check-label {
+    color: #4CAF50;
+}
+
+/* General Styling for Form Fields */
+.form-group {
+    margin-bottom: 20px;
+}
+
 .form-check-label {
     font-weight: normal;
+    font-size: 0.875rem;
 }
+
+/* Success Message */
+.alert.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-color: #c3e6cb;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+    .alert.alert-success strong {
+        font-weight: bold;
+    }

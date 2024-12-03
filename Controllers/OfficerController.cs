@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿
+using System.Security.Claims;
 using System.Text.Json;
 
 namespace GovConnect.Controllers
@@ -90,9 +91,6 @@ namespace GovConnect.Controllers
             // If model state is not valid, return the view with the model.
             return View(model);
         }
-
-
-
 
         [HttpGet]
         public IActionResult Dashboard(int officerId)

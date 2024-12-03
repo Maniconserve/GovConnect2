@@ -16,36 +16,33 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="~/Images/ap-logo.png" />
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/footer.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/header.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/GovConnect.min.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEJ6H5f6O5Q9w6YF7L1h8wL2Zw8z57ZyD6gDqg6uJek1V5dq5de1lfdJgn1F9" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body class="bg-light min-vh-100">
-    <div class="header">
-        <div class="gov-connect">
-            <span class="g">G</span><span class="ov">ov</span><span class="g-5">C</span><span class="connect">onnect</span>
+    
+    <div class="custom-header">
+        <div class="custom-gov-connect">
+            <a asp-action="Index" asp-controller="Scheme" style="text-decoration:none;color:black">
+                <span class="custom-g">G</span><span class="custom-ov">ov</span><span class="custom-g-5">C</span><span class="custom-connect">onnect</span>
+            </a>
         </div>
-
-        <!-- Check if the Officer is signed in -->
         @if (User.Identity.IsAuthenticated)
         {
-            <div class="dropdown hover-dropdown">
+            <div class="custom-dropdown hover-dropdown">
                 <button class="btn btn-link text-decoration-none" type="button" id="profileDropdown" aria-expanded="false">
-                    <!-- Show officer's profile picture -->
                     <img src="~/Images/Elon.png" alt="Profile" class="rounded-circle" width="40" height="40" />
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-                    <!-- Logout link for officer -->
                     <li><a class="dropdown-item" asp-controller="Officer" asp-action="Logout">Logout</a></li>
                 </ul>
             </div>
         }
         else
         {
-            <!-- Show login link if the officer is not signed in -->
-            <a asp-controller="Officer" asp-action="Login" class="button text-decoration-none"><span class="try-free">Login</span></a>
+            <a asp-controller="Citizen" asp-action="Login" class="custom-button text-decoration-none"><span class="custom-try-free">Login</span></a>
         }
     </div>
 

@@ -2,7 +2,7 @@
 
 namespace GovConnect.Repository
 {
-    public class GrievanceRepository : IGrievanceRepository
+    public class GrievanceRepository : IGrievanceRepository<Grievance>
     {
         private readonly SqlServerDbContext _context;
 
@@ -11,7 +11,7 @@ namespace GovConnect.Repository
             _context = context;
         }
 
-        public async Task<Grievance> GetGrievanceByIdAsync(int grievanceId)
+        public async Task<Grievance?> GetGrievanceByIdAsync(int grievanceId)
         {
             return await _context.DGrievances
                 .FirstOrDefaultAsync(g => g.GrievanceID == grievanceId);
@@ -64,7 +64,7 @@ namespace GovConnect.Repository
             return false; // No file uploaded
         }
 
-        public async Task<List<TimeLineEntry>> GetGrievanceTimelineAsync(int grievanceId)
+        public async Task<List<TimeLineEntry>?> GetGrievanceTimelineAsync(int grievanceId)
         {
             var grievance = await _context.DGrievances
                 .FirstOrDefaultAsync(g => g.GrievanceID == grievanceId);
@@ -75,15 +75,15 @@ namespace GovConnect.Repository
             return JsonConvert.DeserializeObject<List<TimeLineEntry>>(grievance.TimeLine);
         }
 
-        public async Task<byte[]> GetGrievanceFileAsync(int grievanceId)
+        public async Task<byte[]?> GetGrievanceFileAsync(int grievanceId)
         {
             var grievance = await _context.DGrievances
                 .FirstOrDefaultAsync(g => g.GrievanceID == grievanceId);
 
-            return grievance?.FilesUploaded;  
+            return grievance.FilesUploaded;  
         }
 
-        public async Task<PoliceOfficer> GetSuperiorOfficerByDepartmentAsync(int? officerId)
+        public async Task<PoliceOfficer?> GetSuperiorOfficerByDepartmentAsync(int? officerId)
         
         {
             return await _context.PoliceOfficers
@@ -95,6 +95,41 @@ namespace GovConnect.Repository
         {
             _context.DGrievances.Update(grievance);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<Grievance?> GetByIdAsync(int grievanceId)
+        {
+            return await _context.DGrievances
+                .FirstOrDefaultAsync(g => g.GrievanceID == grievanceId);
+        }
+
+        public async Task<List<Grievance>> GetAllAsync()
+        {
+            return await _context.DGrievances.ToListAsync();
+        }
+
+        public async Task<bool> AddAsync(Grievance entity)
+        {
+            _context.DGrievances.Add(entity);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> UpdateAsync(Grievance entity)
+        {
+            _context.DGrievances.Update(entity);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> DeleteAsync(int grievanceId)
+        {
+            var grievance = await GetByIdAsync(grievanceId);
+            if (grievance == null) return false;
+
+            _context.DGrievances.Remove(grievance);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

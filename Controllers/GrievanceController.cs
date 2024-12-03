@@ -62,7 +62,7 @@
 
             if (grievance == null)
             {
-                return NotFound();
+                return View();
             }
 
             var timeline = _grievanceService.GetGrievanceTimelineAsync(grievanceId.Value).Result;

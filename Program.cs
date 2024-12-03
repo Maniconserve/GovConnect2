@@ -1,16 +1,14 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddScoped<ISchemeService,SchemeService>();
-builder.Services.AddScoped<SchemeRepository>();
-builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
+builder.Services.AddScoped<ISchemeRepository<Scheme>,SchemeRepository>();
+builder.Services.AddScoped<IServiceRepository<Service>, ServiceRepository>();
+builder.Services.AddScoped<IGrievanceRepository<Grievance>, GrievanceRepository>();
+builder.Services.AddScoped<ISchemeService, SchemeService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
-builder.Services.AddScoped<IGrievanceRepository, GrievanceRepository>();
 builder.Services.AddScoped<IGrievanceService, GrievanceService>();
-builder.Services.AddScoped<DashboardService>();
-builder.Services.AddScoped<EmailSender>();
+builder.Services.AddTransient<DashboardService>();
+builder.Services.AddSingleton<EmailSender>();
 builder.Services.AddScoped<ProfileService>();
 var connectionString = builder.Configuration.GetConnectionString("SQLServerConnection") ?? throw new InvalidOperationException("Connection string 'SQLServerIdentityConnection' not found.");
 builder.Services.AddDbContext<SqlServerDbContext>(options =>
@@ -27,11 +25,8 @@ builder.Services.AddIdentity<Citizen, IdentityRole>(
         options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";
     })
     .AddEntityFrameworkStores<SqlServerDbContext>().AddDefaultTokenProviders();
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/Citizen/Login";
-    }).AddGoogle(options =>
+builder.Services.AddAuthentication()
+    .AddGoogle(options =>
     {
         options.ClientId = builder.Configuration["Google:ClientId"];
         options.ClientSecret = builder.Configuration["Google:ClientSecret"];
@@ -45,7 +40,6 @@ builder.Services.AddAuthorization(options =>
 });
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -53,9 +47,10 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 app.UseStaticFiles();
+
 app.UseStatusCodePagesWithReExecute("/Citizen/HandleError", "?statusCode={0}");
+
 app.UseHttpsRedirection();
-app.UseStaticFiles();
 
 app.UseRouting();
 

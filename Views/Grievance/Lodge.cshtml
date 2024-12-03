@@ -3,7 +3,6 @@
 <html lang="en">
 <head>
 	<title>Lodge a Grievance</title>
-	<link href="~/css/lodge.css" rel="stylesheet" />
 </head>
 <body>
 
@@ -19,14 +18,14 @@
 
 		<form method="post" enctype="multipart/form-data">
 			<div class="form-group mb-4">
-				<label for="Title">Grievance Title <span class="text-danger">*</span></label>
-				<input asp-for="Title" class="form-control" id="Title" placeholder="Enter the title of your grievance" />
+				<label for="grievance-Title">Grievance Title <span class="text-danger">*</span></label>
+				<input asp-for="Title" class="form-control grievance-input" id="grievance-Title" placeholder="Enter the title of your grievance" required />
 				<span asp-validation-for="Title" class="text-danger"></span>
 			</div>
 
 			<div class="form-group mb-4">
-				<label for="Department">Select Department <span class="text-danger">*</span></label>
-				<select asp-for="DepartmentID" class="form-select form-control" id="Department">
+				<label for="grievance-Department">Select Department <span class="text-danger">*</span></label>
+				<select asp-for="DepartmentID" class="form-select form-control grievance-select" id="grievance-Department" required>
 					<option value="" disabled selected>Select Department</option>
 					<option value="1">Police</option>
 					<option value="2">Revenue</option>
@@ -37,22 +36,22 @@
 			</div>
 
 			<div class="form-group mb-4">
-				<label for="Description">Describe Your Grievance <span class="text-danger">*</span></label>
-				<textarea asp-for="Description" class="form-control" id="Description" rows="5" placeholder="Provide detailed description of the grievance"></textarea>
+				<label for="grievance-Description">Describe Your Grievance <span class="text-danger">*</span></label>
+				<textarea asp-for="Description" class="form-control grievance-textarea" id="grievance-Description" rows="5" placeholder="Provide detailed description of the grievance" required></textarea>
 				<span asp-validation-for="Description" class="text-danger"></span>
 			</div>
 
 			<div class="form-group mb-4">
-				<label for="FileUpload">Attach a PDF File</label>
-				<input type="file" class="form-control file-upload-btn" id="FileUpload" name="fileUpload" accept=".pdf" />
+				<label for="grievance-FileUpload">Attach a PDF File</label>
+				<input type="file" class="form-control grievance-file-upload-btn" id="grievance-FileUpload" name="fileUpload" accept=".pdf" />
 			</div>
 
 			<div class="form-group form-check mb-4">
-				<input type="checkbox" class="form-check-input" id="Consent" required />
-				<label class="form-check-label" for="Consent">I agree to the terms and conditions <span class="text-danger">*</span></label>
+				<input type="checkbox" class="form-check-input grievance-consent" id="grievance-Consent" required />
+				<label class="form-check-label" for="grievance-Consent">I agree to the terms and conditions <span class="text-danger">*</span></label>
 			</div>
 
-			<button type="submit" class="btn submit-btn">Submit Grievance</button>
+			<button type="submit" class="btn grievance-submit-btn" style="background-color:#4CAF50;border-color: #4CAF50;color: #fff;">Submit Grievance</button>
 		</form>
 	</div>
 </body>
