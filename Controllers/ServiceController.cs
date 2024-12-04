@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Newtonsoft.Json;
 namespace GovConnect.Controllers
 {
     /// <summary>
@@ -59,6 +60,7 @@ namespace GovConnect.Controllers
         /// Retrieves and displays a specific service's details and checks if the user has already applied for it.
         /// </summary>
         /// <param name="id">The service ID to display details for.</param>
+        [Authorize(Roles = "User", AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
         public async Task<IActionResult> PService(int? id)
         {
             var user = await _userManager.GetUserAsync(User);
@@ -68,7 +70,10 @@ namespace GovConnect.Controllers
             {
                 return NotFound();
             }
-
+            if(user == null)
+            {
+                RedirectToAction("Login","Citizen");
+            }
             List<Service>? services = null;
 
             // Deserialize the services stored in TempData

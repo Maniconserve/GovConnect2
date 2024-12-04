@@ -456,7 +456,6 @@ namespace GovConnect.Controllers
         /// <summary>
         /// Handles errors and returns the appropriate error page.
         /// </summary>
-        [Route("Citizen/HandleError")]
         public IActionResult HandleError(int statusCode)
         {
             if (statusCode == 404)
@@ -470,6 +469,10 @@ namespace GovConnect.Controllers
             else if(statusCode == 500)
             {
                 return View("ServerError"); // If the error is 500, show the ServerError page.
+            }
+            else if (statusCode == 403)
+            {
+                return View("AccessDenied"); // If the error is 403, show the AccessDenied page.
             }
             return View("Error"); // Otherwise, show a generic error page.
         }

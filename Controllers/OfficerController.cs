@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace GovConnect.Controllers
 {
@@ -102,7 +103,7 @@ namespace GovConnect.Controllers
         /// Displays the officer dashboard for a specific officer.
         /// </summary>
         /// <param name="officerId">The officer's ID</param>
-        [Authorize(Policy = "NotUser")]
+        [Authorize(Roles = "NotUser", AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
         [HttpGet]
         public IActionResult Dashboard(int officerId)
         {

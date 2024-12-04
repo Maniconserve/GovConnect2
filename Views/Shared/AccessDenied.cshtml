@@ -1,0 +1,23 @@
+﻿@{
+    Layout = "_Gov_Layout";
+}
+<body>
+    <div class="container text-center mt-5" style="margin-bottom:98px;">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card p-5 shadow-lg">
+                    <div class="card-body">
+                        <h1 class="display-4 text-danger">
+                            Oops! 403 - Access Denied
+                        </h1>
+                        <p class="lead">Sorry, you do not have permission to view this page.</p>
+                        <p>
+                            You may want to check your access rights or go back to the homepage.
+                        </p>
+                        <a asp-controller="Scheme" asp-action="Index" class="btn btn-primary">Go to Homepage</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
