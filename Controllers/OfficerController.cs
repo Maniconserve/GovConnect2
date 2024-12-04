@@ -1,5 +1,4 @@
-﻿
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Text.Json;
 
 namespace GovConnect.Controllers
@@ -10,37 +9,48 @@ namespace GovConnect.Controllers
         private SqlServerDbContext _SqlServerDbContext;
         private EmailSender _emailSender;
         private static string originalOtp;
-        public OfficerController(DashboardService dashboardService, SqlServerDbContext sqlServerDbContext,EmailSender emailSender) {
+
+        public OfficerController(DashboardService dashboardService, SqlServerDbContext sqlServerDbContext, EmailSender emailSender)
+        {
             _dashboardService = dashboardService;
             _SqlServerDbContext = sqlServerDbContext;
             _emailSender = emailSender;
         }
+
+        /// <summary>
+        /// Displays the login page if the officer is not authenticated.
+        /// Redirects to the Scheme index page if the officer is already logged in.
+        /// </summary>
+        
         [HttpGet]
         public IActionResult Login()
         {
             if (User.Identity.IsAuthenticated)
             {
-                return RedirectToAction("Index", "Scheme");
+                return RedirectToAction("Index", "Scheme"); // Redirect to Scheme index if logged in
             }
             return View();
         }
 
+        /// <summary>
+        /// Handles the POST request to log in the officer.
+        /// Validates officer credentials and sets authentication cookies on success.
+        /// </summary>
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl)
         {
             if (ModelState.IsValid)
             {
-                // Find the officer by email
+                // Attempt to find the officer by email
                 var officer = await _SqlServerDbContext.PoliceOfficers
                     .FirstOrDefaultAsync(o => o.Email != null && o.Email == model.Email);
 
-                // Check if the officer exists and the password matches
                 if (officer != null)
                 {
-                    // Check if the entered password matches the stored password
+                    // Validate the password
                     if (officer.Password == model.Password)
                     {
-                        // Define the claims for the officer
+                        // Define claims for the logged-in officer
                         var claims = new List<Claim>
                         {
                             new Claim(ClaimTypes.Name, officer.OfficerName),
@@ -48,7 +58,7 @@ namespace GovConnect.Controllers
                             new Claim("OfficerId", officer.OfficerId.ToString())
                         };
 
-                        // Assign the 'RoleOfficer' role claim if officer has this role
+                        // Add a custom role claim for the officer
                         claims.Add(new Claim(ClaimTypes.Role, "NotUser"));
 
                         var identity = new ClaimsIdentity(claims, "OfficerLogin");
@@ -56,13 +66,13 @@ namespace GovConnect.Controllers
 
                         var authProperties = new AuthenticationProperties
                         {
-                            IsPersistent = false // Set to true if you want the login to persist across browser sessions
+                            IsPersistent = false // Set to true if the login should persist across sessions
                         };
 
-                        // Sign in the officer with the cookie authentication scheme
+                        // Sign the officer in using cookie authentication
                         await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, principal, authProperties);
 
-                        // Redirect to the returnUrl or home page
+                        // Redirect to the returnUrl if specified or to the officer dashboard
                         if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                         {
                             return Redirect(returnUrl);
@@ -74,32 +84,41 @@ namespace GovConnect.Controllers
                     }
                     else
                     {
-                        // If the password is incorrect, add a model error
-                        ModelState.AddModelError(string.Empty, "The password is incorrect.");
+                        ModelState.AddModelError(string.Empty, "The password is incorrect."); // Invalid password
                     }
                 }
                 else
                 {
-                    // If no officer is found with the provided email
-                    ModelState.AddModelError(string.Empty, "Officer doesn't exist.");
+                    ModelState.AddModelError(string.Empty, "Officer doesn't exist."); // Officer not found
                 }
 
-                // If we reach here, it means either the officer doesn't exist or the password is incorrect
-                return View(model);
+                return View(model); // Return view with error messages
             }
 
-            // If model state is not valid, return the view with the model.
-            return View(model);
+            return View(model); // Return view with invalid model state errors
         }
 
+        /// <summary>
+        /// Displays the officer dashboard for a specific officer.
+        /// </summary>
+        /// <param name="officerId">The officer's ID</param>
+        [Authorize(Policy = "NotUser")]
         [HttpGet]
         public IActionResult Dashboard(int officerId)
         {
             var model = _dashboardService.GetOfficerDashboard(officerId);
-            if (model == null) return NotFound();
+            if (model == null)
+            {
+                return NotFound(); // Return 404 if no dashboard data is found
+            }
 
-            return View(model);
+            return View(model); // Return the dashboard view
         }
+
+        /// <summary>
+        /// Displays the details of a specific grievance.
+        /// </summary>
+        /// <param name="id">The grievance ID</param>
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
@@ -121,13 +140,18 @@ namespace GovConnect.Controllers
 
             if (grievance == null)
             {
-                return NotFound();
+                return NotFound(); // Return 404 if grievance not found
             }
 
-            return View(grievance);
+            return View(grievance); // Return the grievance details view
         }
 
-        // Action to add a new timeline entry
+        /// <summary>
+        /// Adds a new timeline entry for a specific grievance.
+        /// </summary>
+        /// <param name="grievanceId">The grievance ID</param>
+        /// <param name="date">The date of the work entry</param>
+        /// <param name="work">Description of the work done</param>
         [HttpPost]
         public async Task<IActionResult> AddTimeLineEntry(int grievanceId, DateTime date, string work)
         {
@@ -135,43 +159,7 @@ namespace GovConnect.Controllers
 
             if (grievance != null)
             {
-                // Deserialize existing timeline, add the new entry, and serialize it back
-                var timeLine = string.IsNullOrEmpty(grievance.TimeLine)
-                    ? new List<TimeLineEntry>()
-                    : JsonSerializer.Deserialize<List<TimeLineEntry>>(grievance.TimeLine);
-
-                timeLine.Add(new TimeLineEntry
-                {
-                    Date = date,
-                    Work = work
-                });
-
-                // Update the timeline in the Grievance object
-                grievance.SetTimeLine(timeLine);
-
-                // Save changes to the database
-                _SqlServerDbContext.Update(grievance);
-                await _SqlServerDbContext.SaveChangesAsync();
-            }
-
-            // Redirect back to the grievance details page
-            return RedirectToAction("Details", new { id = grievanceId });
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> AddReason(int grievanceId, DateTime date, string work)
-        {
-            try
-            {
-                // Fetch the grievance from the database
-                var grievance = await _SqlServerDbContext.DGrievances.FindAsync(grievanceId);
-
-                if (grievance == null)
-                {
-                    return Json(new { success = false, message = "Grievance not found." });
-                }
-
-                // Deserialize the existing timeline or create a new one
+                // Deserialize existing timeline or initialize a new one
                 var timeLine = string.IsNullOrEmpty(grievance.TimeLine)
                     ? new List<TimeLineEntry>()
                     : JsonSerializer.Deserialize<List<TimeLineEntry>>(grievance.TimeLine);
@@ -183,114 +171,145 @@ namespace GovConnect.Controllers
                     Work = work
                 });
 
-                // Set the updated timeline
+                // Update the grievance with the new timeline
                 grievance.SetTimeLine(timeLine);
+                _SqlServerDbContext.Update(grievance);
 
                 // Save changes to the database
+                await _SqlServerDbContext.SaveChangesAsync();
+            }
+
+            return RedirectToAction("Details", new { id = grievanceId }); // Redirect back to the grievance details page
+        }
+
+        /// <summary>
+        /// Adds a reason for the grievance status, along with a timeline entry.
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> AddReason(int grievanceId, DateTime date, string work)
+        {
+            try
+            {
+                var grievance = await _SqlServerDbContext.DGrievances.FindAsync(grievanceId);
+
+                if (grievance == null)
+                {
+                    return Json(new { success = false, message = "Grievance not found." }); // Return error if grievance not found
+                }
+
+                // Deserialize or initialize timeline
+                var timeLine = string.IsNullOrEmpty(grievance.TimeLine)
+                    ? new List<TimeLineEntry>()
+                    : JsonSerializer.Deserialize<List<TimeLineEntry>>(grievance.TimeLine);
+
+                // Add the reason/work entry to the timeline
+                timeLine.Add(new TimeLineEntry
+                {
+                    Date = date,
+                    Work = work
+                });
+
+                // Set the updated timeline
+                grievance.SetTimeLine(timeLine);
                 _SqlServerDbContext.Update(grievance);
+
+                // Save changes to the database
                 await _SqlServerDbContext.SaveChangesAsync();
 
                 return Json(new { success = true, message = "Timeline entry added successfully." });
             }
             catch (Exception ex)
             {
-                // Log the exception (if necessary) and return a failure response
                 return Json(new { success = false, message = "An error occurred while adding the timeline entry.", error = ex.Message });
             }
         }
 
+        /// <summary>
+        /// Displays the forgot password page.
+        /// </summary>
         [HttpGet]
         public IActionResult ForgotPassword()
         {
             return View(new ForgotPasswordViewModel());
         }
+
+        /// <summary>
+        /// Sends an OTP to the officer's email for password reset.
+        /// </summary>
         [HttpPost]
         public async Task<IActionResult> SendOtp(string email)
         {
-            // Check if the email exists
-            var user = await _SqlServerDbContext.PoliceOfficers.FirstOrDefaultAsync(u => u.Email == email); ;
+            var user = await _SqlServerDbContext.PoliceOfficers.FirstOrDefaultAsync(u => u.Email == email);
+
             if (user == null)
             {
                 TempData["EmailMessage"] = "No user found with this email.";
                 return View("ForgotPassword", new ForgotPasswordViewModel { Email = email });
             }
 
-            // Generate a random OTP
-            originalOtp = new Random().Next(100000, 999999).ToString();  // Generate a 6-digit OTP
-
-            // Send OTP via email
+            // Generate and send OTP
+            originalOtp = new Random().Next(100000, 999999).ToString();
             var subject = "Reset Password";
-            var body = $"Your OTP code resetting password is: {originalOtp}";
+            var body = $"Your OTP code for resetting your password is: {originalOtp}";
 
             try
             {
                 await _emailSender.SendEmailAsync(email, subject, body);
-
-                // Save OTP in TempData for use in subsequent form submissions
-                TempData["EmailMessage"] = "OTP has been sent to your email. Please check your inbox (and spam folder).";
+                TempData["EmailMessage"] = "OTP has been sent to your email. Please check your inbox.";
             }
             catch (Exception)
             {
                 TempData["EmailMessage"] = "Failed to send OTP. Please try again later.";
             }
+
             return View("ForgotPassword", new ForgotPasswordViewModel { Email = email });
         }
 
+        /// <summary>
+        /// Verifies the OTP entered by the officer and allows resetting the password.
+        /// </summary>
         [HttpPost]
         public async Task<IActionResult> VerifyOtp(ForgotPasswordViewModel forgotPasswordViewModel)
         {
-            // Check if the OTP is correct
             if (!forgotPasswordViewModel.Otp.Equals(originalOtp))
             {
                 TempData["OtpMessage"] = "OTP is invalid";
                 return View("ForgotPassword", forgotPasswordViewModel);
             }
 
-            // Check if model state is valid
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                return View("ForgotPassword", forgotPasswordViewModel);
-            }
+                var user = await _SqlServerDbContext.PoliceOfficers
+                                                   .FirstOrDefaultAsync(u => u.Email == forgotPasswordViewModel.Email);
 
-            // Retrieve the user from the database using SqlServerDbContext
-            var user = await _SqlServerDbContext.PoliceOfficers
-                                               .FirstOrDefaultAsync(u => u.Email == forgotPasswordViewModel.Email);
-
-            if (user != null)
-            {
-                // Assuming you have a Password field in your PoliceOfficers table.
-                user.Password = forgotPasswordViewModel.Password;  // Set the new password
-
-                // Update the user in the database
-                _SqlServerDbContext.PoliceOfficers.Update(user);
-
-                // Save the changes
-                var saveResult = await _SqlServerDbContext.SaveChangesAsync();
-
-                if (saveResult > 0)
+                if (user != null)
                 {
-                    // Successfully updated the password, redirect to Login
-                    return RedirectToAction("Login");
-                }
-                else
-                {
-                    // If saving fails, you might want to show an error message.
-                    TempData["ErrorMessage"] = "Failed to update the password.";
+                    user.Password = forgotPasswordViewModel.Password;
+                    _SqlServerDbContext.PoliceOfficers.Update(user);
+                    var saveResult = await _SqlServerDbContext.SaveChangesAsync();
+
+                    if (saveResult > 0)
+                    {
+                        return RedirectToAction("Login"); // Redirect to login after successful password reset
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "Failed to update the password.";
+                    }
                 }
             }
 
-            // If user is not found or update fails, redirect to the form again
             return RedirectToAction("Index");
         }
 
-
+        /// <summary>
+        /// Logs the officer out of the system.
+        /// </summary>
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(IdentityConstants.ApplicationScheme);
-
-            return RedirectToAction("Login");
+            return RedirectToAction("Login"); // Redirect to login page after logout
         }
-
     }
 }

@@ -9,5 +9,6 @@
         Task<bool> UpdateGrievanceFilesAsync(int grievanceId, IFormFile fileUpload);
         Task<bool> EscalateGrievanceAsync(int grievanceId);
         Task<byte[]?> GetGrievanceFileAsync(int grievanceId);
+        Task UpdateAsync(Grievance entity);
     }
 }

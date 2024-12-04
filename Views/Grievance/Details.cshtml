@@ -47,7 +47,23 @@
                     </form>
                 </div>
             }
-
+            @if (Model.Status == "Completed")
+            {
+                <div class="mb-3">
+                    <h5>Add Reason:</h5>
+                    <form asp-controller="Grievance" asp-action="AddTimeLineEntry" method="post">
+                        <div class="mb-3">
+                            <input type="date" class="form-control" id="Date" name="Date" required/>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Work" class="form-label">Reason(For Not Completed)</label>
+                            <input type="text" class="form-control" id="Work" name="Work" required />
+                        </div>
+                        <input type="hidden" name="GrievanceID" value="@Model.GrievanceID" />
+                        <button type="submit" class="btn btn-primary">Add Entry</button>
+                    </form>
+                </div>
+            }
             <a href="@Url.Action("MyGrievances", "Grievance")" class="btn btn-success mt-3">Back to My Grievances</a>
         </div>
     </div>

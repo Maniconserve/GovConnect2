@@ -1,4 +1,6 @@
 ﻿
+using Microsoft.EntityFrameworkCore;
+
 namespace GovConnect.Services
 {
     public class GrievanceService : IGrievanceService
@@ -83,6 +85,10 @@ namespace GovConnect.Services
             }
 
             return false; 
+        }
+        public async Task UpdateAsync(Grievance entity)
+        {
+            await _grievanceRepository.UpdateGrievanceAsync(entity);
         }
     }
 }
