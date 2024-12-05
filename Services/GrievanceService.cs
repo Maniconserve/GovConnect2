@@ -17,7 +17,7 @@ namespace GovConnect.Services
             return await _grievanceRepository.GetGrievanceByIdAsync(grievanceId);
         }
 
-        public async Task<List<Grievance>?> GetGrievancesByUserAsync(string userId, string statusFilter="All")
+        public async Task<List<Grievance>?> GetGrievancesByUserAsync(string userId, Status? statusFilter)
         {
             return await _grievanceRepository.GetGrievancesByUserAsync(userId, statusFilter);
         }

@@ -73,12 +73,15 @@
 					<div class="w-full">
 						<label class="block mb-1">Gender<span style="color:red">*</span></label>
 						<div class="flex items-center">
-							<input type="radio" name="gender" class="mr-2"> Male
-							<input type="radio" name="gender" class="ml-4 mr-2"> Female
+							<select asp-for="Gender">
+								<option value="Male">Male</option>
+								<option value="Female">Female</option>
+							</select>
 						</div>
 						<br /><span asp-validation-for="Gender" class="text-danger"></span>
 					</div>
 				</div>
+
 
 				<div class="flex justify-center">
 					<div class="w-full">

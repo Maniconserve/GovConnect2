@@ -17,13 +17,13 @@
         {
             return await _context.Services.ToListAsync();
         }
-        public async Task<List<ServiceApplication>> GetAppliedServicesAsync(string userId, string statusFilter = "All")
+        public async Task<List<ServiceApplication>> GetAppliedServicesAsync(string userId, Status? statusFilter)
         {
             var query = _context.ServiceApplications.Where(s => s.UserID == userId);
 
-            if (statusFilter != "All")
+            if (statusFilter.HasValue)
             {
-                query = query.Where(s => s.Status == statusFilter);
+                query = query.Where(s => s.Status == statusFilter.Value);
             }
 
             return await query.ToListAsync();
@@ -45,7 +45,7 @@
                 return false;
             }
 
-            serviceApplication.Status = "Withdrawn";
+            serviceApplication.Status = Status.Withdrawn;
             _context.ServiceApplications.Update(serviceApplication);
             await _context.SaveChangesAsync();
             return true;

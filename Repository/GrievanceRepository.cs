@@ -17,14 +17,14 @@ namespace GovConnect.Repository
                 .FirstOrDefaultAsync(g => g.GrievanceID == grievanceId);
         }
 
-        public async Task<List<Grievance>> GetGrievancesByUserAsync(string userId, string statusFilter)
+        public async Task<List<Grievance>> GetGrievancesByUserAsync(string userId,Status? statusFilter)
         {
             var grievancesQuery = _context.DGrievances
                 .Where(g => g.UserID == userId);
 
-            if (!string.IsNullOrEmpty(statusFilter))
+            if (statusFilter.HasValue)
             {
-                grievancesQuery = grievancesQuery.Where(g => g.Status == statusFilter);
+                grievancesQuery = grievancesQuery.Where(g => g.Status == statusFilter.Value);
             }
 
             return await grievancesQuery.OrderByDescending(g => g.CreatedAt).ToListAsync();
@@ -83,7 +83,7 @@ namespace GovConnect.Repository
             return grievance.FilesUploaded;  
         }
 
-        public async Task<PoliceOfficer?> GetSuperiorOfficerByDepartmentAsync(int? officerId)
+        public async Task<PoliceOfficer?> GetSuperiorOfficerByDepartmentAsync(string? officerId)
         
         {
             return await _context.PoliceOfficers

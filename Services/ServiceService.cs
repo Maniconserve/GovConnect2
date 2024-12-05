@@ -17,11 +17,11 @@
         public async Task<bool> ApplyForServiceAsync(ServiceApplication model, string userId)
         {
             model.UserID = userId;
-            model.Status = "Pending";
+            model.Status = Status.Pending;
             return await _serviceRepository.ApplyForServiceAsync(model);
         }
 
-        public async Task<List<ServiceApplication>> GetMyServicesAsync(string userId, string statusFilter = "All")
+        public async Task<List<ServiceApplication>> GetMyServicesAsync(string userId, Status? statusFilter)
         {
             return await _serviceRepository.GetAppliedServicesAsync(userId, statusFilter);
         }

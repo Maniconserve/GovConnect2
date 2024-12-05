@@ -87,7 +87,7 @@ namespace GovConnect.Controllers
             var service = services?.FirstOrDefault(s => s.ServiceId == id);
 
             // Check if the user has already applied for this service
-            var appliedServices = await _serviceService.GetMyServicesAsync(user.Id, "All");
+            var appliedServices = await _serviceService.GetMyServicesAsync(user.Id, null);
             bool alreadyApplied = appliedServices.Any(s => s.ServiceID == id);
 
             // Display a message if the user has already applied
@@ -134,7 +134,7 @@ namespace GovConnect.Controllers
         /// <param name="statusFilter">The status filter (default is "All").</param>
         [Authorize]
         [HttpGet]
-        public async Task<IActionResult> MyServices(string statusFilter = "All")
+        public async Task<IActionResult> MyServices(Status? statusFilter)
         {
             var user = await _userManager.GetUserAsync(User);
 

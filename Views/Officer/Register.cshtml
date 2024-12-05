@@ -1,0 +1,185 @@
+﻿@model OfficerRegisterViewModel
+
+<head>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Register</title>
+</head>
+<body>
+    <div class="container d-flex justify-content-center align-items-center mt-4 mb-4">
+        <div class="bg-white p-10 rounded-lg shadow-lg w-full max-w-4xl">
+
+            <h1 class="text-center text-2xl font-bold mb-6">Register</h1>
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger alert-dismissible fade show d-flex justify-content-start align-items-center" role="alert">
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                </div>
+            }
+            <form asp-action="Register" enctype="multipart/form-data" method="post" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+                <!-- Profile Picture Upload Section -->
+                <div class="col-span-2 flex justify-center mb-6">
+                    <label for="profile-upload" class="cursor-pointer flex items-center space-x-4">
+                        <div id="image-container" class="bg-white p-4 rounded-full border-2 border-gray-300 w-32 h-32 flex justify-center items-center relative">
+                            <img id="profile-preview" src="" alt="Profile Image" class="hidden w-32 h-32 rounded-full object-cover">
+                            <i id="default-icon" class="fas fa-user fa-5x text-gray-500"></i>
+                            <input asp-for="ProfilePic" id="profile-upload" type="file" class="hidden" accept="image/*" value="@Model.ProfilePic">
+                        </div>
+                    </label>
+                </div>
+
+                <!-- First Name -->
+                <div class="flex justify-center">
+                    <div class="w-full">
+                        <label class="block mb-1">First Name<span style="color:red">*</span></label>
+                        <input asp-for="FirstName" type="text" placeholder="Enter First Name" class="p-2 w-full border rounded" value="@Model.FirstName">
+                        <br /><span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Last Name -->
+                <div class="flex justify-center">
+                    <div class="w-full">
+                        <label class="block mb-1">Last Name<span style="color:red">*</span></label>
+                        <input asp-for="LastName" type="text" placeholder="Enter Last Name" class="p-2 w-full border rounded" value="@Model.LastName">
+                        <br /><span asp-validation-for="LastName" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="flex justify-center">
+                    <div class="w-full">
+                        <label class="block mb-1">Email<span style="color:red">*</span></label>
+                        <input asp-for="Email" type="email" placeholder="Enter Email" class="p-2 w-full border rounded" value="@Model.Email">
+                        <br /><span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Mobile -->
+                <div class="flex justify-center">
+                    <div class="w-full">
+                        <label class="block mb-1">Mobile<span style="color:red">*</span></label>
+                        <input asp-for="Mobile" type="text" placeholder="Enter Mobile No" class="p-2 w-full border rounded" value="@Model.Mobile">
+                        <br /><span asp-validation-for="Mobile" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="flex justify-center">
+                    <div class="w-full">
+                        <label class="block mb-1">Password<span style="color:red">*</span></label>
+                        <input asp-for="Password" type="password" placeholder="Enter Password" class="p-2 w-full border rounded">
+                        <br /><span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="flex justify-center">
+                    <div class="w-full">
+                        <label class="block mb-1">Confirm Password<span style="color:red">*</span></label>
+                        <input asp-for="ConfirmPassword" type="password" placeholder="Confirm Password" class="p-2 w-full border rounded">
+                        <br /><span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Gender -->
+                <div class="flex justify-center">
+                    <div class="w-full">
+                        <label class="block mb-1">Gender<span style="color:red">*</span></label>
+                        <div class="flex items-center">
+                            <select asp-for="Gender">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <br /><span asp-validation-for="Gender" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Pincode -->
+                <div class="flex justify-center">
+                    <div class="w-full">
+                        <label class="block mb-1">Pincode<span style="color:red">*</span></label>
+                        <input asp-for="Pincode" type="text" placeholder="Enter Pincode" class="p-2 w-full border rounded" value="@Model.Pincode">
+                        <br /><span asp-validation-for="Pincode" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Mandal -->
+                <div class="flex justify-center">
+                    <div class="w-full">
+                        <label class="block mb-1">Mandal<span style="color:red">*</span></label>
+                        <input asp-for="Mandal" type="text" placeholder="Enter Mandal" class="p-2 w-full border rounded" value="@Model.Mandal">
+                        <br /><span asp-validation-for="Mandal" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- District -->
+                <div class="flex justify-center">
+                    <div class="w-full">
+                        <label class="block mb-1">District<span style="color:red">*</span></label>
+                        <input asp-for="District" type="text" placeholder="Enter District" class="p-2 w-full border rounded" value="@Model.District">
+                        <br /><span asp-validation-for="District" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- City -->
+                <div class="flex justify-center">
+                    <div class="w-full">
+                        <label class="block mb-1">City<span style="color:red">*</span></label>
+                        <input asp-for="City" type="text" placeholder="Enter City" class="p-2 w-full border rounded" value="@Model.City">
+                        <br /><span asp-validation-for="City" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Village -->
+                <div class="flex justify-center">
+                    <div class="w-full">
+                        <label class="block mb-1">Village<span style="color:red">*</span></label>
+                        <input asp-for="Village" type="text" placeholder="Enter Village" class="p-2 w-full border rounded" value="@Model.Village">
+                        <br /><span asp-validation-for="Village" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Officer Designation -->
+                <div class="flex justify-center">
+                    <div class="w-full">
+                        <label class="block mb-1">Officer Designation<span style="color:red">*</span></label>
+                        <input asp-for="OfficerDesignation" type="text" placeholder="Enter Officer Designation" class="p-2 w-full border rounded" value="@Model.OfficerDesignation">
+                        <br /><span asp-validation-for="OfficerDesignation" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Department ID -->
+                <div class="flex justify-center">
+                    <div class="w-full">
+                        <label class="block mb-1">Department ID<span style="color:red">*</span></label>
+                        <select asp-for="DepartmentID" class="form-select form-control grievance-select" id="grievance-Department" required>
+                            <option value="" disabled selected>Select Department</option>
+                            <option value="1">Police</option>
+                            <option value="2">Revenue</option>
+                            <option value="3">Municipal</option>
+                            <option value="4">Education</option>
+                        </select>
+                        <br /><span asp-validation-for="DepartmentID" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Superior ID -->
+                <div class="flex justify-center">
+                    <div class="w-full">
+                        <label class="block mb-1">Superior ID (if any)</label>
+                        <input asp-for="SuperiorId" type="text" placeholder="Enter Superior ID" class="p-2 w-full border rounded" value="@Model.SuperiorId" />
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="col-span-2 flex justify-center mt-4">
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="~/js/register.js"></script>
+</body>

@@ -2,14 +2,16 @@
 {
     public class DashboardService
     {
-        private readonly SqlServerDbContext _context;
+        private SqlServerDbContext _context;
+        private UserManager<Citizen> _userManager;
 
-        public DashboardService(SqlServerDbContext context)
+        public DashboardService(SqlServerDbContext context, UserManager<Citizen> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
-        public OfficerDashboardViewModel GetOfficerDashboard(int officerId)
+        public OfficerDashboardViewModel GetOfficerDashboard(String officerId)
         {
             // Retrieve officer details
             var officer = _context.PoliceOfficers.FirstOrDefault(o => o.OfficerId == officerId);
@@ -29,18 +31,16 @@
 
             // Summary statistics
             var totalGrievances = grievances.Count;
-            var pendingGrievances = grievances.Count(g => g.Status == "Pending");
-            var resolvedGrievances = grievances.Count(g => g.Status == "Resolved");
+            var pendingGrievances = grievances.Count(g => g.Status == Status.Pending);
+            var resolvedGrievances = grievances.Count(g => g.Status == Status.Completed);
 
             // Dummy image for now
             var officerImage = "/path/to/dummy/image.jpg";
-
             // Return the dashboard view model
             return new OfficerDashboardViewModel
             {
-                OfficerName = officer.OfficerName,
                 OfficerDesignation = officer.OfficerDesignation,
-                DepartmentId = officer.DeptId,
+                DepartmentId = officer.DepartmentId,
                 TotalGrievances = totalGrievances,
                 PendingGrievances = pendingGrievances,
                 ResolvedGrievances = resolvedGrievances,

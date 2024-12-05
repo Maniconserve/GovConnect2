@@ -79,6 +79,7 @@ namespace GovConnect.Controllers
                 // Check if user creation was successful.
                 if (result.Succeeded)
                 {
+                    await citizenManager.AddToRoleAsync(citizen, "User");
                     return RedirectToAction("Login", "Citizen"); // Redirect to login after successful registration.
                 }
 
@@ -284,11 +285,12 @@ namespace GovConnect.Controllers
             user.LastName = citizen.LastName ?? user.LastName;
             user.PhoneNumber = citizen.PhoneNumber ?? user.PhoneNumber;
             user.City = citizen.City ?? user.City;
-            user.Gender = citizen.Gender ?? user.Gender;
-            user.District = citizen.District ?? user.District;
+			user.Gender = citizen.Gender != null ? citizen.Gender : user.Gender;
+			user.District = citizen.District ?? user.District;
             user.Pincode = citizen.Pincode != 0 ? citizen.Pincode : user.Pincode;
             user.Mandal = citizen.Mandal ?? user.Mandal;
             user.Village = citizen.Village ?? user.Village;
+            user.Profilepic = citizen.Profilepic ?? user.Profilepic;
 
             // Update the user in the database.
             await citizenManager.UpdateAsync(user);

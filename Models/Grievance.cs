@@ -6,7 +6,7 @@ namespace GovConnect.Models
         public int GrievanceID { get; set; }
         public string UserID { get; set; } = ""; // You may adjust this type based on how you're storing UserIDs
         
-        public int? OfficerId { get; set; }
+        public string? OfficerId { get; set; }
         [Required(ErrorMessage = "Department is required")]
         public int DepartmentID { get; set; }
 
@@ -19,7 +19,7 @@ namespace GovConnect.Models
 
         public byte[]? FilesUploaded { get; set; }
 
-        public string Status { get; set; } = "Pending";
+        public Status Status { get; set; } = Status.Pending;
 
         public DateTime CreatedAt { get; set; } = DateTime.Now; // Automatically set the current timestamp
 

@@ -8,7 +8,7 @@
         public int ServiceID { get; set; }
         public string ServiceName { get; set; }
         public DateTime ApplicationDate { get; set; }
-        public string Status { get; set; }
+        public Status Status { get; set; } = Status.Pending;
         public int? OfficerID { get; set; }  // Optional: Can be null if not assigned yet
     }
 

@@ -99,7 +99,7 @@ namespace GovConnect.Controllers
         /// <param name="statusFilter">Optional status filter for grievances.</param>
         [Authorize]
         [HttpGet]
-        public async Task<IActionResult> MyGrievances(string? statusFilter)
+        public async Task<IActionResult> MyGrievances(Status? statusFilter)
         {
             var user = await _citizenManager.GetUserAsync(User); // Get the current logged-in user
             if (user == null)
@@ -187,7 +187,7 @@ namespace GovConnect.Controllers
                     Work = work
                 });
 
-                grievance.Status = "In Progress"; // Set grievance status to 'In Progress'
+                grievance.Status = Models.Status.InProgress; // Set grievance status to 'In Progress'
                 grievance.SetTimeLine(timeLine); // Update the timeline
 
                 await _grievanceService.UpdateAsync(grievance); // Update the grievance in the database

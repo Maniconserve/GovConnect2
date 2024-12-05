@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
@@ -27,23 +25,20 @@ builder.Services.AddIdentity<Citizen, IdentityRole>(
         options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";
     })
     .AddEntityFrameworkStores<SqlServerDbContext>().AddDefaultTokenProviders();
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/Citizen/Login"; // This is the path that will be used for unauthorized redirects
-        options.AccessDeniedPath = "/Citizen/HandleError?statusCode=403";
-    })
+builder.Services.AddAuthentication()
     .AddGoogle(options =>
     {
         options.ClientId = builder.Configuration["Google:ClientId"];
         options.ClientSecret = builder.Configuration["Google:ClientSecret"];
     });
+builder.Services.ConfigureApplicationCookie(options =>
+{
+	options.LoginPath = "/Citizen/Login";  
+});
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("User", policy => policy.RequireRole("User"));
-    options.AddPolicy("NotUser", policy =>
-        policy.RequireAssertion(context =>
-            !context.User.IsInRole("User")));
+    options.AddPolicy("Officer", policy => policy.RequireRole("Officer"));
 });
 var app = builder.Build();
 

@@ -1,113 +1,90 @@
-﻿using System.Security.Claims;
-using System.Text.Json;
-using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using System.Text.Json;
 
 namespace GovConnect.Controllers
 {
     public class OfficerController : Controller
     {
-        private DashboardService _dashboardService;
         private SqlServerDbContext _SqlServerDbContext;
+        private UserManager<Citizen> _officerManager;
+        private SignInManager<Citizen> _signInManager;
         private EmailSender _emailSender;
+        private DashboardService _dashboardService;
         private static string originalOtp;
 
-        public OfficerController(DashboardService dashboardService, SqlServerDbContext sqlServerDbContext, EmailSender emailSender)
+        public OfficerController(SqlServerDbContext sqlServerDbContext, EmailSender emailSender,UserManager<Citizen> officerManager,SignInManager<Citizen> signInManager,DashboardService dashboardService)
         {
-            _dashboardService = dashboardService;
+            _officerManager = officerManager;
             _SqlServerDbContext = sqlServerDbContext;
             _emailSender = emailSender;
+            _signInManager = signInManager;
+            _dashboardService = dashboardService;
         }
 
-        /// <summary>
-        /// Displays the login page if the officer is not authenticated.
-        /// Redirects to the Scheme index page if the officer is already logged in.
-        /// </summary>
-        
+        ///// <summary>
+        ///// Displays the login page if the officer is not authenticated.
+        ///// Redirects to the Scheme index page if the officer is already logged in.
+        ///// </summary>
+
         [HttpGet]
         public IActionResult Login()
         {
-            if (User.Identity.IsAuthenticated)
-            {
-                return RedirectToAction("Index", "Scheme"); // Redirect to Scheme index if logged in
-            }
             return View();
         }
 
-        /// <summary>
-        /// Handles the POST request to log in the officer.
-        /// Validates officer credentials and sets authentication cookies on success.
-        /// </summary>
+        ///// <summary>
+        ///// Handles the POST request to log in the officer.
+        ///// Validates officer credentials and sets authentication cookies on success.
+        ///// </summary>
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl)
         {
             if (ModelState.IsValid)
             {
-                // Attempt to find the officer by email
-                var officer = await _SqlServerDbContext.PoliceOfficers
-                    .FirstOrDefaultAsync(o => o.Email != null && o.Email == model.Email);
+                // Find the user by their email.
+                var user = await _officerManager.FindByEmailAsync(model.Email);
 
-                if (officer != null)
+                if (user != null)
                 {
-                    // Validate the password
-                    if (officer.Password == model.Password)
+                    // Perform password-based sign-in.
+                    var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, lockoutOnFailure: false);
+                    if (result.Succeeded)
                     {
-                        // Define claims for the logged-in officer
-                        var claims = new List<Claim>
-                        {
-                            new Claim(ClaimTypes.Name, officer.OfficerName),
-                            new Claim(ClaimTypes.Email, officer.Email),
-                            new Claim("OfficerId", officer.OfficerId.ToString())
-                        };
-
-                        // Add a custom role claim for the officer
-                        claims.Add(new Claim(ClaimTypes.Role, "NotUser"));
-
-                        var identity = new ClaimsIdentity(claims, "OfficerLogin");
-                        var principal = new ClaimsPrincipal(identity);
-
-                        var authProperties = new AuthenticationProperties
-                        {
-                            IsPersistent = false // Set to true if the login should persist across sessions
-                        };
-
-                        // Sign the officer in using cookie authentication
-                        await HttpContext.SignInAsync(IdentityConstants.ApplicationScheme, principal, authProperties);
-
-                        // Redirect to the returnUrl if specified or to the officer dashboard
+                        // If login is successful, redirect to the requested return URL or the Scheme Index page.
                         if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                         {
                             return Redirect(returnUrl);
                         }
                         else
                         {
-                            return RedirectToAction("Dashboard", "Officer", new { officerId = officer.OfficerId });
+                            return RedirectToAction("Dashboard", new { officerId = user.Id });
                         }
                     }
                     else
                     {
-                        ModelState.AddModelError(string.Empty, "The password is incorrect."); // Invalid password
+                        ModelState.AddModelError(string.Empty, "Invalid login attempt");
+                        return View(model);
                     }
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Officer doesn't exist."); // Officer not found
+                    // If user doesn't exist, add an error to the model state.
+                    ModelState.AddModelError(string.Empty, "Officer doesn't exist");
+                    return View(model);
                 }
-
-                return View(model); // Return view with error messages
             }
-
-            return View(model); // Return view with invalid model state errors
+            return View(model);
         }
 
-        /// <summary>
-        /// Displays the officer dashboard for a specific officer.
-        /// </summary>
-        /// <param name="officerId">The officer's ID</param>
-        [Authorize(Roles = "NotUser", AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+        ///// <summary>
+        ///// Displays the officer dashboard for a specific officer.
+        ///// </summary>
+        ///// <param name="officerId">The officer's ID</param>
+        [Authorize(Roles = "Officer")]
         [HttpGet]
-        public IActionResult Dashboard(int officerId)
+        public IActionResult Dashboard(string officerId)
         {
             var model = _dashboardService.GetOfficerDashboard(officerId);
+            model.OfficerName = User.Identity.Name;
             if (model == null)
             {
                 return NotFound(); // Return 404 if no dashboard data is found
@@ -116,10 +93,11 @@ namespace GovConnect.Controllers
             return View(model); // Return the dashboard view
         }
 
-        /// <summary>
-        /// Displays the details of a specific grievance.
-        /// </summary>
-        /// <param name="id">The grievance ID</param>
+        ///// <summary>
+        ///// Displays the details of a specific grievance.
+        ///// </summary>
+        ///// <param name="id">The grievance ID</param>
+        [Authorize(Roles = "Officer")]
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
@@ -226,91 +204,80 @@ namespace GovConnect.Controllers
         }
 
         /// <summary>
-        /// Displays the forgot password page.
-        /// </summary>
-        [HttpGet]
-        public IActionResult ForgotPassword()
-        {
-            return View(new ForgotPasswordViewModel());
-        }
-
-        /// <summary>
-        /// Sends an OTP to the officer's email for password reset.
-        /// </summary>
-        [HttpPost]
-        public async Task<IActionResult> SendOtp(string email)
-        {
-            var user = await _SqlServerDbContext.PoliceOfficers.FirstOrDefaultAsync(u => u.Email == email);
-
-            if (user == null)
-            {
-                TempData["EmailMessage"] = "No user found with this email.";
-                return View("ForgotPassword", new ForgotPasswordViewModel { Email = email });
-            }
-
-            // Generate and send OTP
-            originalOtp = new Random().Next(100000, 999999).ToString();
-            var subject = "Reset Password";
-            var body = $"Your OTP code for resetting your password is: {originalOtp}";
-
-            try
-            {
-                await _emailSender.SendEmailAsync(email, subject, body);
-                TempData["EmailMessage"] = "OTP has been sent to your email. Please check your inbox.";
-            }
-            catch (Exception)
-            {
-                TempData["EmailMessage"] = "Failed to send OTP. Please try again later.";
-            }
-
-            return View("ForgotPassword", new ForgotPasswordViewModel { Email = email });
-        }
-
-        /// <summary>
-        /// Verifies the OTP entered by the officer and allows resetting the password.
-        /// </summary>
-        [HttpPost]
-        public async Task<IActionResult> VerifyOtp(ForgotPasswordViewModel forgotPasswordViewModel)
-        {
-            if (!forgotPasswordViewModel.Otp.Equals(originalOtp))
-            {
-                TempData["OtpMessage"] = "OTP is invalid";
-                return View("ForgotPassword", forgotPasswordViewModel);
-            }
-
-            if (ModelState.IsValid)
-            {
-                var user = await _SqlServerDbContext.PoliceOfficers
-                                                   .FirstOrDefaultAsync(u => u.Email == forgotPasswordViewModel.Email);
-
-                if (user != null)
-                {
-                    user.Password = forgotPasswordViewModel.Password;
-                    _SqlServerDbContext.PoliceOfficers.Update(user);
-                    var saveResult = await _SqlServerDbContext.SaveChangesAsync();
-
-                    if (saveResult > 0)
-                    {
-                        return RedirectToAction("Login"); // Redirect to login after successful password reset
-                    }
-                    else
-                    {
-                        TempData["ErrorMessage"] = "Failed to update the password.";
-                    }
-                }
-            }
-
-            return RedirectToAction("Index");
-        }
-
-        /// <summary>
         /// Logs the officer out of the system.
         /// </summary>
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync(IdentityConstants.ApplicationScheme);
-            return RedirectToAction("Login"); // Redirect to login page after logout
+			await _signInManager.SignOutAsync();
+			return RedirectToAction("Login"); // Redirect to login page after logout
+        }
+
+        [HttpGet]
+        public IActionResult Register()
+        {
+            
+            return View(new OfficerRegisterViewModel());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Register(OfficerRegisterViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+
+                // Create a new Citizen object with the registration data.
+                var citizen = new Citizen
+                {
+                    UserName = model.FirstName,
+                    Email = model.Email,
+                    LastName = model.LastName,
+                    Gender = model.Gender,
+                    PhoneNumber = model.Mobile,
+                    Pincode = model.Pincode,
+                    Mandal = model.Mandal,
+                    District = model.District,
+                    City = model.City,
+                    Village = model.Village,
+                    Profilepic = await ConvertFileToByteArray(model.ProfilePic) // Convert uploaded profile picture to byte array.
+                };
+
+                // Create the new user in the database.
+                var result = await _officerManager.CreateAsync(citizen, model.Password);
+
+                // Check if user creation was successful.
+                if (result.Succeeded)
+                {
+                    await _officerManager.AddToRoleAsync(citizen, "Officer");
+                    PoliceOfficer policeOfficer = new PoliceOfficer();
+                    policeOfficer.OfficerId = citizen.Id;
+                    policeOfficer.DepartmentId = model.DepartmentID;
+                    policeOfficer.OfficerDesignation = model.OfficerDesignation;
+                    policeOfficer.SuperiorId = model.SuperiorId;
+                    _SqlServerDbContext.PoliceOfficers.Add(policeOfficer);
+                    await _SqlServerDbContext.SaveChangesAsync();
+                    return View(new OfficerRegisterViewModel());
+                }
+
+                // Add any errors to the model state for display.
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+            }
+            return View(model); // Return the registration view with any validation errors.
+        }
+
+        private async Task<byte[]> ConvertFileToByteArray(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return null;
+
+            using (var memoryStream = new MemoryStream())
+            {
+                await file.CopyToAsync(memoryStream);
+                return memoryStream.ToArray();
+            }
         }
     }
 }

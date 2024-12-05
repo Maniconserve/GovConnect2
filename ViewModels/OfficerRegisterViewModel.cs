@@ -1,6 +1,6 @@
 ﻿namespace GovConnect.ViewModels
 {
-    public class RegisterViewModel
+    public class OfficerRegisterViewModel
     {
         [Required(ErrorMessage = "First Name is required")]
         [RegularExpression(@"^[A-Za-z\s]+$", ErrorMessage = "First Name must contain only letters and spaces.")]
@@ -56,5 +56,10 @@
         [Required(ErrorMessage = "ProfilePic is required")]
         public IFormFile ProfilePic { get; set; }
 
+        [Required]
+        public string OfficerDesignation { get; set; }
+        [Required]
+        public int DepartmentID { get; set; }
+        public string? SuperiorId { get; set; }
     }
 }

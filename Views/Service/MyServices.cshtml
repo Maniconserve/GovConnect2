@@ -12,12 +12,11 @@
 				<form method="get" action="@Url.Action("MyServices", "Service")">
 					<div class="mb-4 d-flex justify-content-end">
 						<select id="statusFilter" name="statusFilter" class="form-select w-auto" aria-label="Filter status">
-							<option value="None">None</option>
-							<option value="All">All</option>
-							<option value="In Progress">In Progress</option>
-							<option value="Pending">Pending</option>
-							<option value="Completed">Completed</option>
-							<option value="Withdrawn">Withdrawn</option>
+							<option value="">Sort By</option>
+							@foreach (var status in Enum.GetValues(typeof(GovConnect.Models.Status)))
+							{
+								<option value="@status">@status</option>
+							}
 						</select>
 					</div>
 				</form>
@@ -33,7 +32,7 @@
 							<h5 class="card-title text-primary">@service.ServiceName</h5>                              <p class="card-text"><strong>Status:</strong> @service.Status</p>
 							<p class="card-text"><strong>Applied on:</strong> @service.ApplicationDate.ToString("dd MMM yyyy")</p>
 
-							@if (service.Status != "Completed" && service.Status != "Withdrawn")
+							@if (service.Status != Status.Completed && service.Status != Status.Withdrawn)
 							{
 								<button class="btn btn-warning w-100 mt-3" onclick="location.href='@Url.Action("Withdraw", "Service", new { id = service.ApplicationID })'">Withdraw</button>
 							}
