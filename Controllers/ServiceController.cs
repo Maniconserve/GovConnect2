@@ -60,7 +60,7 @@ namespace GovConnect.Controllers
         /// Retrieves and displays a specific service's details and checks if the user has already applied for it.
         /// </summary>
         /// <param name="id">The service ID to display details for.</param>
-        [Authorize(Roles = "User", AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+        [Authorize(Roles = "User")]
         public async Task<IActionResult> PService(int? id)
         {
             var user = await _userManager.GetUserAsync(User);

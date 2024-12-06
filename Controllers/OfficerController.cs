@@ -45,35 +45,53 @@ namespace GovConnect.Controllers
 
                 if (user != null)
                 {
-                    // Perform password-based sign-in.
-                    var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, lockoutOnFailure: false);
-                    if (result.Succeeded)
+                    // Check if the user is in the "Officer" role before attempting to sign in
+                    var isOfficer = await _officerManager.IsInRoleAsync(user, "Officer");
+
+                    if (isOfficer)
                     {
-                        // If login is successful, redirect to the requested return URL or the Scheme Index page.
-                        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                        HttpContext.Session.SetString("officerId", user.Id);
+                        // Perform password-based sign-in only if the user is an officer
+                        var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, lockoutOnFailure: false);
+
+                        if (result.Succeeded)
                         {
-                            return Redirect(returnUrl);
+                            // If login is successful, redirect to the requested return URL or the Scheme Index page.
+                            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                            {
+                                return Redirect(returnUrl);
+                            }
+                            else
+                            {
+                                return RedirectToAction("Dashboard", new { officerId = user.Id });
+                            }
                         }
                         else
                         {
-                            return RedirectToAction("Dashboard", new { officerId = user.Id });
+                            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                            return View(model);
                         }
                     }
                     else
                     {
-                        ModelState.AddModelError(string.Empty, "Invalid login attempt");
+                        // If the user is not in the "Officer" role, add an error to the model.
+                        ModelState.AddModelError(string.Empty, "You are not an officer");
                         return View(model);
                     }
                 }
                 else
                 {
-                    // If user doesn't exist, add an error to the model state.
-                    ModelState.AddModelError(string.Empty, "Officer doesn't exist");
+                    // If the user doesn't exist, add an error to the model state.
+                    ModelState.AddModelError(string.Empty, "Officer doesn't exist.");
                     return View(model);
                 }
             }
+
+            // If the model is invalid, return the same view with validation errors
             return View(model);
         }
+
+
 
         ///// <summary>
         ///// Displays the officer dashboard for a specific officer.
@@ -225,7 +243,6 @@ namespace GovConnect.Controllers
         {
             if (ModelState.IsValid)
             {
-
                 // Create a new Citizen object with the registration data.
                 var citizen = new Citizen
                 {
@@ -248,14 +265,26 @@ namespace GovConnect.Controllers
                 // Check if user creation was successful.
                 if (result.Succeeded)
                 {
+                    // Immediately set the email as confirmed after successful registration
+                    citizen.EmailConfirmed = true;
+                    await _officerManager.UpdateAsync(citizen);  // Save changes to the user record.
+
+                    // Assign the "Officer" role to the user
                     await _officerManager.AddToRoleAsync(citizen, "Officer");
-                    PoliceOfficer policeOfficer = new PoliceOfficer();
-                    policeOfficer.OfficerId = citizen.Id;
-                    policeOfficer.DepartmentId = model.DepartmentID;
-                    policeOfficer.OfficerDesignation = model.OfficerDesignation;
-                    policeOfficer.SuperiorId = model.SuperiorId;
+
+                    // Create and save the PoliceOfficer entity
+                    PoliceOfficer policeOfficer = new PoliceOfficer
+                    {
+                        OfficerId = citizen.Id,
+                        DepartmentId = model.DepartmentID,
+                        OfficerDesignation = model.OfficerDesignation,
+                        SuperiorId = model.SuperiorId
+                    };
+
                     _SqlServerDbContext.PoliceOfficers.Add(policeOfficer);
                     await _SqlServerDbContext.SaveChangesAsync();
+
+                    // Return a new model (perhaps a confirmation or success page)
                     return View(new OfficerRegisterViewModel());
                 }
 
@@ -265,8 +294,11 @@ namespace GovConnect.Controllers
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
-            return View(model); // Return the registration view with any validation errors.
+
+            // Return the registration view with any validation errors.
+            return View(model);
         }
+
 
         private async Task<byte[]> ConvertFileToByteArray(IFormFile file)
         {

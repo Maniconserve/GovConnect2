@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+
 namespace GovConnect.Controllers
 {
     public class CitizenController : Controller
@@ -8,13 +9,14 @@ namespace GovConnect.Controllers
         private SqlServerDbContext SqlServerDbContext;
         private EmailSender emailSender;
         private static string originalotp;
-
-        public CitizenController(UserManager<Citizen> _citizenManager, SignInManager<Citizen> _signInManager, EmailSender _emailSender, SqlServerDbContext _SqlServerDbContext)
+        private ICitizenService _citizenService;
+        public CitizenController(ICitizenService citizenService,UserManager<Citizen> _citizenManager, SignInManager<Citizen> _signInManager, EmailSender _emailSender, SqlServerDbContext _SqlServerDbContext)
         {
             citizenManager = _citizenManager;
             signInManager = _signInManager;
             emailSender = _emailSender;
             SqlServerDbContext = _SqlServerDbContext;
+            _citizenService = citizenService;
         }
 
         /// <summary>
@@ -42,7 +44,7 @@ namespace GovConnect.Controllers
             if (ModelState.IsValid)
             {
                 // Check if email already exists in the system.
-                var existingEmail = await citizenManager.FindByEmailAsync(model.Email);
+                var existingEmail = await _citizenService.GetUserByEmailAsync(model.Email);
                 if (existingEmail != null)
                 {
                     ModelState.AddModelError("Email", "This email address is already taken.");
@@ -50,36 +52,22 @@ namespace GovConnect.Controllers
                 }
 
                 // Check if the mobile number is already associated with another user.
-                var existingMobile = await citizenManager.Users.FirstOrDefaultAsync(citizen => citizen.PhoneNumber == model.Mobile);
-                if (existingMobile != null)
-                {
-                    ModelState.AddModelError("Mobile", "This mobile number is already taken.");
-                    return View(model);
-                }
+                //var existingMobile = await citizenManager.Users.FirstOrDefaultAsync(citizen => citizen.PhoneNumber == model.Mobile);
+                //if (existingMobile != null)
+                //{
+                //    ModelState.AddModelError("Mobile", "This mobile number is already taken.");
+                //    return View(model);
+                //}
 
                 // Create a new Citizen object with the registration data.
-                var citizen = new Citizen
-                {
-                    UserName = model.FirstName,
-                    Email = model.Email,
-                    LastName = model.LastName,
-                    Gender = model.Gender,
-                    PhoneNumber = model.Mobile,
-                    Pincode = model.Pincode,
-                    Mandal = model.Mandal,
-                    District = model.District,
-                    City = model.City,
-                    Village = model.Village,
-                    Profilepic = await ConvertFileToByteArray(model.ProfilePic) // Convert uploaded profile picture to byte array.
-                };
+                
 
                 // Create the new user in the database.
-                var result = await citizenManager.CreateAsync(citizen, model.Password);
+                var result = await _citizenService.RegisterUserAsync(model);
 
                 // Check if user creation was successful.
                 if (result.Succeeded)
                 {
-                    await citizenManager.AddToRoleAsync(citizen, "User");
                     return RedirectToAction("Login", "Citizen"); // Redirect to login after successful registration.
                 }
 
@@ -120,15 +108,26 @@ namespace GovConnect.Controllers
             if (ModelState.IsValid)
             {
                 // Find the user by their email.
-                var user = await citizenManager.FindByEmailAsync(model.Email);
+                var user = await _citizenService.GetUserByEmailAsync(model.Email);
 
                 if (user != null)
                 {
-                    // Check if the user's email is confirmed.
+                    // Check if the user has the required role (e.g., Citizen, Officer, etc.)
+                    var isUserRole = await _citizenService.CheckRoleAsync(user, "User"); // Replace "Citizen" with the required role
+
+                    if (!isUserRole)
+                    {
+                        // If the user does not have the required role, add an error and return the view.
+                        ModelState.AddModelError(string.Empty, "You are not an User");
+                        model.Schemes = await signInManager.GetExternalAuthenticationSchemesAsync();
+                        return View(model);
+                    }
+
+                    // Now, check if the user's email is confirmed.
                     if (user.EmailConfirmed == false)
                     {
-                        // Send confirmation email if not confirmed.
-                        SendEmail(model, user);
+                        String token = await _citizenService.GetEmailConfirmationTokenAsync(user.Email);
+                        SendEmail(model, user, token);
                         TempData["Message"] = "Thank you for registering! An email has been sent to your address with a link to log in. Please check your inbox (and spam folder) to proceed with logging in.";
                         model.Schemes = await signInManager.GetExternalAuthenticationSchemesAsync();
                         return View(model);
@@ -136,10 +135,10 @@ namespace GovConnect.Controllers
                     else
                     {
                         // Perform password-based sign-in.
-                        var result = await signInManager.PasswordSignInAsync(user, model.Password, false, lockoutOnFailure: false);
+                        var result = await _citizenService.SignInUserAsync(user, model, false, false);
                         if (result.Succeeded)
                         {
-                            // If login is successful, redirect to the requested return URL or the Scheme Index page.
+                            // If login is successful, redirect to the requested return URL or the default page (Scheme Index page).
                             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                             {
                                 return Redirect(returnUrl);
@@ -151,7 +150,7 @@ namespace GovConnect.Controllers
                         }
                         else
                         {
-                            ModelState.AddModelError(string.Empty, "Invalid login attempt");
+                            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                             model.Schemes = await signInManager.GetExternalAuthenticationSchemesAsync();
                             return View(model);
                         }
@@ -160,21 +159,22 @@ namespace GovConnect.Controllers
                 else
                 {
                     // If user doesn't exist, add an error to the model state.
-                    ModelState.AddModelError(string.Empty, "Citizen doesn't exist");
+                    ModelState.AddModelError(string.Empty, "Citizen doesn't exist.");
                     model.Schemes = await signInManager.GetExternalAuthenticationSchemesAsync();
                     return View(model);
                 }
             }
+
+            // If the model is invalid, return the same view with validation errors.
             return View(model);
         }
+
 
         /// <summary>
         /// Sends an email with the confirmation link for email verification.
         /// </summary>
-        private async void SendEmail(LoginViewModel model, Citizen user)
+        private async void SendEmail(LoginViewModel model, Citizen user,String token)
         {
-            // Generate a confirmation token for the user.
-            var token = await citizenManager.GenerateEmailConfirmationTokenAsync(user);
             var callbackUrl = Url.Action(
                 "ConfirmEmail", "Citizen",
                 new { token, email = user.Email },
@@ -199,14 +199,14 @@ namespace GovConnect.Controllers
             }
 
             // Find the user by email.
-            var user = await citizenManager.FindByEmailAsync(email);
+            var user = await _citizenService.GetUserByEmailAsync(email);
             if (user == null)
             {
                 return RedirectToAction("Index", "Scheme");
             }
 
             // Confirm the user's email using the token.
-            var result = await citizenManager.ConfirmEmailAsync(user, token);
+            var result = await _citizenService.ConfirmEmailAsync(user, token);
             if (result.Succeeded)
             {
                 return View("Login", new LoginViewModel { Schemes = await signInManager.GetExternalAuthenticationSchemesAsync() });
@@ -226,30 +226,14 @@ namespace GovConnect.Controllers
         {
             try
             {
-                var user = await citizenManager.GetUserAsync(User);
+                Citizen user = await _citizenService.GetUserAsync(User);
 
                 if (user == null)
                 {
                     return NotFound();
                 }
 
-                // Create a model to pre-populate the edit form with existing user data.
-                var model = new Citizen
-                {
-                    UserName = user.UserName,
-                    LastName = user.LastName,
-                    Gender = user.Gender,
-                    PhoneNumber = user.PhoneNumber,
-                    City = user.City,
-                    Email = user.Email,
-                    Profilepic = user.Profilepic,
-                    Pincode = user.Pincode,
-                    Mandal = user.Mandal,
-                    District = user.District,
-                    Village = user.Village
-                };
-
-                return View(model);
+                return View(user);
             }
             catch (Exception ex)
             {
@@ -264,36 +248,7 @@ namespace GovConnect.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(Citizen citizen, IFormFile Profilepic)
         {
-            Citizen user = await citizenManager.GetUserAsync(User);
-
-            if (Profilepic != null && Profilepic.Length > 0)
-            {
-                using (var memoryStream = new MemoryStream())
-                {
-                    await Profilepic.CopyToAsync(memoryStream);
-                    user.Profilepic = memoryStream.ToArray(); // Update the profile picture.
-                }
-            }
-
-            // Update other user properties (if they have been modified).
-            if (citizen.Email != user.Email)
-            {
-                user.Email = citizen.Email;
-                user.EmailConfirmed = false; // Set email as unconfirmed if changed.
-            }
-            user.UserName = citizen.UserName ?? user.UserName;
-            user.LastName = citizen.LastName ?? user.LastName;
-            user.PhoneNumber = citizen.PhoneNumber ?? user.PhoneNumber;
-            user.City = citizen.City ?? user.City;
-			user.Gender = citizen.Gender != null ? citizen.Gender : user.Gender;
-			user.District = citizen.District ?? user.District;
-            user.Pincode = citizen.Pincode != 0 ? citizen.Pincode : user.Pincode;
-            user.Mandal = citizen.Mandal ?? user.Mandal;
-            user.Village = citizen.Village ?? user.Village;
-            user.Profilepic = citizen.Profilepic ?? user.Profilepic;
-
-            // Update the user in the database.
-            await citizenManager.UpdateAsync(user);
+            await _citizenService.EditProfile(citizen, Profilepic, User);
             return RedirectToAction("Edit");
         }
 
@@ -304,8 +259,7 @@ namespace GovConnect.Controllers
         public IActionResult GoogleLogin(String provider, String returnUrl = "")
         {
             var redirectUrl = Url.Action("GoogleLoginCallBack", "Citizen", new { ReturnUrl = returnUrl });
-            var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-            properties.Items["prompt"] = "select_account";
+            AuthenticationProperties properties = _citizenService.GoogleLogin(provider, redirectUrl);
             return new ChallengeResult(provider, properties);
         }
 
@@ -330,8 +284,8 @@ namespace GovConnect.Controllers
                 return View("Login", loginVM);
             }
 
-            var user = await citizenManager.FindByEmailAsync(info.Principal?.FindFirst(ClaimTypes.Email)?.Value);
-            await signInManager.SignInAsync(user, isPersistent: false); // Sign in the user.
+            var user = await _citizenService.GetUserByEmailAsync(info.Principal?.FindFirst(ClaimTypes.Email)?.Value);
+            await _citizenService.SignInAsync(user, isPersistent: false); // Sign in the user.
             return RedirectToAction("Index", "Scheme");
         }
 
@@ -350,22 +304,17 @@ namespace GovConnect.Controllers
         [HttpPost]
         public async Task<IActionResult> SendOtp(string email)
         {
-            var user = await citizenManager.FindByEmailAsync(email);
+            var user = await _citizenService.GetUserByEmailAsync(email);
             if (user == null)
             {
                 TempData["EmailMessage"] = "No user found with this email.";
                 return View("ForgotPassword", new ForgotPasswordViewModel { Email = email });
             }
 
-            // Generate a random OTP for password reset.
-            originalotp = new Random().Next(100000, 999999).ToString();
-            var subject = "Reset Password";
-            var body = $"Your OTP code resetting password is: {originalotp}";
-
             try
             {
                 // Send OTP email.
-                await emailSender.SendEmailAsync(email, subject, body);
+                await _citizenService.SendOtpAsync(user);
                 TempData["EmailMessage"] = "OTP has been sent to your email. Please check your inbox (and spam folder).";
             }
             catch (Exception)
@@ -381,7 +330,7 @@ namespace GovConnect.Controllers
         [HttpPost]
         public async Task<IActionResult> VerifyOtp(ForgotPasswordViewModel forgotPasswordViewModel)
         {
-            if (!forgotPasswordViewModel.Otp.Equals(originalotp))
+            if (await _citizenService.VerifyOtpAsync(forgotPasswordViewModel.Otp))
             {
                 TempData["OtpMessage"] = "OTP is invalid";
                 return View("ForgotPassword", forgotPasswordViewModel);
@@ -393,20 +342,13 @@ namespace GovConnect.Controllers
             }
 
             // Find the user and reset their password.
-            var user = await citizenManager.FindByEmailAsync(forgotPasswordViewModel.Email);
-            if (user != null)
+            var result = await _citizenService.RemoveAndResetPasswordAsync(forgotPasswordViewModel.Email, forgotPasswordViewModel.Password);
+       
+            if (result.Succeeded)
             {
-                var result = await citizenManager.RemovePasswordAsync(user);
-                if (result.Succeeded)
-                {
-                    result = await citizenManager.AddPasswordAsync(user, forgotPasswordViewModel.Password);
-                    if (result.Succeeded)
-                    {
-                        return RedirectToAction("Login");
-                    }
-                }
+                return RedirectToAction("Login");
             }
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "Scheme");
         }
 
         /// <summary>
@@ -416,44 +358,35 @@ namespace GovConnect.Controllers
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
-            await signInManager.SignOutAsync();
+            await _citizenService.SignOutAsync();
             return RedirectToAction("Index", "Scheme");
         }
 
-        /// <summary>
-        /// Converts an uploaded file to a byte array.
-        /// </summary>
-        private async Task<byte[]> ConvertFileToByteArray(IFormFile file)
-        {
-            if (file == null || file.Length == 0)
-                return null;
-
-            using (var memoryStream = new MemoryStream())
-            {
-                await file.CopyToAsync(memoryStream);
-                return memoryStream.ToArray();
-            }
-        }
+        
 
         /// <summary>
         /// Routes the user based on their role to either their Officer Dashboard or the Scheme Index page.
         /// </summary>
-        public IActionResult Route()
+        public async Task<IActionResult> Route()
         {
-            var userRoles = User.FindAll(ClaimTypes.Role).Select(role => role.Value).ToList();
+            var officer = User.IsInRole("Officer");
 
             // If the user is an officer (not a regular user), redirect to the officer dashboard.
-            if (userRoles.Contains("NotUser"))
+            if (officer)
             {
-                var officeId = User.FindFirst("OfficerId")?.Value;
+                var officerId = HttpContext.Session.GetString("officerId");
 
-                if (officeId != null)
+                // If the officerId is found, redirect to the officer dashboard.
+                if (!string.IsNullOrEmpty(officerId))
                 {
-                    return RedirectToAction("Dashboard", "Officer", new { officerId = officeId });
+                    return RedirectToAction("Dashboard", "Officer", new { officerId = officerId });
                 }
             }
+
+            // If not an officer or officerId is not found, redirect to the Scheme Index page
             return RedirectToAction("Index", "Scheme");
         }
+
 
         /// <summary>
         /// Handles errors and returns the appropriate error page.
@@ -468,15 +401,15 @@ namespace GovConnect.Controllers
             {
                 return View("BadRequest"); // If the error is 400, show the BadRequest page.
             }
-            else if(statusCode == 500)
+            else if (statusCode == 500)
             {
                 return View("ServerError"); // If the error is 500, show the ServerError page.
             }
-            else if (statusCode == 403)
-            {
-                return View("AccessDenied"); // If the error is 403, show the AccessDenied page.
-            }
             return View("Error"); // Otherwise, show a generic error page.
+        }
+        public IActionResult AccessDenied()
+        {
+            return View("AccessDenied");
         }
     }
 }

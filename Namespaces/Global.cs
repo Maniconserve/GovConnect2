@@ -2,7 +2,9 @@
 global using global::GovConnect.ViewModels;
 global using global::GovConnect.Data;
 global using global::GovConnect.Services;
+global using global::GovConnect.Services.Interfaces;
 global using global::GovConnect.Repository;
+global using global::GovConnect.Repository.Interfaces;
 global using global::Microsoft.AspNetCore.Authorization;
 global using global::Microsoft.AspNetCore.Authentication;
 global using global::Microsoft.AspNetCore.Identity;

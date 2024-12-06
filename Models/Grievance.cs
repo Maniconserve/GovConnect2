@@ -38,6 +38,12 @@ namespace GovConnect.Models
         {
             this.TimeLine = JsonSerializer.Serialize(timeLine);
         }
+
+        public string? GetDepartmentName()
+        {
+            return Enum.GetName(typeof(Departments), this.DepartmentID);
+        }
+
     }
 
 }

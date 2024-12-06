@@ -1,7 +1,9 @@
 ﻿@model Grievance
+
 <head>
     <title>Grievance Details</title>
 </head>
+
 <div class="container mt-4 min-vh-100">
     <div class="card shadow-lg">
         <div class="card-header bg-success text-white">
@@ -20,7 +22,7 @@
 
             <div class="mb-3">
                 <h5>Department:</h5>
-                <p>@Model.DepartmentID</p>
+                <p>@Model.GetDepartmentName()</p>
             </div>
 
             <div class="mb-3">
@@ -42,21 +44,43 @@
                 <div class="mb-3">
                     <h5>Upload File:</h5>
                     <form method="post" enctype="multipart/form-data" asp-action="UploadFile" asp-route-id="@Model.GrievanceID">
-                        <input type="file" class="form-control" name="fileUpload" accept=".pdf"/>
+                        <input type="file" class="form-control" name="fileUpload" accept=".pdf" />
                         <button type="submit" class="btn btn-primary mt-3">Upload File</button>
                     </form>
                 </div>
             }
+
+            <div class="mb-3">
+                <h5>TimeLine:</h5>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Work</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.GetTimeLine())
+                        {
+                            <tr>
+                                <td>@item.Date.ToString("MMMM dd, yyyy")</td>
+                                <td>@item.Work</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
             @if (Model.Status == Status.Completed)
             {
                 <div class="mb-3">
                     <h5>Add Reason:</h5>
                     <form asp-controller="Grievance" asp-action="AddTimeLineEntry" method="post">
                         <div class="mb-3">
-                            <input type="date" class="form-control" id="Date" name="Date" required/>
+                            <input type="date" class="form-control" id="Date" name="Date" required />
                         </div>
                         <div class="mb-3">
-                            <label for="Work" class="form-label">Reason(For Not Completed)</label>
+                            <label for="Work" class="form-label">Reason (For Not Completed)</label>
                             <input type="text" class="form-control" id="Work" name="Work" required />
                         </div>
                         <input type="hidden" name="GrievanceID" value="@Model.GrievanceID" />
@@ -64,6 +88,7 @@
                     </form>
                 </div>
             }
+
             <a href="@Url.Action("MyGrievances", "Grievance")" class="btn btn-success mt-3">Back to My Grievances</a>
         </div>
     </div>

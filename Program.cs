@@ -1,6 +1,9 @@
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICitizenRepository, CitizenRepository>();
+builder.Services.AddScoped<ICitizenService, CitizenService>();
 builder.Services.AddScoped<ISchemeRepository<Scheme>,SchemeRepository>();
 builder.Services.AddScoped<IServiceRepository<Service>, ServiceRepository>();
 builder.Services.AddScoped<IGrievanceRepository<Grievance>, GrievanceRepository>();
@@ -10,6 +13,7 @@ builder.Services.AddScoped<IGrievanceService, GrievanceService>();
 builder.Services.AddTransient<DashboardService>();
 builder.Services.AddSingleton<EmailSender>();
 builder.Services.AddScoped<ProfileService>();
+builder.Services.AddSession();
 var connectionString = builder.Configuration.GetConnectionString("SQLServerConnection") ?? throw new InvalidOperationException("Connection string 'SQLServerIdentityConnection' not found.");
 builder.Services.AddDbContext<SqlServerDbContext>(options =>
     options.UseSqlServer(connectionString));
@@ -33,12 +37,15 @@ builder.Services.AddAuthentication()
     });
 builder.Services.ConfigureApplicationCookie(options =>
 {
-	options.LoginPath = "/Citizen/Login";  
+    options.LoginPath = "/Citizen/Login";
+    options.AccessDeniedPath = "/Citizen/AccessDenied"; 
 });
+
+
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("User", policy => policy.RequireRole("User"));
-    options.AddPolicy("Officer", policy => policy.RequireRole("Officer"));
+    options.AddPolicy("UserPolicy", policy => policy.RequireRole("User"));
+    options.AddPolicy("OfficerPolicy", policy => policy.RequireRole("Officer"));
 });
 var app = builder.Build();
 
@@ -49,6 +56,8 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 app.UseStaticFiles();
+
+app.UseSession();
 
 app.UseStatusCodePagesWithReExecute("/Citizen/HandleError", "?statusCode={0}");
 
