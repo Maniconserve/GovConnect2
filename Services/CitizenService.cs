@@ -7,7 +7,7 @@ namespace GovConnect.Services
         private readonly UserManager<Citizen> citizenManager;
         private readonly SignInManager<Citizen> signInManager;
         private readonly EmailSender emailSender;
-        private static string originalOtp;
+        private string originalOtp;
         private ICitizenRepository _citizenRepository;
 
         public CitizenService(ICitizenRepository citizenRepository,UserManager<Citizen> citizenManager, SignInManager<Citizen> signInManager, EmailSender emailSender)
@@ -76,7 +76,7 @@ namespace GovConnect.Services
         {
             return await _citizenRepository.GetUserAsync(User);
         }
-        public async Task EditProfile(Citizen citizen, IFormFile Profilepic,ClaimsPrincipal User)
+        public async Task<bool> EditProfile(Citizen citizen, IFormFile Profilepic,ClaimsPrincipal User)
         {
             Citizen user = await GetUserAsync(User);
 
@@ -89,12 +89,7 @@ namespace GovConnect.Services
                 }
             }
 
-            // Update other user properties (if they have been modified).
-            if (citizen.Email != user.Email)
-            {
-                user.Email = citizen.Email;
-                user.EmailConfirmed = false; // Set email as unconfirmed if changed.
-            }
+            
             user.UserName = citizen.UserName ?? user.UserName;
             user.LastName = citizen.LastName ?? user.LastName;
             user.PhoneNumber = citizen.PhoneNumber ?? user.PhoneNumber;
@@ -106,8 +101,23 @@ namespace GovConnect.Services
             user.Village = citizen.Village ?? user.Village;
             user.Profilepic = citizen.Profilepic ?? user.Profilepic;
 
+            if (citizen.Email != user.Email)
+            {
+                var emailExists = await _citizenRepository.GetUserByEmailAsync(citizen.Email);
+                if (emailExists == null)
+                {
+                    user.Email = citizen.Email;
+                    user.EmailConfirmed = false; // Set email as unconfirmed if changed.
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
             // Update the user in the database.
             await UpdateUserAsync(user);
+            return true;
         }
         public async Task<IdentityResult> UpdateUserAsync(Citizen citizen)
         {
@@ -120,18 +130,19 @@ namespace GovConnect.Services
             properties.Items["prompt"] = "select_account";
             return properties;
         }
-        public async Task SendOtpAsync(Citizen user)
+        public async Task SendOtpAsync(Citizen user, HttpContext httpContext)
         {
             if (user != null)
             {
                 originalOtp = new Random().Next(100000, 999999).ToString();
+                httpContext.Session.SetString("Otp",originalOtp);
                 await emailSender.SendEmailAsync(user.Email, "Reset Password", $"Your OTP code resetting password is: {originalOtp}");
             }
         }
 
-        public Task<bool> VerifyOtpAsync(string otp)
+        public Task<bool> VerifyOtpAsync(string otp, HttpContext httpContext)
         {
-            return Task.FromResult(otp == originalOtp);
+            return Task.FromResult(otp == httpContext.Session.GetString("Otp"));
         }
 
         public async Task<IdentityResult> RemoveAndResetPasswordAsync(string email, string newPassword)

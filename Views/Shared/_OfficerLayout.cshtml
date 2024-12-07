@@ -1,13 +1,11 @@
-﻿@using GovConnect.Services
-@inject GovConnect.Services.ProfileService profileService
+﻿@inject UserManager<Citizen> citizenManager
 @{
     string profilePic = "~/Images/Elon.png";
-
-    var username = User.Identity.Name;
-
-    if (User.Identity.IsAuthenticated)
+    var user = await citizenManager.GetUserAsync(User);
+    @if (user != null && user.Profilepic != null && user.Profilepic.Length > 0)
     {
-        profilePic = await profileService.GetProfilePicAsync(username);
+        var base64String = Convert.ToBase64String(user.Profilepic);
+        profilePic = $"data:image/jpeg;base64,{base64String}";
     }
 }
 <!DOCTYPE html>

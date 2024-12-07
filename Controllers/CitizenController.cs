@@ -4,18 +4,15 @@ namespace GovConnect.Controllers
 {
     public class CitizenController : Controller
     {
-        private UserManager<Citizen> citizenManager;
         private SignInManager<Citizen> signInManager;
-        private SqlServerDbContext SqlServerDbContext;
         private EmailSender emailSender;
-        private static string originalotp;
         private ICitizenService _citizenService;
+        static DateTime expirationTime; // OTP expires in 5 minutes
+
         public CitizenController(ICitizenService citizenService,UserManager<Citizen> _citizenManager, SignInManager<Citizen> _signInManager, EmailSender _emailSender, SqlServerDbContext _SqlServerDbContext)
         {
-            citizenManager = _citizenManager;
             signInManager = _signInManager;
             emailSender = _emailSender;
-            SqlServerDbContext = _SqlServerDbContext;
             _citizenService = citizenService;
         }
 
@@ -191,7 +188,7 @@ namespace GovConnect.Controllers
         /// Handles the email confirmation callback after the user clicks the confirmation link.
         /// </summary>
         [HttpGet]
-        private async Task<IActionResult> ConfirmEmail(string email, string token)
+        public async Task<IActionResult> ConfirmEmail(string token, string email)
         {
             if (email == null || token == null)
             {
@@ -248,7 +245,12 @@ namespace GovConnect.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(Citizen citizen, IFormFile Profilepic)
         {
-            await _citizenService.EditProfile(citizen, Profilepic, User);
+            bool result = await _citizenService.EditProfile(citizen, Profilepic, User);
+            if (!result)
+            {
+                ModelState.AddModelError("", "Sorry, Email already exists");
+                return View(citizen);
+            }
             return RedirectToAction("Edit");
         }
 
@@ -295,14 +297,23 @@ namespace GovConnect.Controllers
         [HttpGet]
         public IActionResult ForgotPassword()
         {
-            return View(new ForgotPasswordViewModel());
+            var email = HttpContext.Session.GetString("Email");
+            if (email != null)
+            {
+                TempData["EmailMessage"] = "OTP has been sent to your email. Please check your inbox (and spam folder).";
+                var countdownTime = (int)(expirationTime - DateTime.UtcNow).TotalSeconds;
+                TempData["OtpExpirationTime"] = expirationTime.ToString("o"); // ISO 8601 format
+                TempData["OtpCountdownTime"] = countdownTime.ToString();
+            }
+            return View(new ForgotPasswordViewModel { Email = email });
+
         }
 
         /// <summary>
-        /// Sends an OTP to the user's email for password reset.
+        /// Sends an OTP to the user's email for password reset
         /// </summary>
         [HttpPost]
-        public async Task<IActionResult> SendOtp(string email)
+        public async Task<IActionResult> SendOtp(string email,String countdown)
         {
             var user = await _citizenService.GetUserByEmailAsync(email);
             if (user == null)
@@ -314,15 +325,23 @@ namespace GovConnect.Controllers
             try
             {
                 // Send OTP email.
-                await _citizenService.SendOtpAsync(user);
+                await _citizenService.SendOtpAsync(user, HttpContext);
+                HttpContext.Session.SetString("Email", email);
+                if(int.Parse(countdown) <= 0) expirationTime = DateTime.UtcNow.AddSeconds(30);
+                var countdownTime = (int)(expirationTime - DateTime.UtcNow).TotalSeconds;
+                TempData["OtpExpirationTime"] = expirationTime.ToString("o"); // ISO 8601 format
+                TempData["OtpCountdownTime"] = countdownTime.ToString();
                 TempData["EmailMessage"] = "OTP has been sent to your email. Please check your inbox (and spam folder).";
+                // Store timer data in TempData (e.g., set countdown to 60 seconds).
             }
             catch (Exception)
             {
                 TempData["EmailMessage"] = "Failed to send OTP. Please try again later.";
             }
+
             return View("ForgotPassword", new ForgotPasswordViewModel { Email = email });
         }
+
 
         /// <summary>
         /// Verifies the OTP entered by the user for password reset.
@@ -330,15 +349,15 @@ namespace GovConnect.Controllers
         [HttpPost]
         public async Task<IActionResult> VerifyOtp(ForgotPasswordViewModel forgotPasswordViewModel)
         {
-            if (await _citizenService.VerifyOtpAsync(forgotPasswordViewModel.Otp))
+            if (!await _citizenService.VerifyOtpAsync(forgotPasswordViewModel.Otp, HttpContext))
             {
                 TempData["OtpMessage"] = "OTP is invalid";
-                return View("ForgotPassword", forgotPasswordViewModel);
+                return View("ForgotPassword",new ForgotPasswordViewModel());
             }
 
             if (!ModelState.IsValid)
             {
-                return View("ForgotPassword", forgotPasswordViewModel);
+                return View("ForgotPassword",new ForgotPasswordViewModel());
             }
 
             // Find the user and reset their password.

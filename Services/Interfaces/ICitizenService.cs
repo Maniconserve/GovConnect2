@@ -11,11 +11,11 @@ namespace GovConnect.Services.Interfaces
         Task SignInAsync(Citizen user, bool isPersistent);
         Task<IdentityResult> ConfirmEmailAsync(Citizen user, string token);
         Task<Citizen> GetUserAsync(ClaimsPrincipal user);
-        Task EditProfile(Citizen citizen, IFormFile Profilepic, ClaimsPrincipal user);
+        Task<bool> EditProfile(Citizen citizen, IFormFile Profilepic, ClaimsPrincipal user);
         Task<IdentityResult> UpdateUserAsync(Citizen citizen);
         AuthenticationProperties GoogleLogin(string provider, string? redirectUrl);
-        Task SendOtpAsync(Citizen user);
-        Task<bool> VerifyOtpAsync(string otp);
+        Task SendOtpAsync(Citizen user, HttpContext httpContext);
+        Task<bool> VerifyOtpAsync(string otp, HttpContext httpContext);
         Task<IdentityResult> RemoveAndResetPasswordAsync(string email, string newPassword);
         Task SignOutAsync();
     }

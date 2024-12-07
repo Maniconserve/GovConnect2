@@ -9,9 +9,10 @@ namespace GovConnect.Repository
         private UserManager<Citizen> _citizenManager;
         private SignInManager<Citizen> _signInManager;
 
-        public CitizenRepository(UserManager<Citizen> citizenManager)
+        public CitizenRepository(UserManager<Citizen> citizenManager,SignInManager<Citizen> signInManager)
         {
             _citizenManager = citizenManager;
+            _signInManager = signInManager;
         }
 
         public async Task<Citizen> GetUserByEmailAsync(string email)

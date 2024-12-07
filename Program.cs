@@ -12,8 +12,10 @@ builder.Services.AddScoped<IServiceService, ServiceService>();
 builder.Services.AddScoped<IGrievanceService, GrievanceService>();
 builder.Services.AddTransient<DashboardService>();
 builder.Services.AddSingleton<EmailSender>();
-builder.Services.AddScoped<ProfileService>();
-builder.Services.AddSession();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromSeconds(30);
+});
 var connectionString = builder.Configuration.GetConnectionString("SQLServerConnection") ?? throw new InvalidOperationException("Connection string 'SQLServerIdentityConnection' not found.");
 builder.Services.AddDbContext<SqlServerDbContext>(options =>
     options.UseSqlServer(connectionString));

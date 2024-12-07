@@ -1,6 +1,4 @@
-﻿@using Microsoft.AspNetCore.Identity
-@inject GovConnect.Services.ProfileService profileService
-@inject SignInManager<Citizen> SignInManager
+﻿@inject UserManager<Citizen> citizenManager
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,11 +25,16 @@
             <div class="custom-menu-item"><a asp-controller="Service" asp-action="Index" class="custom-no-link">Services</a></div>
             <div class="custom-menu-item"><a asp-controller="Scheme" asp-action="Search" class="custom-no-link">Schemes</a></div>
         </div>
-        @if (SignInManager.IsSignedIn(User))
+        @if (User.Identity.IsAuthenticated)
         {
-            string profilePic = "/images/default-profile.jpg";
+            string profilePic = "~/Images/Elon.png";
             var username = User.Identity.Name;
-            profilePic = await profileService.GetProfilePicAsync(username);
+            var user = await citizenManager.GetUserAsync(User);
+            @if (user != null && user.Profilepic != null && user.Profilepic.Length > 0)
+            {
+                var base64String = Convert.ToBase64String(user.Profilepic);
+                profilePic = $"data:image/jpeg;base64,{base64String}";
+            }
 
             <div class="custom-dropdown hover-dropdown">
                 <button class="btn btn-link text-decoration-none" type="button" id="profileDropdown" aria-expanded="false">
