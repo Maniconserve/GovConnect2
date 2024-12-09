@@ -6,7 +6,7 @@
         public int EligibilityId { get; set; }
         [ForeignKey("Scheme")]
         public int SchemeId { get; set; }
-        public string Gender { get; set; }
+        public Gender Gender { get; set; }
         public int Age { get; set; }
 
         public int MinAge {  get; set; }

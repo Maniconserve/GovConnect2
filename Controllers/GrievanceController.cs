@@ -108,6 +108,7 @@ namespace GovConnect.Controllers
             }
 
             var grievances = await _grievanceService.GetGrievancesByUserAsync(user.Id, statusFilter); // Get grievances by user and status filter
+            ViewBag.Status = statusFilter;
             return View(grievances); // Return the grievances to the view
         }
 

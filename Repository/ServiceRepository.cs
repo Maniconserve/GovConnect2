@@ -1,10 +1,10 @@
 ﻿namespace GovConnect.Repository
 {
-    public class ServiceRepository : IServiceRepository<Service>
+    public class ServiceRepository : GenericRepository<Service>, IServiceRepository
     {
         private readonly SqlServerDbContext _context;
 
-        public ServiceRepository(SqlServerDbContext context)
+        public ServiceRepository(SqlServerDbContext context) : base(context) 
         {
             _context = context;
         }
@@ -13,17 +13,13 @@
             return await _context.ServiceApplications
                 .FirstOrDefaultAsync(s => s.ApplicationID == applicationId && s.UserID == userId);
         }
-        public async Task<List<Service>> GetAllServicesAsync()
-        {
-            return await _context.Services.ToListAsync();
-        }
         public async Task<List<ServiceApplication>> GetAppliedServicesAsync(string userId, Status? statusFilter)
         {
-            var query = _context.ServiceApplications.Where(s => s.UserID == userId);
+            var query = _context.ServiceApplications.Where(service => service.UserID == userId);
 
             if (statusFilter.HasValue)
             {
-                query = query.Where(s => s.Status == statusFilter.Value);
+                query = query.Where(service => service.Status == statusFilter.Value);
             }
 
             return await query.ToListAsync();
@@ -47,41 +43,6 @@
 
             serviceApplication.Status = Status.Withdrawn;
             _context.ServiceApplications.Update(serviceApplication);
-            await _context.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<Service?> GetByIdAsync(int id)
-        {
-            return await _context.Services
-                .FirstOrDefaultAsync(s => s.ServiceId == id);
-        }
-
-        public async Task<List<Service>> GetAllAsync()
-        {
-            return await _context.Services.ToListAsync();
-        }
-
-        public async Task<bool> AddAsync(Service entity)
-        {
-            _context.Services.Add(entity);
-            await _context.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<bool> UpdateAsync(Service entity)
-        {
-            _context.Services.Update(entity);
-            await _context.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<bool> DeleteAsync(int id)
-        {
-            var service = await GetByIdAsync(id);
-            if (service == null) return false;
-
-            _context.Services.Remove(service);
             await _context.SaveChangesAsync();
             return true;
         }

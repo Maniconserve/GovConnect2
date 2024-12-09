@@ -2,19 +2,12 @@
 
 namespace GovConnect.Repository
 {
-    public class GrievanceRepository : IGrievanceRepository<Grievance>
+    public class GrievanceRepository : GenericRepository<Grievance>,IGrievanceRepository
     {
         private readonly SqlServerDbContext _context;
 
-        public GrievanceRepository(SqlServerDbContext context)
-        {
+        public GrievanceRepository(SqlServerDbContext context) : base(context) {  
             _context = context;
-        }
-
-        public async Task<Grievance?> GetGrievanceByIdAsync(int grievanceId)
-        {
-            return await _context.DGrievances
-                .FirstOrDefaultAsync(g => g.GrievanceID == grievanceId);
         }
 
         public async Task<List<Grievance>> GetGrievancesByUserAsync(string userId,Status? statusFilter)
@@ -89,47 +82,6 @@ namespace GovConnect.Repository
             return await _context.PoliceOfficers
                 .Where(o => o.OfficerId == officerId)
                 .FirstOrDefaultAsync();
-        }
-
-        public async Task UpdateGrievanceAsync(Grievance grievance)
-        {
-            _context.DGrievances.Update(grievance);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task<Grievance?> GetByIdAsync(int grievanceId)
-        {
-            return await _context.DGrievances
-                .FirstOrDefaultAsync(g => g.GrievanceID == grievanceId);
-        }
-
-        public async Task<List<Grievance>> GetAllAsync()
-        {
-            return await _context.DGrievances.ToListAsync();
-        }
-
-        public async Task<bool> AddAsync(Grievance entity)
-        {
-            _context.DGrievances.Add(entity);
-            await _context.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<bool> UpdateAsync(Grievance entity)
-        {
-            _context.DGrievances.Update(entity);
-            await _context.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<bool> DeleteAsync(int grievanceId)
-        {
-            var grievance = await GetByIdAsync(grievanceId);
-            if (grievance == null) return false;
-
-            _context.DGrievances.Remove(grievance);
-            await _context.SaveChangesAsync();
-            return true;
         }
     }
 }

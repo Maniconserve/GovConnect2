@@ -1,10 +1,7 @@
-﻿using GovConnect.Repository.Interfaces;
-
-namespace GovConnect.Repository
+﻿namespace GovConnect.Repository
 {
-    public interface IServiceRepository<T> : IGenericRepository<T> where T : class
+    public interface IServiceRepository : IGenericRepository<Service>
     {
-        Task<List<Service>> GetAllServicesAsync();
         Task<ServiceApplication?> GetServiceApplicationByIdAsync(int applicationId, string userId);
         Task<bool> ApplyForServiceAsync(ServiceApplication application);
         Task<List<ServiceApplication>> GetAppliedServicesAsync(string userId, Status? statusFilter);

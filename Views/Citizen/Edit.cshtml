@@ -1,17 +1,58 @@
 ﻿@model Citizen
 @inject UserManager<Citizen> citizenManager
+@{
+    var schemes = ViewBag.Schemes as List<Scheme>; // Get schemes passed from the controller
+}
 <head>
     <title>Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="mb-3 container min-vh-100 row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header text-center">
-                    <h3>Profile</h3>
+<body class="bg-gray-100">
+
+    <!-- Main Container -->
+    <div class="min-h-screen flex justify-center items-start p-6">
+        <div class="w-full max-w-7xl grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Left Section - Schemes -->
+            <div class="col-span-1 bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-center text-xl font-semibold text-gray-700">Eligible Schemes</h3>
+                </br>
+                @if (schemes != null && schemes.Any())
+                {
+                    foreach (var scheme in schemes)
+                    {
+                        <div class="bg-white p-4 mb-4 rounded-lg shadow">
+                            <a href="@Url.Action("ProfileScheme", "Scheme", new { schemeId = scheme.SchemeID , eligibilityJson = ViewBag.EligibilityJson })" class="text-blue-600 hover:text-blue-700">
+                                @scheme.SchemeName
+                            </a>
+                            @if (!string.IsNullOrEmpty(scheme.Attributes))
+                            {
+                                <div class="flex space-x-2 mt-4">
+                                    @foreach (var attribut in scheme.Attributes.Split(','))
+                                    {
+                                        <span class="bg-green-100 text-green-800 text-sm font-medium px-2.5 py-0.5 rounded">
+                                            @attribut
+                                        </span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="bg-white p-4 rounded-lg shadow">
+                        <p class="text-gray-600">No schemes available for your eligibility criteria.</p>
+                    </div>
+                }
+            </div>
+
+            <!-- Right Section - Profile -->
+            <div class="col-span-1 md:col-span-2 bg-white shadow-lg rounded-lg p-6">
+                <div class="text-center bg-gray-100 py-4 rounded-t-lg">
+                    <h3 class="text-2xl font-semibold text-gray-700">Profile</h3>
                 </div>
 
-                <div class="card-body">
+                <div class="space-y-6">
                     @if (!ViewData.ModelState.IsValid)
                     {
                         <div class="alert alert-danger alert-dismissible fade show d-flex justify-content-start align-items-center" role="alert">
@@ -23,117 +64,102 @@
                         <!-- Profile Picture Upload -->
                         @{
                             string imageSrc = "~/Images/Elon.png";
-                            var username = User.Identity.Name;
                             var user = await citizenManager.GetUserAsync(User);
-                            @if (user != null && user.Profilepic != null && user.Profilepic.Length > 0)
+                            if (user != null && user.Profilepic != null && user.Profilepic.Length > 0)
                             {
                                 var base64String = Convert.ToBase64String(user.Profilepic);
                                 imageSrc = $"data:image/jpeg;base64,{base64String}";
                             }
                         }
 
-                        <div class="text-center mb-4">
-                            <img id="profilePicPreview" src="@imageSrc" alt="Profile Picture" class="profile-img rounded-circle" style="width: 100px; height: 130px; object-fit: cover;" />
-                            <div class="mt-2">
+                        <div class="text-center mb-6">
+                            <img id="profilePicPreview" src="@imageSrc" alt="Profile Picture" class="rounded-full w-24 h-32 object-cover mx-auto" />
+                            <div class="mt-4">
                                 <!-- Custom Upload Button -->
-                                <button type="button" class="btn btn-secondary" id="uploadButton">Upload</button>
+                                <button type="button" class="bg-gray-300 text-black px-6 py-2 rounded-md hover:bg-gray-400" id="uploadButton">
+                                    Upload
+                                </button>
                                 <!-- Hidden File Input -->
                                 <input type="file" id="Profilepic" name="Profilepic" class="form-control visually-hidden" asp-for="Profilepic" />
                             </div>
                         </div>
 
                         <!-- Name Fields -->
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="FirstName" class="form-label">First Name</label>
-                                    <input type="text" id="FirstName" name="UserName" class="form-control" placeholder="Enter First Name" asp-for="UserName" />
-                                    <span class="text-danger">@Html.ValidationMessageFor(m => m.UserName)</span>
-                                </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div>
+                                <label for="FirstName" class="block text-sm font-medium text-gray-700">First Name</label>
+                                <input type="text" id="FirstName" name="UserName" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter First Name" asp-for="UserName" />
+                                <span class="text-red-500">@Html.ValidationMessageFor(m => m.UserName)</span>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="LastName" class="form-label">Last Name</label>
-                                    <input type="text" id="LastName" name="LastName" class="form-control" placeholder="Enter Last Name" asp-for="LastName" />
-                                    <span class="text-danger">@Html.ValidationMessageFor(m => m.LastName)</span>
-                                </div>
+                            <div>
+                                <label for="LastName" class="block text-sm font-medium text-gray-700">Last Name</label>
+                                <input type="text" id="LastName" name="LastName" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter Last Name" asp-for="LastName" />
+                                <span class="text-red-500">@Html.ValidationMessageFor(m => m.LastName)</span>
                             </div>
                         </div>
 
                         <!-- Gender and Phone Number Fields -->
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="Gender" class="form-label">Gender</label>
-                                    <select id="Gender" name="Gender" class="form-select" asp-for="Gender">
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
-                                        <option value="Other">Other</option>
-                                    </select>
-                                    <span class="text-danger">@Html.ValidationMessageFor(m => m.Gender)</span>
-                                </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div>
+                                <label for="Gender" class="block text-sm font-medium text-gray-700">Gender</label>
+                                <select id="Gender" name="Gender" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" asp-for="Gender">
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <span class="text-red-500">@Html.ValidationMessageFor(m => m.Gender)</span>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="PhoneNumber" class="form-label">Mobile</label>
-                                    <input type="text" id="PhoneNumber" name="PhoneNumber" class="form-control" placeholder="Enter Mobile Number" asp-for="PhoneNumber" />
-                                    <span class="text-danger">@Html.ValidationMessageFor(m => m.PhoneNumber)</span>
-                                </div>
+                            <div>
+                                <label for="PhoneNumber" class="block text-sm font-medium text-gray-700">Mobile</label>
+                                <input type="text" id="PhoneNumber" name="PhoneNumber" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter Mobile Number" asp-for="PhoneNumber" />
+                                <span class="text-red-500">@Html.ValidationMessageFor(m => m.PhoneNumber)</span>
                             </div>
                         </div>
 
                         <!-- Address Fields -->
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="Pincode" class="form-label">Pincode</label>
-                                    <input type="text" id="Pincode" name="Pincode" class="form-control" placeholder="Enter Pincode" asp-for="Pincode" />
-                                    <span class="text-danger">@Html.ValidationMessageFor(m => m.Pincode)</span>
-                                </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                            <div>
+                                <label for="Pincode" class="block text-sm font-medium text-gray-700">Pincode</label>
+                                <input type="text" id="Pincode" name="Pincode" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter Pincode" asp-for="Pincode" />
+                                <span class="text-red-500">@Html.ValidationMessageFor(m => m.Pincode)</span>
                             </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="Mandal" class="form-label">Mandal</label>
-                                    <input type="text" id="Mandal" name="Mandal" class="form-control" placeholder="Enter Mandal" asp-for="Mandal" />
-                                    <span class="text-danger">@Html.ValidationMessageFor(m => m.Mandal)</span>
-                                </div>
+                            <div>
+                                <label for="Mandal" class="block text-sm font-medium text-gray-700">Mandal</label>
+                                <input type="text" id="Mandal" name="Mandal" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter Mandal" asp-for="Mandal" />
+                                <span class="text-red-500">@Html.ValidationMessageFor(m => m.Mandal)</span>
                             </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="District" class="form-label">District</label>
-                                    <input type="text" id="District" name="District" class="form-control" placeholder="Enter District" asp-for="District" />
-                                    <span class="text-danger">@Html.ValidationMessageFor(m => m.District)</span>
-                                </div>
+                            <div>
+                                <label for="District" class="block text-sm font-medium text-gray-700">District</label>
+                                <input type="text" id="District" name="District" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter District" asp-for="District" />
+                                <span class="text-red-500">@Html.ValidationMessageFor(m => m.District)</span>
                             </div>
                         </div>
 
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="City" class="form-label">City</label>
-                                    <input type="text" id="City" name="City" class="form-control" placeholder="Enter City" asp-for="City" />
-                                    <span class="text-danger">@Html.ValidationMessageFor(m => m.City)</span>
-                                </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div>
+                                <label for="City" class="block text-sm font-medium text-gray-700">City</label>
+                                <input type="text" id="City" name="City" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter City" asp-for="City" />
+                                <span class="text-red-500">@Html.ValidationMessageFor(m => m.City)</span>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="Village" class="form-label">Village</label>
-                                    <input type="text" id="Village" name="Village" class="form-control" placeholder="Enter Village" asp-for="Village" />
-                                    <span class="text-danger">@Html.ValidationMessageFor(m => m.Village)</span>
-                                </div>
+                            <div>
+                                <label for="Village" class="block text-sm font-medium text-gray-700">Village</label>
+                                <input type="text" id="Village" name="Village" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter Village" asp-for="Village" />
+                                <span class="text-red-500">@Html.ValidationMessageFor(m => m.Village)</span>
                             </div>
                         </div>
 
                         <!-- Email Field -->
-                        <div class="form-group">
-                            <label for="Email" class="form-label">Email</label>
-                            <input type="email" id="Email" name="Email" class="form-control" placeholder="Enter Email" asp-for="Email" />
-                            <span class="text-danger">@Html.ValidationMessageFor(m => m.Email)</span>
+                        <div>
+                            <label for="Email" class="block text-sm font-medium text-gray-700">Email</label>
+                            <input type="email" id="Email" name="Email" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter Email" asp-for="Email" />
+                            <span class="text-red-500">@Html.ValidationMessageFor(m => m.Email)</span>
                         </div>
 
                         <!-- Submit Button -->
-                        <div class="text-center mt-4">
-                            <button type="submit" class="btn btn-primary px-5">Save Changes</button>
+                        <div class="text-center mt-6">
+                            <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
+                                Save Changes
+                            </button>
                         </div>
                     </form>
                 </div>

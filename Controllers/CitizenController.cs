@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using Newtonsoft.Json;
 
 namespace GovConnect.Controllers
 {
@@ -7,13 +8,15 @@ namespace GovConnect.Controllers
         private SignInManager<Citizen> signInManager;
         private EmailSender emailSender;
         private ICitizenService _citizenService;
+        private ISchemeService _schemeService;
         static DateTime expirationTime; // OTP expires in 5 minutes
 
-        public CitizenController(ICitizenService citizenService,UserManager<Citizen> _citizenManager, SignInManager<Citizen> _signInManager, EmailSender _emailSender, SqlServerDbContext _SqlServerDbContext)
+        public CitizenController(ICitizenService citizenService,UserManager<Citizen> _citizenManager, SignInManager<Citizen> _signInManager, EmailSender _emailSender, SqlServerDbContext _SqlServerDbContext,ISchemeService schemeService)
         {
             signInManager = _signInManager;
             emailSender = _emailSender;
             _citizenService = citizenService;
+            _schemeService = schemeService;
         }
 
         /// <summary>
@@ -224,12 +227,10 @@ namespace GovConnect.Controllers
             try
             {
                 Citizen user = await _citizenService.GetUserAsync(User);
-
-                if (user == null)
-                {
-                    return NotFound();
-                }
-
+                Eligibility eligibility = new Eligibility { Gender = user.Gender , Age = 22 };
+                List<Scheme> schemes = await _schemeService.GetSchemesByProfileAsync(eligibility,HttpContext);
+                ViewBag.Schemes = schemes;
+                ViewBag.EligibilityJson = JsonConvert.SerializeObject(eligibility);
                 return View(user);
             }
             catch (Exception ex)
@@ -313,7 +314,7 @@ namespace GovConnect.Controllers
         /// Sends an OTP to the user's email for password reset
         /// </summary>
         [HttpPost]
-        public async Task<IActionResult> SendOtp(string email,String countdown)
+        public async Task<IActionResult> SendOtp(string email)
         {
             var user = await _citizenService.GetUserByEmailAsync(email);
             if (user == null)
@@ -321,13 +322,12 @@ namespace GovConnect.Controllers
                 TempData["EmailMessage"] = "No user found with this email.";
                 return View("ForgotPassword", new ForgotPasswordViewModel { Email = email });
             }
-
             try
             {
                 // Send OTP email.
                 await _citizenService.SendOtpAsync(user, HttpContext);
                 HttpContext.Session.SetString("Email", email);
-                if(int.Parse(countdown) <= 0) expirationTime = DateTime.UtcNow.AddSeconds(30);
+                expirationTime = DateTime.UtcNow.AddSeconds(30);
                 var countdownTime = (int)(expirationTime - DateTime.UtcNow).TotalSeconds;
                 TempData["OtpExpirationTime"] = expirationTime.ToString("o"); // ISO 8601 format
                 TempData["OtpCountdownTime"] = countdownTime.ToString();

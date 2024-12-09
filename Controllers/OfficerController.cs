@@ -143,13 +143,49 @@ namespace GovConnect.Controllers
             return View(grievance); // Return the grievance details view
         }
 
-        /// <summary>
-        /// Adds a new timeline entry for a specific grievance.
-        /// </summary>
-        /// <param name="grievanceId">The grievance ID</param>
-        /// <param name="date">The date of the work entry</param>
-        /// <param name="work">Description of the work done</param>
-        [HttpPost]
+		[HttpPost]
+		public async Task<IActionResult> UpdateStatus(int complaintId, Status status)
+		{
+			try
+			{
+				// Fetch the complaint based on the provided complaintId
+				var complaint = await _SqlServerDbContext.DGrievances
+														 .FirstOrDefaultAsync(c => c.GrievanceID == complaintId);
+
+				if (complaint != null)
+				{
+					// Update the complaint status
+					complaint.Status = status;
+
+					// Save changes (assuming you have a method to update the complaint in your database)
+					_SqlServerDbContext.DGrievances.Update(complaint);
+					await _SqlServerDbContext.SaveChangesAsync();
+
+					// Optionally, show a success message or redirect to the details page
+					TempData["SuccessMessage"] = "Complaint status updated successfully.";
+					return RedirectToAction("Details", new { id = complaintId });
+				}
+				else
+				{
+					TempData["ErrorMessage"] = "Complaint not found.";
+					return RedirectToAction("Details", new { id = complaintId });
+				}
+			}
+			catch (Exception ex)
+			{
+				TempData["ErrorMessage"] = "An error occurred while updating the status.";
+				return RedirectToAction("Details", new { id = complaintId });
+			}
+		}
+
+
+		/// <summary>
+		/// Adds a new timeline entry for a specific grievance.
+		/// </summary>
+		/// <param name="grievanceId">The grievance ID</param>
+		/// <param name="date">The date of the work entry</param>
+		/// <param name="work">Description of the work done</param>
+		[HttpPost]
         public async Task<IActionResult> AddTimeLineEntry(int grievanceId, DateTime date, string work)
         {
             var grievance = await _SqlServerDbContext.DGrievances.FindAsync(grievanceId);

@@ -11,11 +11,21 @@
 			<form method="get" action="@Url.Action("MyGrievances", "Grievance")">
 				<div class="mb-4 d-flex justify-content-end">
 					<select id="statusFilter" name="statusFilter" class="form-select w-auto" aria-label="Filter status">
-						<option value="">Sort By</option>
 						@foreach (var status in Enum.GetValues(typeof(GovConnect.Models.Status)))
 						{
-								<option value="@status">@status</option>
+							// Ensure status is correctly cast to enum type
+							var statusValue = (GovConnect.Models.Status)status;
+
+							if (ViewBag.Status != null && ViewBag.Status.Equals(statusValue))
+							{
+								<option value="@statusValue" selected>@statusValue</option>
+							}
+							else
+							{
+								<option value="@statusValue">@statusValue</option>
+							}
 						}
+
 					</select>
 				</div>
 			</form>

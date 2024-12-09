@@ -1,3 +1,5 @@
+using GovConnect.Models;
+using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 namespace GovConnect.Controllers
 {
@@ -82,6 +84,16 @@ namespace GovConnect.Controllers
 
             // Return the scheme details view, passing the scheme to the view
             return View(scheme);
+        }
+        [HttpGet]
+        public async Task<IActionResult> ProfileScheme(int schemeId, string eligibilityJson)
+        {
+            var eligibility = JsonConvert.DeserializeObject<Eligibility>(eligibilityJson);
+            List<Scheme> schemes = await _schemeService.GetSchemesByProfileAsync(eligibility,HttpContext);
+
+            Scheme? scheme = schemes.FirstOrDefault(scheme => scheme.SchemeID == schemeId);
+
+            return View("PScheme",scheme);
         }
     }
 }

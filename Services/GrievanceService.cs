@@ -1,20 +1,17 @@
-﻿
-using Microsoft.EntityFrameworkCore;
-
-namespace GovConnect.Services
+﻿namespace GovConnect.Services
 {
     public class GrievanceService : IGrievanceService
     {
-        private readonly IGrievanceRepository<Grievance> _grievanceRepository;
+        private readonly IGrievanceRepository _grievanceRepository;
 
-        public GrievanceService(IGrievanceRepository<Grievance> grievanceRepository)
+        public GrievanceService(IGrievanceRepository grievanceRepository)
         {
             _grievanceRepository = grievanceRepository;
         }
 
         public async Task<Grievance?> GetGrievanceByIdAsync(int grievanceId)
         {
-            return await _grievanceRepository.GetGrievanceByIdAsync(grievanceId);
+            return await _grievanceRepository.GetByIdAsync(grievanceId);
         }
 
         public async Task<List<Grievance>?> GetGrievancesByUserAsync(string userId, Status? statusFilter)
@@ -30,7 +27,7 @@ namespace GovConnect.Services
             do
             {
                 randomGrievanceId = random.Next(100000, 999999); // 6-digit number
-            } while (await _grievanceRepository.GetGrievanceByIdAsync(randomGrievanceId) != null);
+            } while (await _grievanceRepository.GetByIdAsync(randomGrievanceId) != null);
 
             grievance.GrievanceID = randomGrievanceId;
             grievance.UserID = userId;
@@ -65,7 +62,7 @@ namespace GovConnect.Services
 
         public async Task<bool> EscalateGrievanceAsync(int grievanceId)
         {
-            var grievance = await _grievanceRepository.GetGrievanceByIdAsync(grievanceId);
+            var grievance = await _grievanceRepository.GetByIdAsync(grievanceId);
             if (grievance == null)
             {
                 return false; 
@@ -78,7 +75,7 @@ namespace GovConnect.Services
             {
                 grievance.OfficerId = assignedOfficer.SuperiorId;
 
-                await _grievanceRepository.UpdateGrievanceAsync(grievance);
+                await _grievanceRepository.UpdateAsync(grievance);
 
 
                 return true; 
@@ -88,7 +85,7 @@ namespace GovConnect.Services
         }
         public async Task UpdateAsync(Grievance entity)
         {
-            await _grievanceRepository.UpdateGrievanceAsync(entity);
+            await _grievanceRepository.UpdateAsync(entity);
         }
     }
 }

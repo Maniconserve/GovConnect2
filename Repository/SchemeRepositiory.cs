@@ -1,7 +1,7 @@
 ﻿using System.Text;
 namespace GovConnect.Repository
 {
-    public class SchemeRepository : ISchemeRepository<Scheme>
+    public class SchemeRepository : ISchemeRepository
     {
         private readonly SqlServerDbContext _context;
 
@@ -13,15 +13,16 @@ namespace GovConnect.Repository
         public async Task<List<Scheme>> GetSchemesByEligibilityAsync(Eligibility eligibility)
         {
             var eligible = await _context.SchemeEligibilities
-                .Where(e =>
-                    (string.IsNullOrEmpty(eligibility.Gender) || e.Gender == eligibility.Gender) &&
-                    (eligibility.Age >= e.MinAge && eligibility.Age <= e.MaxAge) &&
-                    (string.IsNullOrEmpty(eligibility.Caste) || e.Caste == eligibility.Caste) &&
-                    e.IsDifferentlyAbled == eligibility.IsDifferentlyAbled &&
-                    e.IsStudent == eligibility.IsStudent &&
-                    e.IsBPL == eligibility.IsBPL
-                )
-                .ToListAsync();  
+                        .Where(e =>
+                            (e.Gender == eligibility.Gender) &&
+                            (eligibility.Age >= e.MinAge && eligibility.Age <= e.MaxAge) &&
+                            (string.IsNullOrEmpty(eligibility.Caste) || e.Caste == eligibility.Caste) &&
+                            (eligibility.IsDifferentlyAbled == null || e.IsDifferentlyAbled == eligibility.IsDifferentlyAbled) &&
+                            (eligibility.IsStudent == null || e.IsStudent == eligibility.IsStudent) &&
+                            (eligibility.IsBPL == null || e.IsBPL == eligibility.IsBPL)
+                        )
+                        .ToListAsync();
+
 
             var schemeIds = eligible.Select(e => e.SchemeId).Distinct().ToList();
 
@@ -66,30 +67,5 @@ namespace GovConnect.Repository
         {
             return await _context.GovSchemes.ToListAsync();
         }
-
-        public async Task<bool> AddAsync(Scheme entity)
-        {
-            _context.GovSchemes.Add(entity);
-            await _context.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<bool> UpdateAsync(Scheme entity)
-        {
-            _context.GovSchemes.Update(entity);
-            await _context.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<bool> DeleteAsync(int id)
-        {
-            var scheme = await GetByIdAsync(id);
-            if (scheme == null) return false;
-
-            _context.GovSchemes.Remove(scheme);
-            await _context.SaveChangesAsync();
-            return true;
-        }
     }
-
 }

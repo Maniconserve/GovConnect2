@@ -50,8 +50,8 @@ namespace GovConnect.Controllers
             }
 
             // Filter the services by department ID
-            services = services?.FindAll(s => s.DeptId == deptId);
-
+            if(deptId > 0) services = services?.FindAll(s => s.DeptId == deptId);
+            ViewBag.Dept = deptId;
             // Return the filtered services (Index view)
             return View("Index", services);
         }
@@ -146,7 +146,7 @@ namespace GovConnect.Controllers
 
             // Retrieve the services that the user has applied for based on the status filter
             var appliedServices = await _serviceService.GetMyServicesAsync(user.Id, statusFilter);
-
+            ViewBag.Status = statusFilter;
             // Return the view with the applied services
             return View(appliedServices);
         }

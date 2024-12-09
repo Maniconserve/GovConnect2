@@ -47,7 +47,28 @@
 
 				<div class="mb-3">
 					<h5>Status:</h5>
-					<p class="badge bg-primary">@Model.Status</p>
+					@{
+						var statusList = Enum.GetValues(typeof(Status))
+						.Cast<Status>()
+						.ToList();
+					}
+					<form asp-action="UpdateStatus" method="post">
+						<input type="hidden" name="complaintId" value="@Model.GrievanceID" />
+						<div class="mb-3">
+							<select id="Status" name="Status" class="form-select w-25">
+								@foreach (var status in statusList)
+								{
+									if (status == Model.Status){
+										<option value="@status" selected>@status</option>
+									}else{
+										<option value="@status">@status</option>
+									}
+								}
+							</select>
+						</div>
+    
+						<button type="submit" class="btn btn-primary">Update Status</button>
+					</form>
 				</div>
 
 				<div class="mb-3">

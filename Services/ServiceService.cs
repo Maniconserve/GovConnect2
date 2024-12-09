@@ -2,16 +2,16 @@
 {
     public class ServiceService : IServiceService
     {
-        private readonly IServiceRepository<Service> _serviceRepository;
+        private readonly IServiceRepository _serviceRepository;
 
-        public ServiceService(IServiceRepository<Service> serviceRepository)
+        public ServiceService(IServiceRepository serviceRepository)
         {
             _serviceRepository = serviceRepository;
         }
 
         public async Task<List<Service>> GetAllServicesAsync()
         {
-            return await _serviceRepository.GetAllServicesAsync();
+            return await _serviceRepository.GetAllAsync();
         }
 
         public async Task<bool> ApplyForServiceAsync(ServiceApplication model, string userId)

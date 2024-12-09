@@ -1,4 +1,5 @@
-﻿@model IEnumerable<Service> 
+﻿@model IEnumerable<Service>
+
 <head>
     <title>Andhra Pradesh Doorstep Delivery of Public Services</title>
     <link rel="stylesheet" href="~/css/SIndex.css" />
@@ -10,31 +11,63 @@
             The broad modus operandi of the project is that one representative (Mobile Sahayak) shall visit the residence of citizen who has requested to the call centre for availing the public service. The Mobile Sahayak shall facilitate citizen in applying for public service and also collect the physical documents, if required for availing the said service/services, deposit the physical documents to respective Departments and deliver the service/certificate of citizen at his door step. Government shall allow representative to collect facilitation fee / service charges of Rs.50/- directly from the citizen for each service.
         </p>
 
+        <!-- Dropdown for filtering -->
         <div class="mb-4 d-flex justify-content-end">
             <form method="get" action="@Url.Action("DeptServices", "Service")">
-                <div class="dropdown">
-                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        Sort By
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="sortDropdown">
-                        <li><a class="dropdown-item" data-deptId="1">Revenue</a></li>
-                        <li><a class="dropdown-item" data-deptId="2">Transport</a></li>
-                        <li><a class="dropdown-item" data-deptId="3">Food and Civil Supplies</a></li>
-                    </ul>
+                <div class="mb-3">
+                    <select class="form-select" id="deptSelect" name="deptId" aria-label="Dept">
+                        <!-- All Departments -->
+                        @if (ViewBag.Dept == 0)
+                        {
+                            <option value="0" selected>All</option>
+                        }
+                        else
+                        {
+                            <option value="0">All</option>
+                        }
+
+                        @if (ViewBag.Dept == 1)
+                        {
+                            <option value="1" selected>Revenue</option>
+                        }
+                        else
+                        {
+                            <option value="1">Revenue</option>
+                        }
+
+                        @if (ViewBag.Dept == 2)
+                        {
+                            <option value="2" selected>Transport</option>
+                        }
+                        else
+                        {
+                            <option value="2">Transport</option>
+                        }
+
+                        @if (ViewBag.Dept == 3)
+                        {
+                            <option value="3" selected>Food and Civil Supplies</option>
+                        }
+                        else
+                        {
+                            <option value="3">Food and Civil Supplies</option>
+                        }
+                    </select>
                 </div>
             </form>
         </div>
 
+        <!-- Services Listing -->
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
-            @foreach (var service in Model)  
+            @foreach (var service in Model)
             {
                 var totalFee = service.FeeDetails.GovFee + service.FeeDetails.ServiceFee + service.FeeDetails.Tax;
                 <div class="col">
                     <div class="service-card p-4 shadow-sm text-center">
                         <div class="service-info">
                             <i class="fas fa-file-alt icon mb-3"></i>
-                            <h2 class="h5 mb-2">@service.ServiceName</h2>  
-                            <p class="fee">INR @totalFee</p>  
+                            <h2 class="h5 mb-2">@service.ServiceName</h2>
+                            <p class="fee">INR @totalFee</p>
                         </div>
                         <a href="@Url.Action("PService", "Service", new { id = service.ServiceId })" class="btn w-100 mb-2">Apply</a>
                     </div>
@@ -42,5 +75,7 @@
             }
         </div>
     </div>
-    <script src="~/js/SIndex.js"></script>
+
+    <script src="~/js/SIndex.js?v=1.0"></script>
+
 </body>
