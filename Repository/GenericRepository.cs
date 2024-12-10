@@ -1,4 +1,4 @@
-﻿namespace GovConnect.Repository.Interfaces
+﻿namespace GovConnect.Repository
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {

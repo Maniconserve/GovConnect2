@@ -36,7 +36,7 @@ namespace GovConnect.Controllers
         /// <param name="grievance">The grievance data submitted by the user.</param>
         /// <param name="fileUpload">An optional file to attach to the grievance.</param>
         [HttpPost]
-        public async Task<IActionResult> Lodge(Grievance grievance, IFormFile? fileUpload)
+        public async Task<IActionResult> Lodge(Grievance grievance, List<IFormFile?> files)
         {
             if (ModelState.IsValid)
             {
@@ -47,7 +47,7 @@ namespace GovConnect.Controllers
                 }
 
                 // Call the service to lodge the grievance
-                bool success = await _grievanceService.LodgeGrievanceAsync(grievance, user.Id, fileUpload);
+                bool success = await _grievanceService.LodgeGrievanceAsync(grievance, user.Id, files);
 
                 if (success)
                 {
@@ -125,7 +125,14 @@ namespace GovConnect.Controllers
             {
                 return NotFound(); // Return 404 if grievance not found
             }
-            return View(grievance); // Return the grievance details to the view
+            var files = await _grievanceService.GetGrievanceFileAsync(id);
+            var viewModel = new GrievanceDetailsViewModel
+            {
+                Grievance = grievance,
+                Files = files
+            };
+
+            return View(viewModel);
         }
 
         /// <summary>
@@ -134,9 +141,9 @@ namespace GovConnect.Controllers
         /// <param name="id">The ID of the grievance for which the file is being uploaded.</param>
         /// <param name="fileUpload">The file to be uploaded.</param>
         [HttpPost]
-        public async Task<IActionResult> UploadFile(int id, IFormFile fileUpload)
+        public async Task<IActionResult> UploadFile(int id, List<IFormFile> files)
         {
-            var success = await _grievanceService.UpdateGrievanceFilesAsync(id, fileUpload); // Upload the file to the grievance
+            var success = await _grievanceService.UpdateGrievanceFilesAsync(id, files); // Upload the file to the grievance
             if (success)
             {
                 return RedirectToAction("Details", new { id }); // Redirect back to the grievance details page
@@ -202,19 +209,22 @@ namespace GovConnect.Controllers
         /// </summary>
         /// <param name="id">The ID of the grievance for which the file is being downloaded.</param>
         [HttpGet]
-        public async Task<IActionResult> DownloadFile(int id)
+        public async Task<IActionResult> DownloadFile(int fileId)
         {
-            var fileData = await _grievanceService.GetGrievanceFileAsync(id); // Get the file data for the grievance
+            var fileData = await _grievanceService.GetFileAsync(fileId); // Get the file data for the grievance
 
             if (fileData == null)
             {
                 return NotFound(); // Return 404 if no file is found
             }
 
-            string fileName = "GrievanceFile.pdf"; // Default file name
-            string mimeType = "application/pdf"; // MIME type for PDF
+            // Get the file's content and other properties
+            byte[] fileBytes = fileData.FileContent; // The actual file content as a byte array
+            string fileName = fileData.FileName ?? "GrievanceFile.pdf"; // Use file name from the database or default to "GrievanceFile.pdf"
+            string mimeType = "application/pdf"; // Default MIME type for PDF (you can adjust this based on your file types)
 
-            return File(fileData, mimeType, fileName); // Return the file for download
+            return File(fileBytes, mimeType, fileName); // Return the file for download
         }
+
     }
 }

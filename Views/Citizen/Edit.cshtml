@@ -1,18 +1,15 @@
 ﻿@model Citizen
 @inject UserManager<Citizen> citizenManager
 @{
-    var schemes = ViewBag.Schemes as List<Scheme>; // Get schemes passed from the controller
+    var schemes = ViewBag.Schemes as List<Scheme>; 
 }
 <head>
     <title>Profile</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
-
-    <!-- Main Container -->
     <div class="min-h-screen flex justify-center items-start p-6">
         <div class="w-full max-w-7xl grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Left Section - Schemes -->
             <div class="col-span-1 bg-white p-6 rounded-lg shadow-lg">
                 <h3 class="text-center text-xl font-semibold text-gray-700">Eligible Schemes</h3>
                 </br>
@@ -73,14 +70,16 @@
                         }
 
                         <div class="text-center mb-6">
-                            <img id="profilePicPreview" src="@imageSrc" alt="Profile Picture" class="rounded-full w-24 h-32 object-cover mx-auto" />
+                            </br>
+                            <img id="profilePicPreview" src="@imageSrc" alt="Profile Picture" class="rounded-circle w-24 h-32 object-cover mx-auto" />
                             <div class="mt-4">
                                 <!-- Custom Upload Button -->
-                                <button type="button" class="bg-gray-300 text-black px-6 py-2 rounded-md hover:bg-gray-400" id="uploadButton">
+                                <label type="button" class="bg-gray-300 text-black px-6 py-2 rounded-md hover:bg-gray-400" for="Profilepic">
                                     Upload
-                                </button>
+                                </label>
                                 <!-- Hidden File Input -->
-                                <input type="file" id="Profilepic" name="Profilepic" class="form-control visually-hidden" asp-for="Profilepic" />
+                                <input type="file" id="Profilepic" name="Profilepic" class="form-control visually-hidden" asp-for="Profilepic" onchange="previewImage(event)"/>
+                                </br><span class="text-red-500">@Html.ValidationMessageFor(m => m.Profilepic)</span>
                             </div>
                         </div>
 
@@ -166,22 +165,5 @@
             </div>
         </div>
     </div>
-
-    <script>
-        const uploadButton = document.getElementById("uploadButton");
-        const fileInput = document.getElementById("Profilepic");
-        uploadButton.addEventListener("click", function () {
-            fileInput.click();
-        });
-        fileInput.addEventListener("change", function (event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onloadend = function () {
-                    document.getElementById("profilePicPreview").src = reader.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    </script>
+    <script src="~/js/Edit.js"></script>
 </body>

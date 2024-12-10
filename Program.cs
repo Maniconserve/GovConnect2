@@ -4,6 +4,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICitizenRepository, CitizenRepository>();
 builder.Services.AddScoped<ICitizenService, CitizenService>();
+builder.Services.AddScoped<IOfficerService, OfficerService>();
+builder.Services.AddScoped<IOfficerRepository, OfficerRepository>();
 builder.Services.AddScoped<ISchemeRepository,SchemeRepository>();
 builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
 builder.Services.AddScoped<IGrievanceRepository, GrievanceRepository>();

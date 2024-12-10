@@ -1,134 +1,148 @@
-﻿@model Grievance
+﻿@model GrievanceDetailsViewModel
+
 <head>
-	<title>Details</title>
+    <title>Grievance Details</title>
 </head>
 <body>
-	<div class="container">
-		<div class="card shadow-lg">
-			<div class="card-header bg-success text-white">
-				<h2 class="card-title d-inline">@Model.Title</h2>
-				<form id="escalateForm" method="post" asp-controller="Grievance" asp-action="EscalateGrievance" class="d-inline float-end">
-					<input type="hidden" name="grievanceId" value="@Model.GrievanceID" />
-					<input type="hidden" name="OfficerId" value="@Model.OfficerId" />
-					<button type="button" id="escalateButton" class="btn btn-danger ms-3" data-bs-toggle="modal" data-bs-target="#timelineModal">Escalate</button>
-				</form>
+    <div class="container">
+        <div class="card shadow-lg">
+            <div class="card-header bg-success text-white">
+                <h2 class="card-title d-inline">@Model.Grievance.Title</h2>
 
-				<div class="modal fade" id="timelineModal" tabindex="-1" aria-labelledby="timelineModalLabel" aria-hidden="true">
-					<div class="modal-dialog">
-						<div class="modal-content">
-							<div class="modal-header">
-								<h5 class="modal-title" id="timelineModalLabel">Add TimeLine Entry</h5>
-								<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-							</div>
-							<div class="modal-body">
-								<form id="timelineEntryForm" asp-action="AddReason" method="post">
-									<div class="mb-3">
-										<label for="Date" class="form-label">Date</label>
-										<input type="date" class="form-control" id="Date" name="Date" required />
-									</div>
-									<div class="mb-3">
-										<label for="Work" class="form-label">Work</label>
-										<input type="text" class="form-control" id="Work" name="Work" required />
-									</div>
-									<input type="hidden" name="GrievanceID" value="@Model.GrievanceID" />
-									<button type="submit" class="btn btn-primary">Add Entry</button>
-								</form>
-							</div>
-						</div>
-					</div>
-				</div>
+                <!-- Escalate Grievance Button -->
+                <form id="escalateForm" method="post" asp-controller="Grievance" asp-action="EscalateGrievance" class="d-inline float-end">
+                    <input type="hidden" name="grievanceId" value="@Model.Grievance.GrievanceID" />
+                    <input type="hidden" name="OfficerId" value="@Model.Grievance.OfficerId" />
+                    <button type="button" id="escalateButton" class="btn btn-danger ms-3" data-bs-toggle="modal" data-bs-target="#timelineModal">Escalate</button>
+                </form>
 
+                <!-- Modal to Add Timeline Entry -->
+                <div class="modal fade" id="timelineModal" tabindex="-1" aria-labelledby="timelineModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="timelineModalLabel">Add TimeLine Entry</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="timelineEntryForm" asp-action="AddReason" method="post">
+                                    <div class="mb-3">
+                                        <label for="Date" class="form-label">Date</label>
+                                        <input type="date" class="form-control" id="Date" name="Date" required />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="Work" class="form-label">Work</label>
+                                        <input type="text" class="form-control" id="Work" name="Work" required />
+                                    </div>
+                                    <input type="hidden" name="GrievanceID" value="@Model.Grievance.GrievanceID" />
+                                    <button type="submit" class="btn btn-primary">Add Entry</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-			</div>
-			<div class="card-body">
-				<p class="text-muted">Posted on: @Model.CreatedAt.ToString("MMMM dd, yyyy")</p>
+            <div class="card-body">
+                <p class="text-muted">Posted on: @Model.Grievance.CreatedAt.ToString("MMMM dd, yyyy")</p>
 
-				<hr />
+                <hr />
 
-				<div class="mb-3">
-					<h5>Status:</h5>
-					@{
-						var statusList = Enum.GetValues(typeof(Status))
-						.Cast<Status>()
-						.ToList();
-					}
-					<form asp-action="UpdateStatus" method="post">
-						<input type="hidden" name="complaintId" value="@Model.GrievanceID" />
-						<div class="mb-3">
-							<select id="Status" name="Status" class="form-select w-25">
-								@foreach (var status in statusList)
-								{
-									if (status == Model.Status){
-										<option value="@status" selected>@status</option>
-									}else{
-										<option value="@status">@status</option>
-									}
-								}
-							</select>
-						</div>
-    
-						<button type="submit" class="btn btn-primary">Update Status</button>
-					</form>
-				</div>
+                <!-- Status Update Form -->
+                <div class="mb-3">
+                    <h5>Status:</h5>
+                    @{
+                        var statusList = Enum.GetValues(typeof(Status))
+                        .Cast<Status>()
+                        .ToList();
+                    }
+                    <form asp-action="UpdateStatus" method="post">
+                        <input type="hidden" name="complaintId" value="@Model.Grievance.GrievanceID" />
+                        <div class="mb-3">
+                            <select id="Status" name="Status" class="form-select w-25">
+                                @foreach (var status in statusList)
+                                {
+                                    if (status == Model.Grievance.Status)
+                                    {
+                                        <option value="@status" selected>@status</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@status">@status</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Status</button>
+                    </form>
+                </div>
 
-				<div class="mb-3">
-					<h5>Department:</h5>
-					<p>@Model.DepartmentID</p>
-				</div>
+                <div class="mb-3">
+                    <h5>Department:</h5>
+                    <p>@Model.Grievance.DepartmentID</p>
+                </div>
 
-				<div class="mb-3">
-					<h5>Description:</h5>
-					<p>@Model.Description</p>
-				</div>
+                <div class="mb-3">
+                    <h5>Description:</h5>
+                    <p>@Model.Grievance.Description</p>
+                </div>
 
-				@if (Model.FilesUploaded != null && Model.FilesUploaded.Length > 0)
-				{
-					<div class="mb-3">
-						<h5>Attached File:</h5>
-						<a href="@Url.Action("DownloadFile", "Grievance", new { id = Model.GrievanceID })" class="btn btn-secondary">
-							Download File
-						</a>
-					</div>
-				}
+                <!-- Display Files -->
+                @if (Model.Files != null && Model.Files.Any())
+                {
+                    <div class="mb-3">
+                        <h5>Attached Files:</h5>
+                        @foreach (var file in Model.Files)
+                        {
+                            <div>
+                                <a href="@Url.Action("DownloadFile", "Grievance", new { id = file.FileID })" class="btn btn-secondary">
+                                    Download @file.FileName
+                                </a>
+                            </div>
+                        }
+                    </div>
+                }
 
-				<div class="mb-3">
-					<h5>TimeLine:</h5>
-					<table class="table table-bordered">
-						<thead>
-							<tr>
-								<th>Date</th>
-								<th>Work</th>
-							</tr>
-						</thead>
-						<tbody>
-							@foreach (var item in Model.GetTimeLine())
-							{
-								<tr>
-									<td>@item.Date.ToString("MMMM dd, yyyy")</td>
-									<td>@item.Work</td>
-								</tr>
-							}
-						</tbody>
-					</table>
-				</div>
+                <!-- Timeline -->
+                <div class="mb-3">
+                    <h5>TimeLine:</h5>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Work</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Grievance.GetTimeLine())
+                            {
+                                <tr>
+                                    <td>@item.Date.ToString("MMMM dd, yyyy")</td>
+                                    <td>@item.Work</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
 
-				<div class="mb-3">
-					<h5>Add TimeLine Entry:</h5>
-					<form asp-action="AddTimeLineEntry" method="post">
-						<div class="mb-3">
-							<label for="Date" class="form-label">Date</label>
-							<input type="date" class="form-control" id="Date" name="Date" required />
-						</div>
-						<div class="mb-3">
-							<label for="Work" class="form-label">Work</label>
-							<input type="text" class="form-control" id="Work" name="Work" required />
-						</div>
-						<input type="hidden" name="GrievanceID" value="@Model.GrievanceID" />
-						<button type="submit" class="btn btn-primary">Add Entry</button>
-					</form>
-				</div>
-			</div>
-		</div>
-	</div>
-	<script src="~/js/ODetails.js"></script>
+                <!-- Add TimeLine Entry Form -->
+                <div class="mb-3">
+                    <h5>Add TimeLine Entry:</h5>
+                    <form asp-action="AddTimeLineEntry" method="post">
+                        <div class="mb-3">
+                            <label for="Date" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="Date" name="Date" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="Work" class="form-label">Work</label>
+                            <input type="text" class="form-control" id="Work" name="Work" required />
+                        </div>
+                        <input type="hidden" name="GrievanceID" value="@Model.Grievance.GrievanceID" />
+                        <button type="submit" class="btn btn-primary">Add Entry</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="~/js/ODetails.js"></script>
 </body>

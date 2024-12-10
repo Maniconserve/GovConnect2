@@ -47,9 +47,6 @@ namespace GovConnect.Data
                 .WithMany()         // Add the appropriate relationship configuration
                 .HasForeignKey(s => s.ServiceID)
                 .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<Grievance>()
-                .Property(g => g.FilesUploaded)
-                .IsRequired(false);
 
             //modelBuilder.Entity<PoliceOfficer>(entity =>
             //{
@@ -91,5 +88,7 @@ namespace GovConnect.Data
 
         public DbSet<Grievance> DGrievances { get; set; }
         public DbSet<PoliceOfficer> PoliceOfficers { get; set; }
+
+        public DbSet<GrievanceFile> DGrievanceFiles { get; set; }
     }
 }

@@ -172,5 +172,12 @@ namespace GovConnect.Services
                 return memoryStream.ToArray();
             }
         }
+        public async Task<IEnumerable<AuthenticationScheme>> GetAuthenticationSchemesAsync() {
+            return await _citizenRepository.GetExternalAuthenticationSchemes();
+        }
+        public async Task<ExternalLoginInfo?> GetExternalLoginInfoAsync()
+        {
+            return await _citizenRepository.GetExternalLoginInfoAsync();
+        }
     }
 }

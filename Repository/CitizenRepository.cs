@@ -75,6 +75,16 @@ namespace GovConnect.Repository
             return await _citizenManager.AddPasswordAsync(user, password);
         }
 
+        public async Task<IEnumerable<AuthenticationScheme>> GetExternalAuthenticationSchemes()
+        {
+            return await _signInManager.GetExternalAuthenticationSchemesAsync();
+        }
+
+        public async Task<ExternalLoginInfo?> GetExternalLoginInfoAsync()
+        {
+            return await _signInManager.GetExternalLoginInfoAsync();
+        }
+
         public async Task SignOutAsync()
         {
             await _signInManager.SignOutAsync();

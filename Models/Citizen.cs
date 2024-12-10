@@ -31,7 +31,6 @@
         [RegularExpression(@"^[A-Za-z\s]+$", ErrorMessage = "Village Name must contain only letters and spaces.")]
         public string Village { get; set; }
 
-        // ProfilePic is required, but we assume it's handled in RegisterViewModel so no need for validation here.
-        public byte[] Profilepic { get; set; }
+        public byte[]? Profilepic { get; set; }
     }
 }

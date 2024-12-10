@@ -5,15 +5,13 @@ namespace GovConnect.Controllers
 {
     public class CitizenController : Controller
     {
-        private SignInManager<Citizen> signInManager;
         private EmailSender emailSender;
         private ICitizenService _citizenService;
         private ISchemeService _schemeService;
-        static DateTime expirationTime; // OTP expires in 5 minutes
+        static DateTime expirationTime; 
 
-        public CitizenController(ICitizenService citizenService,UserManager<Citizen> _citizenManager, SignInManager<Citizen> _signInManager, EmailSender _emailSender, SqlServerDbContext _SqlServerDbContext,ISchemeService schemeService)
+        public CitizenController(ICitizenService citizenService,UserManager<Citizen> _citizenManager, EmailSender _emailSender, SqlServerDbContext _SqlServerDbContext,ISchemeService schemeService)
         {
-            signInManager = _signInManager;
             emailSender = _emailSender;
             _citizenService = citizenService;
             _schemeService = schemeService;
@@ -93,7 +91,7 @@ namespace GovConnect.Controllers
             }
             var loginVM = new LoginViewModel()
             {
-                Schemes = await signInManager.GetExternalAuthenticationSchemesAsync() // Get available external authentication schemes (e.g., Google, Facebook).
+                Schemes = await _citizenService.GetAuthenticationSchemesAsync() // Get available external authentication schemes (e.g., Google, Facebook).
             };
             return View(loginVM);
         }
@@ -119,7 +117,7 @@ namespace GovConnect.Controllers
                     {
                         // If the user does not have the required role, add an error and return the view.
                         ModelState.AddModelError(string.Empty, "You are not an User");
-                        model.Schemes = await signInManager.GetExternalAuthenticationSchemesAsync();
+                        model.Schemes = await _citizenService.GetAuthenticationSchemesAsync();
                         return View(model);
                     }
 
@@ -129,7 +127,7 @@ namespace GovConnect.Controllers
                         String token = await _citizenService.GetEmailConfirmationTokenAsync(user.Email);
                         SendEmail(model, user, token);
                         TempData["Message"] = "Thank you for registering! An email has been sent to your address with a link to log in. Please check your inbox (and spam folder) to proceed with logging in.";
-                        model.Schemes = await signInManager.GetExternalAuthenticationSchemesAsync();
+                        model.Schemes = await _citizenService.GetAuthenticationSchemesAsync();
                         return View(model);
                     }
                     else
@@ -151,7 +149,7 @@ namespace GovConnect.Controllers
                         else
                         {
                             ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                            model.Schemes = await signInManager.GetExternalAuthenticationSchemesAsync();
+                            model.Schemes = await _citizenService.GetAuthenticationSchemesAsync();
                             return View(model);
                         }
                     }
@@ -160,7 +158,7 @@ namespace GovConnect.Controllers
                 {
                     // If user doesn't exist, add an error to the model state.
                     ModelState.AddModelError(string.Empty, "Citizen doesn't exist.");
-                    model.Schemes = await signInManager.GetExternalAuthenticationSchemesAsync();
+                    model.Schemes = await _citizenService.GetAuthenticationSchemesAsync();
                     return View(model);
                 }
             }
@@ -209,7 +207,7 @@ namespace GovConnect.Controllers
             var result = await _citizenService.ConfirmEmailAsync(user, token);
             if (result.Succeeded)
             {
-                return View("Login", new LoginViewModel { Schemes = await signInManager.GetExternalAuthenticationSchemesAsync() });
+                return View("Login", new LoginViewModel { Schemes = await _citizenService.GetAuthenticationSchemesAsync() });
             }
             else
             {
@@ -269,18 +267,18 @@ namespace GovConnect.Controllers
         /// <summary>
         /// Handles the callback after a successful Google login.
         /// </summary>
-        public async Task<IActionResult> GoogleLoginCallBack(string remoteError, String returnUrl = "")
+        public async Task<IActionResult> GoogleLoginCallBack(string remoteError, String ReturnUrl = "")
         {
             var loginVM = new LoginViewModel()
             {
-                Schemes = await signInManager.GetExternalAuthenticationSchemesAsync()
+                Schemes = await _citizenService.GetAuthenticationSchemesAsync()
             };
             if (remoteError != null)
             {
                 ModelState.AddModelError("", $"Error from google login provider : {remoteError}");
                 return View("Login", loginVM);
             }
-            var info = await signInManager.GetExternalLoginInfoAsync();
+            var info = await _citizenService.GetExternalLoginInfoAsync();
             if (info == null)
             {
                 ModelState.AddModelError("", $"Error from google login provider : {remoteError}");

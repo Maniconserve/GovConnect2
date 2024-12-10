@@ -16,6 +16,8 @@ namespace GovConnect.Repository.Interfaces
         Task SignInAsync(Citizen user, bool isPersistent);
         Task<IdentityResult> RemovePasswordAsync(Citizen user);
         Task<IdentityResult> AddPasswordAsync(Citizen user, string password);
+        Task<IEnumerable<AuthenticationScheme>> GetExternalAuthenticationSchemes();
+        Task<ExternalLoginInfo?> GetExternalLoginInfoAsync();
         Task SignOutAsync();
     }
 }

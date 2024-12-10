@@ -30,33 +30,6 @@ namespace GovConnect.Repository
             return true;
         }
 
-        public async Task<bool> UpdateGrievanceFilesAsync(int grievanceId, IFormFile fileUpload)
-        {
-            var grievance = await _context.DGrievances
-                .FirstOrDefaultAsync(g => g.GrievanceID == grievanceId);
-
-            if (grievance == null)
-            {
-                return false; // Grievance not found
-            }
-
-            if (fileUpload != null && fileUpload.Length > 0)
-            {
-                // Convert the uploaded file to a byte array
-                using (var memoryStream = new MemoryStream())
-                {
-                    await fileUpload.CopyToAsync(memoryStream);
-                    grievance.FilesUploaded = memoryStream.ToArray();
-                }
-
-                _context.Update(grievance);
-                await _context.SaveChangesAsync();
-                return true;
-            }
-
-            return false; // No file uploaded
-        }
-
         public async Task<List<TimeLineEntry>?> GetGrievanceTimelineAsync(int grievanceId)
         {
             var grievance = await _context.DGrievances
@@ -68,20 +41,45 @@ namespace GovConnect.Repository
             return JsonConvert.DeserializeObject<List<TimeLineEntry>>(grievance.TimeLine);
         }
 
-        public async Task<byte[]?> GetGrievanceFileAsync(int grievanceId)
+        public async Task<List<GrievanceFile>> GetAllGrievanceFilesAsync(int grievanceId)
         {
-            var grievance = await _context.DGrievances
-                .FirstOrDefaultAsync(g => g.GrievanceID == grievanceId);
+            // Retrieve all files associated with the given grievance ID
+            var grievanceFiles = await _context.DGrievanceFiles
+                .Where(f => f.GrievanceID == grievanceId)  // Filter by GrievanceID
+                .ToListAsync();  // Get all matching files
 
-            return grievance.FilesUploaded;  
+            // Return the full list of GrievanceFile objects (not just the file content)
+            return grievanceFiles;
         }
 
+
         public async Task<PoliceOfficer?> GetSuperiorOfficerByDepartmentAsync(string? officerId)
-        
         {
             return await _context.PoliceOfficers
                 .Where(o => o.OfficerId == officerId)
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<GrievanceFile> GetFileAsync(int fileId)
+        {
+            // Retrieve the file from the database based on the fileId
+            var file = await _context.DGrievanceFiles
+                                     .FirstOrDefaultAsync(f => f.FileID == fileId);
+
+            // Check if the file was found, if not return null
+            if (file == null)
+            {
+                return null;  // or throw an exception if preferred
+            }
+
+            return file;
+        }
+
+
+        public async Task UploadFile(GrievanceFile file)
+        {
+            await _context.DGrievanceFiles.AddAsync(file);
+            await _context.SaveChangesAsync();
         }
     }
 }

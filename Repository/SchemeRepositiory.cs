@@ -57,15 +57,5 @@ namespace GovConnect.Repository
 
             return string.Join(Environment.NewLine, lines);
         }
-        public async Task<Scheme?> GetByIdAsync(int id)
-        {
-            return await _context.GovSchemes
-                .FirstOrDefaultAsync(s => s.SchemeID == id);
-        }
-
-        public async Task<List<Scheme>> GetAllAsync()
-        {
-            return await _context.GovSchemes.ToListAsync();
-        }
     }
 }

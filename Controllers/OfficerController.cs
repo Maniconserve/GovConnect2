@@ -1,22 +1,17 @@
-﻿using System.Text.Json;
-
-namespace GovConnect.Controllers
+﻿namespace GovConnect.Controllers
 {
     public class OfficerController : Controller
     {
-        private SqlServerDbContext _SqlServerDbContext;
-        private UserManager<Citizen> _officerManager;
-        private SignInManager<Citizen> _signInManager;
-        private EmailSender _emailSender;
+        private ICitizenService _citizenService;
+        private IGrievanceService _grievanceService;
+        private IOfficerService _officerService;
         private DashboardService _dashboardService;
-        private static string originalOtp;
 
-        public OfficerController(SqlServerDbContext sqlServerDbContext, EmailSender emailSender,UserManager<Citizen> officerManager,SignInManager<Citizen> signInManager,DashboardService dashboardService)
+        public OfficerController(ICitizenService citizenService, IGrievanceService grievanceService, IOfficerService officerService, UserManager<Citizen> officerManager,SignInManager<Citizen> signInManager,DashboardService dashboardService)
         {
-            _officerManager = officerManager;
-            _SqlServerDbContext = sqlServerDbContext;
-            _emailSender = emailSender;
-            _signInManager = signInManager;
+            _citizenService = citizenService;
+            _grievanceService = grievanceService;
+            _officerService = officerService;
             _dashboardService = dashboardService;
         }
 
@@ -41,18 +36,18 @@ namespace GovConnect.Controllers
             if (ModelState.IsValid)
             {
                 // Find the user by their email.
-                var user = await _officerManager.FindByEmailAsync(model.Email);
+                var user = await _citizenService.GetUserByEmailAsync(model.Email);
 
                 if (user != null)
                 {
                     // Check if the user is in the "Officer" role before attempting to sign in
-                    var isOfficer = await _officerManager.IsInRoleAsync(user, "Officer");
+                    var isOfficer = await _citizenService.CheckRoleAsync(user, "Officer");
 
                     if (isOfficer)
                     {
                         HttpContext.Session.SetString("officerId", user.Id);
                         // Perform password-based sign-in only if the user is an officer
-                        var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, lockoutOnFailure: false);
+                        var result = await _citizenService.SignInUserAsync(user, model, false, lockoutOnFailure: false);
 
                         if (result.Succeeded)
                         {
@@ -119,28 +114,19 @@ namespace GovConnect.Controllers
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
-            var grievance = await _SqlServerDbContext.DGrievances
-                .Where(g => g.GrievanceID == id)
-                .Select(g => new Grievance
-                {
-                    GrievanceID = g.GrievanceID,
-                    Title = g.Title,
-                    OfficerId = g.OfficerId,
-                    CreatedAt = g.CreatedAt,
-                    Status = g.Status,
-                    DepartmentID = g.DepartmentID,
-                    Description = g.Description,
-                    FilesUploaded = g.FilesUploaded,
-                    TimeLine = g.TimeLine
-                })
-                .FirstOrDefaultAsync();
+            var grievance = await _grievanceService.GetGrievanceByIdAsync(id);
 
             if (grievance == null)
             {
-                return NotFound(); // Return 404 if grievance not found
+                return NotFound(); 
             }
-
-            return View(grievance); // Return the grievance details view
+            var files = await _grievanceService.GetGrievanceFileAsync(id);
+            var viewModel = new GrievanceDetailsViewModel
+            {
+                Grievance = grievance,
+                Files = files
+            };
+            return View(viewModel); // Return the grievance details view
         }
 
 		[HttpPost]
@@ -149,19 +135,15 @@ namespace GovConnect.Controllers
 			try
 			{
 				// Fetch the complaint based on the provided complaintId
-				var complaint = await _SqlServerDbContext.DGrievances
-														 .FirstOrDefaultAsync(c => c.GrievanceID == complaintId);
+				var complaint = await _grievanceService.GetGrievanceByIdAsync(complaintId);
 
 				if (complaint != null)
 				{
 					// Update the complaint status
 					complaint.Status = status;
 
-					// Save changes (assuming you have a method to update the complaint in your database)
-					_SqlServerDbContext.DGrievances.Update(complaint);
-					await _SqlServerDbContext.SaveChangesAsync();
+                    await _grievanceService.UpdateAsync(complaint);
 
-					// Optionally, show a success message or redirect to the details page
 					TempData["SuccessMessage"] = "Complaint status updated successfully.";
 					return RedirectToAction("Details", new { id = complaintId });
 				}
@@ -188,28 +170,11 @@ namespace GovConnect.Controllers
 		[HttpPost]
         public async Task<IActionResult> AddTimeLineEntry(int grievanceId, DateTime date, string work)
         {
-            var grievance = await _SqlServerDbContext.DGrievances.FindAsync(grievanceId);
+            var grievance = await _grievanceService.GetGrievanceByIdAsync(grievanceId);
 
             if (grievance != null)
             {
-                // Deserialize existing timeline or initialize a new one
-                var timeLine = string.IsNullOrEmpty(grievance.TimeLine)
-                    ? new List<TimeLineEntry>()
-                    : JsonSerializer.Deserialize<List<TimeLineEntry>>(grievance.TimeLine);
-
-                // Add the new timeline entry
-                timeLine.Add(new TimeLineEntry
-                {
-                    Date = date,
-                    Work = work
-                });
-
-                // Update the grievance with the new timeline
-                grievance.SetTimeLine(timeLine);
-                _SqlServerDbContext.Update(grievance);
-
-                // Save changes to the database
-                await _SqlServerDbContext.SaveChangesAsync();
+                await _officerService.AddTimeLineEntryAsync(grievance, date, work);
             }
 
             return RedirectToAction("Details", new { id = grievanceId }); // Redirect back to the grievance details page
@@ -223,7 +188,7 @@ namespace GovConnect.Controllers
         {
             try
             {
-                var grievance = await _SqlServerDbContext.DGrievances.FindAsync(grievanceId);
+                var grievance = await _grievanceService.GetGrievanceByIdAsync(grievanceId);
 
                 if (grievance == null)
                 {
@@ -231,23 +196,7 @@ namespace GovConnect.Controllers
                 }
 
                 // Deserialize or initialize timeline
-                var timeLine = string.IsNullOrEmpty(grievance.TimeLine)
-                    ? new List<TimeLineEntry>()
-                    : JsonSerializer.Deserialize<List<TimeLineEntry>>(grievance.TimeLine);
-
-                // Add the reason/work entry to the timeline
-                timeLine.Add(new TimeLineEntry
-                {
-                    Date = date,
-                    Work = work
-                });
-
-                // Set the updated timeline
-                grievance.SetTimeLine(timeLine);
-                _SqlServerDbContext.Update(grievance);
-
-                // Save changes to the database
-                await _SqlServerDbContext.SaveChangesAsync();
+                await _officerService.AddTimeLineEntryAsync(grievance, date, work);
 
                 return Json(new { success = true, message = "Timeline entry added successfully." });
             }
@@ -263,7 +212,7 @@ namespace GovConnect.Controllers
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
-			await _signInManager.SignOutAsync();
+			await _citizenService.SignOutAsync();
 			return RedirectToAction("Login"); // Redirect to login page after logout
         }
 
@@ -279,73 +228,11 @@ namespace GovConnect.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Create a new Citizen object with the registration data.
-                var citizen = new Citizen
-                {
-                    UserName = model.FirstName,
-                    Email = model.Email,
-                    LastName = model.LastName,
-                    Gender = model.Gender,
-                    PhoneNumber = model.Mobile,
-                    Pincode = model.Pincode,
-                    Mandal = model.Mandal,
-                    District = model.District,
-                    City = model.City,
-                    Village = model.Village,
-                    Profilepic = await ConvertFileToByteArray(model.ProfilePic) // Convert uploaded profile picture to byte array.
-                };
-
-                // Create the new user in the database.
-                var result = await _officerManager.CreateAsync(citizen, model.Password);
-
-                // Check if user creation was successful.
-                if (result.Succeeded)
-                {
-                    // Immediately set the email as confirmed after successful registration
-                    citizen.EmailConfirmed = true;
-                    await _officerManager.UpdateAsync(citizen);  // Save changes to the user record.
-
-                    // Assign the "Officer" role to the user
-                    await _officerManager.AddToRoleAsync(citizen, "Officer");
-
-                    // Create and save the PoliceOfficer entity
-                    PoliceOfficer policeOfficer = new PoliceOfficer
-                    {
-                        OfficerId = citizen.Id,
-                        DepartmentId = model.DepartmentID,
-                        OfficerDesignation = model.OfficerDesignation,
-                        SuperiorId = model.SuperiorId
-                    };
-
-                    _SqlServerDbContext.PoliceOfficers.Add(policeOfficer);
-                    await _SqlServerDbContext.SaveChangesAsync();
-
-                    // Return a new model (perhaps a confirmation or success page)
-                    return View(new OfficerRegisterViewModel());
-                }
-
-                // Add any errors to the model state for display.
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
+                await _officerService.CreateAsync(model);
+                
+                return View(new OfficerRegisterViewModel());
             }
-
-            // Return the registration view with any validation errors.
             return View(model);
-        }
-
-
-        private async Task<byte[]> ConvertFileToByteArray(IFormFile file)
-        {
-            if (file == null || file.Length == 0)
-                return null;
-
-            using (var memoryStream = new MemoryStream())
-            {
-                await file.CopyToAsync(memoryStream);
-                return memoryStream.ToArray();
-            }
         }
     }
 }

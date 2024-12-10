@@ -17,8 +17,6 @@ namespace GovConnect.Models
         [Required(ErrorMessage = "Description is required")]
         public string Description { get; set; }
 
-        public byte[]? FilesUploaded { get; set; }
-
         public Status Status { get; set; } = Status.Pending;
 
         public DateTime CreatedAt { get; set; } = DateTime.Now; // Automatically set the current timestamp

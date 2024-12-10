@@ -17,6 +17,8 @@ namespace GovConnect.Services.Interfaces
         Task SendOtpAsync(Citizen user, HttpContext httpContext);
         Task<bool> VerifyOtpAsync(string otp, HttpContext httpContext);
         Task<IdentityResult> RemoveAndResetPasswordAsync(string email, string newPassword);
+        Task<IEnumerable<AuthenticationScheme>> GetAuthenticationSchemesAsync();
+        Task<ExternalLoginInfo?> GetExternalLoginInfoAsync();
         Task SignOutAsync();
     }
 }

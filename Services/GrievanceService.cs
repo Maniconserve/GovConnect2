@@ -1,4 +1,7 @@
-﻿namespace GovConnect.Services
+﻿using GovConnect.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace GovConnect.Services
 {
     public class GrievanceService : IGrievanceService
     {
@@ -19,7 +22,7 @@
             return await _grievanceRepository.GetGrievancesByUserAsync(userId, statusFilter);
         }
 
-        public async Task<bool> LodgeGrievanceAsync(Grievance grievance, string userId, IFormFile? fileUpload)
+        public async Task<bool> LodgeGrievanceAsync(Grievance grievance, string userId, List<IFormFile?>  files)
         {
             // Generate random GrievanceID
             var random = new Random();
@@ -33,15 +36,28 @@
             grievance.UserID = userId;
 
             // Handle file upload
-            if (fileUpload != null && fileUpload.Length > 0)
+            if (files != null && files.Any())
             {
-                using (var memoryStream = new MemoryStream())
+                foreach (var file in files)
                 {
-                    await fileUpload.CopyToAsync(memoryStream);
-                    grievance.FilesUploaded = memoryStream.ToArray();
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        await file.CopyToAsync(memoryStream);
+                        var fileContent = memoryStream.ToArray();
+                        var fileSize = fileContent.Length;
+
+                        var grievanceFile = new GrievanceFile
+                        {
+                            GrievanceID = randomGrievanceId,
+                            FileName = file.FileName,
+                            FileContent = fileContent,
+                        };
+
+                        // Save the file record to the database
+                        await _grievanceRepository.UploadFile(grievanceFile);
+                    }
                 }
             }
-
             return await _grievanceRepository.LodgeGrievanceAsync(grievance);
         }
 
@@ -50,14 +66,42 @@
             return await _grievanceRepository.GetGrievanceTimelineAsync(grievanceId);
         }
 
-        public async Task<bool> UpdateGrievanceFilesAsync(int grievanceId, IFormFile fileUpload)
+        public async Task<bool> UpdateGrievanceFilesAsync(int grievanceId,List<IFormFile?> files)
         {
-            return await _grievanceRepository.UpdateGrievanceFilesAsync(grievanceId, fileUpload);
+            if (files != null && files.Any())
+            {
+                foreach (var file in files)
+                {
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        await file.CopyToAsync(memoryStream);
+                        var fileContent = memoryStream.ToArray();
+                        var fileSize = fileContent.Length;
+
+                        var grievanceFile = new GrievanceFile
+                        {
+                            GrievanceID = grievanceId,
+                            FileName = file.FileName,
+                            FileContent = fileContent,
+                        };
+
+                        // Save the file record to the database
+                        await _grievanceRepository.UploadFile(grievanceFile);
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
-        public async Task<byte[]?> GetGrievanceFileAsync(int grievanceId)
+        public async Task<List<GrievanceFile?>> GetGrievanceFileAsync(int grievanceId)
         {
-            return await _grievanceRepository.GetGrievanceFileAsync(grievanceId);
+            return await _grievanceRepository.GetAllGrievanceFilesAsync(grievanceId);
+        }
+
+        public async Task<GrievanceFile> GetFileAsync(int fileId)
+        {
+            return await _grievanceRepository.GetFileAsync(fileId);
         }
 
         public async Task<bool> EscalateGrievanceAsync(int grievanceId)

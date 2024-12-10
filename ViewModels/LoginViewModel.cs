@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication;
-namespace GovConnect.ViewModels
+﻿namespace GovConnect.ViewModels
 {
     public class LoginViewModel
     {

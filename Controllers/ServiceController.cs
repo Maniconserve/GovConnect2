@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 namespace GovConnect.Controllers
 {
     /// <summary>
@@ -88,7 +87,7 @@ namespace GovConnect.Controllers
 
             // Check if the user has already applied for this service
             var appliedServices = await _serviceService.GetMyServicesAsync(user.Id, null);
-            bool alreadyApplied = appliedServices.Any(s => s.ServiceID == id);
+            bool alreadyApplied = appliedServices.Any(s => s.ServiceID == id && s.Status != Status.Withdrawn);
 
             // Display a message if the user has already applied
             if (alreadyApplied)
