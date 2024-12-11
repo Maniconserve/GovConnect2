@@ -17,6 +17,7 @@
             }
             
             <form asp-action="Login" method="post">
+                <input asp-for="ReturnUrl" type="text" value="@Model.ReturnUrl" hidden/>
                 <!-- Email Field -->
                 <div class="mb-3">
                     <label for="Email" class="form-label">Email</label>

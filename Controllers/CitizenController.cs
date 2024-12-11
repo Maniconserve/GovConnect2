@@ -8,7 +8,7 @@ namespace GovConnect.Controllers
         private EmailSender emailSender;
         private ICitizenService _citizenService;
         private ISchemeService _schemeService;
-        static DateTime expirationTime; 
+        private static DateTime expirationTime; 
 
         public CitizenController(ICitizenService citizenService,UserManager<Citizen> _citizenManager, EmailSender _emailSender, SqlServerDbContext _SqlServerDbContext,ISchemeService schemeService)
         {
@@ -56,8 +56,6 @@ namespace GovConnect.Controllers
                 //    ModelState.AddModelError("Mobile", "This mobile number is already taken.");
                 //    return View(model);
                 //}
-
-                // Create a new Citizen object with the registration data.
                 
 
                 // Create the new user in the database.
@@ -91,7 +89,8 @@ namespace GovConnect.Controllers
             }
             var loginVM = new LoginViewModel()
             {
-                Schemes = await _citizenService.GetAuthenticationSchemesAsync() // Get available external authentication schemes (e.g., Google, Facebook).
+                Schemes = await _citizenService.GetAuthenticationSchemesAsync(), // Get available external authentication schemes (e.g., Google, Facebook).
+                ReturnUrl = returnUrl
             };
             return View(loginVM);
         }
@@ -101,7 +100,7 @@ namespace GovConnect.Controllers
         /// </summary>
         /// <param name="model">The LoginViewModel containing the login form data.</param>
         [HttpPost]
-        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (ModelState.IsValid)
             {
@@ -137,9 +136,9 @@ namespace GovConnect.Controllers
                         if (result.Succeeded)
                         {
                             // If login is successful, redirect to the requested return URL or the default page (Scheme Index page).
-                            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                            if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
                             {
-                                return Redirect(returnUrl);
+                                return Redirect(model.ReturnUrl);
                             }
                             else
                             {
@@ -327,16 +326,14 @@ namespace GovConnect.Controllers
                 HttpContext.Session.SetString("Email", email);
                 expirationTime = DateTime.UtcNow.AddSeconds(30);
                 var countdownTime = (int)(expirationTime - DateTime.UtcNow).TotalSeconds;
-                TempData["OtpExpirationTime"] = expirationTime.ToString("o"); // ISO 8601 format
+                TempData["OtpExpirationTime"] = expirationTime.ToString("o"); 
                 TempData["OtpCountdownTime"] = countdownTime.ToString();
                 TempData["EmailMessage"] = "OTP has been sent to your email. Please check your inbox (and spam folder).";
-                // Store timer data in TempData (e.g., set countdown to 60 seconds).
             }
             catch (Exception)
             {
                 TempData["EmailMessage"] = "Failed to send OTP. Please try again later.";
             }
-
             return View("ForgotPassword", new ForgotPasswordViewModel { Email = email });
         }
 
@@ -347,15 +344,28 @@ namespace GovConnect.Controllers
         [HttpPost]
         public async Task<IActionResult> VerifyOtp(ForgotPasswordViewModel forgotPasswordViewModel)
         {
-            if (!await _citizenService.VerifyOtpAsync(forgotPasswordViewModel.Otp, HttpContext))
+            string otpres = await _citizenService.VerifyOtpAsync(forgotPasswordViewModel.Otp, HttpContext);
+            if (otpres == "Expired")
+            {
+                TempData["OtpMessage"] = "OTP is expired";
+                TempData["OtpExpirationTime"] = null;
+                TempData["OtpCountdownTime"] = "0";
+                return View("ForgotPassword", new ForgotPasswordViewModel() { Email = forgotPasswordViewModel.Email });
+            }
+            if (otpres == "Invalid")
             {
                 TempData["OtpMessage"] = "OTP is invalid";
-                return View("ForgotPassword",new ForgotPasswordViewModel());
+                var countdownTime = (int)(expirationTime - DateTime.UtcNow).TotalSeconds;
+                TempData["OtpExpirationTime"] = expirationTime.ToString("o");
+                TempData["OtpCountdownTime"] = countdownTime.ToString();
+                return View("ForgotPassword", new ForgotPasswordViewModel() { Email = forgotPasswordViewModel.Email });
             }
-
             if (!ModelState.IsValid)
             {
-                return View("ForgotPassword",new ForgotPasswordViewModel());
+                var countdownTime = (int)(expirationTime - DateTime.UtcNow).TotalSeconds;
+                TempData["OtpExpirationTime"] = expirationTime.ToString("o");
+                TempData["OtpCountdownTime"] = countdownTime.ToString();
+                return View("ForgotPassword",new ForgotPasswordViewModel() { Email = forgotPasswordViewModel.Email });
             }
 
             // Find the user and reset their password.

@@ -15,7 +15,7 @@ namespace GovConnect.Services.Interfaces
         Task<IdentityResult> UpdateUserAsync(Citizen citizen);
         AuthenticationProperties GoogleLogin(string provider, string? redirectUrl);
         Task SendOtpAsync(Citizen user, HttpContext httpContext);
-        Task<bool> VerifyOtpAsync(string otp, HttpContext httpContext);
+        Task<String> VerifyOtpAsync(string otp, HttpContext httpContext);
         Task<IdentityResult> RemoveAndResetPasswordAsync(string email, string newPassword);
         Task<IEnumerable<AuthenticationScheme>> GetAuthenticationSchemesAsync();
         Task<ExternalLoginInfo?> GetExternalLoginInfoAsync();

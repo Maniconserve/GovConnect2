@@ -88,8 +88,6 @@ namespace GovConnect.Services
                     user.Profilepic = memoryStream.ToArray(); // Update the profile picture.
                 }
             }
-
-            
             user.UserName = citizen.UserName ?? user.UserName;
             user.LastName = citizen.LastName ?? user.LastName;
             user.PhoneNumber = citizen.PhoneNumber ?? user.PhoneNumber;
@@ -140,10 +138,28 @@ namespace GovConnect.Services
             }
         }
 
-        public Task<bool> VerifyOtpAsync(string otp, HttpContext httpContext)
+        public Task<string> VerifyOtpAsync(string otp, HttpContext httpContext)
         {
-            return Task.FromResult(otp == httpContext.Session.GetString("Otp"));
+            // Check if the OTP is stored in the session
+            string storedOtp = httpContext.Session.GetString("Otp");
+
+            // If the stored OTP is null, it means it has expired
+            if (storedOtp == null)
+            {
+                return Task.FromResult("Expired"); // OTP expired
+            }
+
+            // Check if the provided OTP matches the stored OTP
+            if (otp == storedOtp)
+            {
+                return Task.FromResult("Valid"); // OTP is correct
+            }
+            else
+            {
+                return Task.FromResult("Invalid"); // OTP is incorrect
+            }
         }
+
 
         public async Task<IdentityResult> RemoveAndResetPasswordAsync(string email, string newPassword)
         {

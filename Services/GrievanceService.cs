@@ -87,9 +87,9 @@ namespace GovConnect.Services
 
                         // Save the file record to the database
                         await _grievanceRepository.UploadFile(grievanceFile);
-                        return true;
                     }
                 }
+                return true;
             }
             return false;
         }

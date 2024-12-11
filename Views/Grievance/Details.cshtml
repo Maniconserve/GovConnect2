@@ -4,7 +4,7 @@
     <title>Grievance Details</title>
 </head>
 
-<div class="container mt-4 min-vh-100">
+<div class="container mt-4 min-vh-100 pb-5">
     <div class="card shadow-lg">
         <div class="card-header bg-success text-white">
             <h2>Grievance Details</h2>
@@ -38,21 +38,13 @@
                         @foreach (var file in Model.Files)
                         {
                             <li>
-                                <strong>@file.FileName</strong>
+                                <strong>
+                                    <a href="@Url.Action("ViewFile", "Grievance", new { fileId = file.FileID })" target="_blank" style="color:black">@file.FileName</a>
+                                </strong>
                                 <a href="@Url.Action("DownloadFile", "Grievance", new { id = Model.Grievance.GrievanceID, fileId = file.FileID })" class="btn btn-link">Download</a>
                             </li>
                         }
                     </ul>
-                </div>
-            }
-            else
-            {
-                <div class="mb-3">
-                    <h5>Upload File:</h5>
-                    <form method="post" enctype="multipart/form-data" asp-action="UploadFile" asp-route-id="@Model.Grievance.GrievanceID">
-                        <input type="file" class="form-control" name="fileUpload" accept=".pdf"multiple />
-                        <button type="submit" class="btn btn-primary mt-3">Upload File</button>
-                    </form>
                 </div>
             }
 
@@ -77,25 +69,86 @@
                 </table>
             </div>
 
-            @if (Model.Grievance.Status == Status.Completed)
-            {
-                <div class="mb-3">
-                    <h5>Add Reason:</h5>
-                    <form asp-controller="Grievance" asp-action="AddTimeLineEntry" method="post">
-                        <div class="mb-3">
-                            <input type="date" class="form-control" id="Date" name="Date" required />
-                        </div>
-                        <div class="mb-3">
-                            <label for="Work" class="form-label">Reason (For Not Completed)</label>
-                            <input type="text" class="form-control" id="Work" name="Work" required />
-                        </div>
-                        <input type="hidden" name="GrievanceID" value="@Model.Grievance.GrievanceID" />
-                        <button type="submit" class="btn btn-primary">Add Entry</button>
-                    </form>
-                </div>
-            }
-
             <a href="@Url.Action("MyGrievances", "Grievance")" class="btn btn-success mt-3">Back to My Grievances</a>
         </div>
     </div>
 </div>
+
+<!-- Static Chat Section -->
+<div id="chatbot-container" class="position-fixed bottom-0 end-0 p-3">
+    <button id="chatbot-toggle-btn" class="btn btn-primary rounded-circle" data-bs-toggle="collapse" href="#chatBox" aria-expanded="false" aria-controls="chatBox">
+        💬
+    </button>
+
+    <!-- Chat Box -->
+    <div id="chatBox" class="collapse" style="width: 300px; height: 400px; border: 1px solid #ccc; border-radius: 8px; background-color: white;">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <strong>Grievance Chat</strong>
+            </div>
+            <div class="card-body" id="chatContent" style="overflow-y: auto; max-height: 300px;">
+                <!-- Static Chat Messages -->
+                <div class="message">
+                    <div><strong>Pranav:</strong> When will the roads be cleaned in my area? The garbage is piling up!</div>
+                    <div class="text-muted" style="font-size: 0.9em;">(Posted on: March 5, 2024)</div>
+                </div>
+                <div class="message" style="margin-top: 15px;">
+                    <div><strong>Surendra:</strong> Hello Pranav, we are aware of the issue. The cleaning crew will be dispatched by tomorrow afternoon.</div>
+                    <div class="text-muted" style="font-size: 0.9em;">(Posted on: March 5, 2024)</div>
+                </div>
+                <div class="message" style="margin-top: 15px;">
+                    <div><strong>Pranav:</strong> Thanks for the update! Can you confirm if it will cover the main road as well?</div>
+                    <div class="text-muted" style="font-size: 0.9em;">(Posted on: March 6, 2024)</div>
+                </div>
+                <div class="message" style="margin-top: 15px;">
+                    <div><strong>Surendra:</strong> Yes, the cleaning crew will cover the main road, including the area around the market.</div>
+                    <div class="text-muted" style="font-size: 0.9em;">(Posted on: March 6, 2024)</div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <input type="text" class="form-control" id="messageInput" placeholder="Type your message..." />
+                <button class="btn btn-primary mt-2 w-100" id="sendMessageBtn">Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chatbot Script -->
+<script>
+    // Simple toggle for chatbot collapse
+    document.getElementById("chatbot-toggle-btn").addEventListener("click", function (event) {
+        event.preventDefault(); // Prevent default action of the button
+        var chatBox = document.getElementById("chatBox");
+        var chatButton = document.getElementById("chatbot-toggle-btn");
+
+
+        // Update the button icon based on the chat box visibility
+        if (chatBox.classList.contains("show")) {
+            chatButton.innerHTML = "❌"; // Show cross when chat is open
+        } else {
+            chatButton.innerHTML = "💬"; // Show chat icon when chat is closed
+        }
+    });
+
+    // Handle sending message (for static demo purposes, we'll log it)
+    document.getElementById("sendMessageBtn").addEventListener("click", function () {
+        var messageInput = document.getElementById("messageInput");
+        var messageText = messageInput.value;
+
+        if (messageText.trim() !== "") {
+            var chatContent = document.getElementById("chatContent");
+
+            // Append new message to the chat window
+            var newMessage = document.createElement("div");
+            newMessage.classList.add("message");
+            newMessage.innerHTML = "<div><strong>Pranav:</strong> " + messageText + "</div><div class='text-muted' style='font-size: 0.9em;'>(Posted on: " + new Date().toLocaleDateString() + ")</div>";
+            chatContent.appendChild(newMessage);
+
+            // Scroll to the bottom of the chat
+            chatContent.scrollTop = chatContent.scrollHeight;
+
+            // Clear the input
+            messageInput.value = "";
+        }
+    });
+</script>

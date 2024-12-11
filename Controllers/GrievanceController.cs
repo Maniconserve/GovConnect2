@@ -139,7 +139,7 @@ namespace GovConnect.Controllers
         /// Handles the upload of files to a specific grievance.
         /// </summary>
         /// <param name="id">The ID of the grievance for which the file is being uploaded.</param>
-        /// <param name="fileUpload">The file to be uploaded.</param>
+        /// <param name="files">The files to be uploaded.</param>
         [HttpPost]
         public async Task<IActionResult> UploadFile(int id, List<IFormFile> files)
         {
@@ -225,6 +225,51 @@ namespace GovConnect.Controllers
 
             return File(fileBytes, mimeType, fileName); // Return the file for download
         }
+        [HttpGet]
+        public async Task<IActionResult> ViewFile(int fileId)
+        {
+            var file = await _grievanceService.GetFileAsync(fileId); // Retrieve the file using the fileId
+            if (file == null)
+            {
+                return NotFound(); // Return 404 if the file is not found
+            }
+            string fileName = file.FileName;
+            string[] parts = fileName.Split('.');
+            string fileExtension = parts.Last().ToLower();  // Extract file extension
+
+            // Determine MIME type based on the file extension
+            string mimeType;
+            switch (fileExtension)
+            {
+                case "pdf":
+                    mimeType = "application/pdf";
+                    break;
+                case "jpg":
+                case "jpeg":
+                    mimeType = "image/jpeg";
+                    break;
+                case "png":
+                    mimeType = "image/png";
+                    break;
+                case "txt":
+                    mimeType = "text/plain";
+                    break;
+                case "html":
+                    mimeType = "text/html";
+                    break;
+                case "docx":
+                    mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                    break;
+                case "xlsx":
+                    mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                    break;
+                default:
+                    mimeType = "application/octet-stream";  // Default binary stream if unknown extension
+                    break;
+            }
+            return File(file.FileContent, mimeType); // You can change the MIME type based on the file type
+        }
+
 
     }
 }
