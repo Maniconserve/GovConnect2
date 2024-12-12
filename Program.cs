@@ -1,3 +1,7 @@
+using GovConnect.Chat;
+using GovConnect.Migrations;
+using Microsoft.Extensions.Configuration;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
@@ -12,8 +16,10 @@ builder.Services.AddScoped<IGrievanceRepository, GrievanceRepository>();
 builder.Services.AddScoped<ISchemeService, SchemeService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
 builder.Services.AddScoped<IGrievanceService, GrievanceService>();
+builder.Services.AddScoped<ChatService>();
 builder.Services.AddTransient<DashboardService>();
 builder.Services.AddSingleton<EmailSender>();
+builder.Services.AddSignalR();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromSeconds(30);
@@ -42,15 +48,17 @@ builder.Services.AddAuthentication()
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Citizen/Login";
-    options.AccessDeniedPath = "/Citizen/AccessDenied"; 
+    options.AccessDeniedPath = "/Citizen/AccessDenied";
 });
-
+var razorpayKeyId = builder.Configuration["Razorpay:KeyId"];
+var razorpaySecretKey = builder.Configuration["Razorpay:SecretKey"];
 
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("UserPolicy", policy => policy.RequireRole("User"));
     options.AddPolicy("OfficerPolicy", policy => policy.RequireRole("Officer"));
 });
+builder.Services.AddHttpClient();
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -67,12 +75,13 @@ app.UseStatusCodePagesWithReExecute("/Citizen/HandleError", "?statusCode={0}");
 
 app.UseHttpsRedirection();
 
+app.MapHub<ChatHub>("/chathub");
+
 app.UseRouting();
 
 app.UseAuthentication();
 
 app.UseAuthorization();
-
 
 app.MapControllerRoute(
     name: "default",

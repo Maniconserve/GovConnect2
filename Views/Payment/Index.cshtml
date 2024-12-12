@@ -1,0 +1,73 @@
+﻿@{
+    var razorpayKeyId = ViewData["RazorpayKeyId"];
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Razorpay Payment</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+    <h2>Make Payment</h2>
+    <button id="payBtn" class="btn btn-primary">Pay with Razorpay</button>
+
+    <script>
+        document.getElementById('payBtn').onclick = function () {
+            var options = {
+                "key": "@razorpayKeyId",  // Razorpay Key ID
+                "amount": 1000,  // Amount in paise (e.g., 1000 paise = 10 INR)
+                "currency": "INR",
+                "name": "Your Company Name",
+                "description": "Payment for Order",
+                "image": "/images/your-logo.png",
+                "order_id": "",  // The Razorpay Order ID (obtained from backend)
+                "handler": function (response) {
+                    // Send the payment details to the backend for verification
+                    fetch('/Payment/VerifyPayment', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            razorpayPaymentId: response.razorpay_payment_id,
+                            razorpayOrderId: response.razorpay_order_id,
+                            razorpaySignature: response.razorpay_signature
+                        }),
+                        headers: { 'Content-Type': 'application/json' }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("Payment Successful!");
+                        } else {
+                            alert("Payment Verification Failed!");
+                        }
+                    });
+                },
+                "prefill": {
+                    "name": "John Doe",
+                    "email": "john.doe@example.com",
+                    "contact": "9999999999"
+                },
+                "theme": {
+                    "color": "#F37254"
+                }
+            };
+
+            // Call your API to create Razorpay order
+            fetch('/Payment/CreateOrder', {
+                method: 'POST',
+                body: JSON.stringify({ amount: 10 }),  // Amount in INR
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                options.order_id = data.id;  // Set the Razorpay Order ID
+                var rzp1 = new Razorpay(options);
+                rzp1.open();  // Open Razorpay payment window
+            })
+            .catch(error => {
+                console.error("Error creating order:", error);
+            });
+        };
+    </script>
+</body>
+</html>

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using GovConnect.Chat;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 namespace GovConnect.Data
 {
     public class SqlServerDbContext : IdentityDbContext<Citizen>
@@ -47,36 +48,6 @@ namespace GovConnect.Data
                 .WithMany()         // Add the appropriate relationship configuration
                 .HasForeignKey(s => s.ServiceID)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            //modelBuilder.Entity<PoliceOfficer>(entity =>
-            //{
-            //    // Configure OfficerId as the primary key
-            //    entity.HasKey(o => o.OfficerId);
-
-
-
-            //    // Configure OfficerDesignation length limit
-            //    entity.Property(o => o.OfficerDesignation)
-            //          .HasMaxLength(100)
-            //          .IsRequired();
-
-
-            //    // Set the relationship with Departments (1-to-many)
-            //    entity.HasOne(o => o.Department) // Assuming you have a `Department` class
-            //          .WithMany(d => d.PoliceOfficers) // If one department has many officers
-            //          .HasForeignKey(o => o.DepartmentId)
-            //          .OnDelete(DeleteBehavior.Restrict); // On delete restricts or cascades depending on your needs
-
-            //    // Configure the relationship for SuperiorId (self-referencing)
-            //    entity.HasOne(o => o.Superior)
-            //          .WithMany() // Many officers can have the same superior (self-referencing relationship)
-            //          .HasForeignKey(o => o.SuperiorId)
-            //          .OnDelete(DeleteBehavior.SetNull); // Or Restrict, depending on the logic
-
-            //    modelBuilder.Entity<Grievance>()
-            //           .Property(g => g.TimeLine)
-            //           .HasColumnType("nvarchar(max)");
-            //});
         }
         public DbSet<Scheme> GovSchemes { get; set; }
         public DbSet<Eligibility> SchemeEligibilities { get; set; }
@@ -90,5 +61,6 @@ namespace GovConnect.Data
         public DbSet<PoliceOfficer> PoliceOfficers { get; set; }
 
         public DbSet<GrievanceFile> DGrievanceFiles { get; set; }
+        public DbSet<ChatMessage> ChatMessages { get; set; }
     }
 }

@@ -78,11 +78,6 @@
                 </div>
 
                 <div class="mb-3">
-                    <h5>Department:</h5>
-                    <p>@Model.Grievance.DepartmentID</p>
-                </div>
-
-                <div class="mb-3">
                     <h5>Description:</h5>
                     <p>@Model.Grievance.Description</p>
                 </div>
@@ -147,9 +142,98 @@
         </div>
     </div>
     <div id="chatbot-container" class="position-fixed bottom-0 end-0 p-3">
-        <button id="chatbot-toggle-btn" class="btn btn-primary rounded-circle">
+        <button id="chatbot-toggle-btn" class="btn btn-primary rounded-circle" data-bs-toggle="collapse" href="#chatBox" aria-expanded="false" aria-controls="chatBox">
             💬
         </button>
+
+        <!-- Chat Box -->
+        <div id="chatBox" class="collapse" style="width: 300px; height: 400px; border: 1px solid #ccc; border-radius: 8px; background-color: white;">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <strong>Grievance Chat</strong>
+                </div>
+                <div class="card-body" id="chatContent" style="overflow-y: auto; max-height: 300px;">
+                    <!-- Dynamic Chat Messages will be appended here -->
+                </div>
+                <div class="card-footer">
+                    <input type="text" class="form-control" id="messageInput" placeholder="Type your message..." />
+                    <button class="btn btn-primary mt-2 w-100" id="sendMessageBtn">Send</button>
+                </div>
+            </div>
+        </div>
     </div>
+    <script src="~/js/signalr.js"></script>
+    <script>
+        // Create a connection to the SignalR Hub
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chathub")
+            .build();
+
+        // Start the connection
+        connection.start().then(function () {
+            console.log("Connected to SignalR!");
+
+            // Grievance ID (this is passed from the model)
+            const grievanceId = "@Model.Grievance.GrievanceID";
+
+            // Fetch previous messages from the server (optional)
+            fetch(`/api/chat/messages/${grievanceId}`)
+                .then(response => response.json())
+                .then(messages => {
+                    const chatContent = document.getElementById("chatContent");
+                    messages.forEach(msg => {
+                        const newMessage = document.createElement("div");
+                        newMessage.classList.add("message");
+                        newMessage.innerHTML = `<div><strong>${msg.name}:</strong> ${msg.message}</div><div class='text-muted' style='font-size: 0.9em;'>Posted on: ${new Date(msg.timestamp).toLocaleDateString()}</div>`;
+                        chatContent.appendChild(newMessage);
+                    });
+                })
+                .catch(err => console.error(err));
+
+            // Join the chat group
+            connection.invoke("JoinChat", grievanceId).catch(function (err) {
+                return console.error(err.toString());
+            });
+        });
+
+        // Handle incoming messages
+        connection.on("ReceiveMessage", function (user, name, message) {
+            const chatContent = document.getElementById("chatContent");
+
+            // Append new message to the chat window
+            const newMessage = document.createElement("div");
+            newMessage.classList.add("message");
+            newMessage.innerHTML = `<div><strong>${name}:</strong> ${message}</div><div class='text-muted' style='font-size: 0.9em;'>Posted on: ${new Date().toLocaleDateString()}</div>`;
+            chatContent.appendChild(newMessage);
+
+            // Scroll to the bottom of the chat
+            chatContent.scrollTop = chatContent.scrollHeight;
+        });
+
+
+        // Handle sending messages
+        document.getElementById("sendMessageBtn").addEventListener("click", function () {
+            const messageInput = document.getElementById("messageInput");
+            const messageText = messageInput.value;
+
+            if (messageText.trim() !== "") {
+                const grievanceId = "@Model.Grievance.GrievanceID"; // Grievance ID passed from the model
+                const officerId = "@Model.Grievance.OfficerId"; // Officer ID passed from the model
+                console.log("Grievance ID: ", grievanceId);
+                console.log("Officer ID: ", officerId);
+
+                // Send message to SignalR Hub
+                connection.invoke("SendMessage", grievanceId, "@User.Identity.Name", officerId, messageText).catch(function (err) {
+                    return console.error(err.toString());
+                });
+
+                // Clear input
+                messageInput.value = "";
+            }
+        });
+
+    </script>
+
+
     <script src="~/js/ODetails.js"></script>
 </body>

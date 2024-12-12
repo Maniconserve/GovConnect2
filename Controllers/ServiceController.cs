@@ -9,6 +9,7 @@ namespace GovConnect.Controllers
         private readonly IServiceService _serviceService;
         private readonly UserManager<Citizen> _userManager;
 
+
         // Inject dependencies into the constructor
         public ServiceController(IServiceService serviceService, UserManager<Citizen> userManager)
         {
@@ -94,7 +95,6 @@ namespace GovConnect.Controllers
             {
                 ViewBag.Error = "You have already applied for this service.";
             }
-
             // Return the service details view
             return View(service);
         }

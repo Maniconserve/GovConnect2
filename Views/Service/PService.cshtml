@@ -1,8 +1,11 @@
 ﻿@model Service
-
+@{
+    var razorpayKeyId = "rzp_test_56EyJrspvE9zA0";
+}
 <head>
     <title>@Model.ServiceName - Service Details</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body class="bg-gray-100" style="font-family:'Roboto',sans-serif">
@@ -17,10 +20,10 @@
             <div class="flex justify-between items-center mb-6">
                 <h1 class="text-2xl font-bold text-gray-800">@Model.ServiceName</h1>
 
-                <form method="post" action="@Url.Action("Apply", "Service")">
+                @* <form method="post" action="@Url.Action("Apply", "Service")">
                     <input type="hidden" name="ServiceID" value="@Model.ServiceId" />
                     <input type="hidden" name="ApplicationDate" value="@DateTime.Now" />
-                    <input type="hidden" name="ServiceName" value="@Model.ServiceName" />
+                    <input type="hidden" name="ServiceName" value="@Model.ServiceName" /> *@
                     <div class="flex items-center space-x-2">
                         @if (ViewBag.Error != null)
                         {
@@ -28,7 +31,7 @@
                         }
                         else
                         {
-                            <button type="submit" class="bg-orange-500 text-white px-3 py-2 rounded-md hover:bg-orange-600 transition">Apply</button>
+                            <button type="submit" id="payBtn" class="bg-orange-500 text-white px-3 py-2 rounded-md hover:bg-orange-600 transition">Apply</button>
                         }
 
                         @{
@@ -38,7 +41,7 @@
                             INR @totalFee
                         </div>
                     </div>
-                </form>
+                @* </form> *@
             </div>
 
             <hr class="border-gray-300 mb-4">
@@ -70,4 +73,61 @@
             </div>
         </div>
     </div>
+    <script>
+        document.getElementById('payBtn').onclick = function () {
+            var options = {
+                "key": "@razorpayKeyId",  // Razorpay Key ID
+                "amount": 1000,  // Amount in paise (e.g., 1000 paise = 10 INR)
+                "currency": "INR",
+                "name": "AP Government",
+                "description": "Payment for Order",
+                "image": "~/images/ap-logo.png",
+                "order_id": "",  // The Razorpay Order ID (obtained from backend)
+                "handler": function (response) {
+                    // Send the payment details to the backend for verification
+                    fetch('/Payment/VerifyPayment', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            razorpayPaymentId: response.razorpay_payment_id,
+                            razorpayOrderId: response.razorpay_order_id,
+                            razorpaySignature: response.razorpay_signature
+                        }),
+                        headers: { 'Content-Type': 'application/json' }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert("Payment Successful!");
+                            } else {
+                                alert("Payment Verification Failed!");
+                            }
+                        });
+                },
+                "prefill": {
+                    "name": "Mani",
+                    "email": "deep05739@gmail.com",
+                    "contact": "8978490327"
+                },
+                "theme": {
+                    "color": "#F37254"
+                }
+            };
+
+            // Call your API to create Razorpay order
+            fetch('/Payment/CreateOrder', {
+                method: 'POST',
+                body: JSON.stringify({ amount: 10 }),  // Amount in INR
+                headers: { 'Content-Type': 'application/json' }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    options.order_id = data.id;  // Set the Razorpay Order ID
+                    var rzp1 = new Razorpay(options);
+                    rzp1.open();  // Open Razorpay payment window
+                })
+                .catch(error => {
+                    console.error("Error creating order:", error);
+                });
+        };
+    </script>
 </body>

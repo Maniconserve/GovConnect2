@@ -87,23 +87,7 @@
                 <strong>Grievance Chat</strong>
             </div>
             <div class="card-body" id="chatContent" style="overflow-y: auto; max-height: 300px;">
-                <!-- Static Chat Messages -->
-                <div class="message">
-                    <div><strong>Pranav:</strong> When will the roads be cleaned in my area? The garbage is piling up!</div>
-                    <div class="text-muted" style="font-size: 0.9em;">(Posted on: March 5, 2024)</div>
-                </div>
-                <div class="message" style="margin-top: 15px;">
-                    <div><strong>Surendra:</strong> Hello Pranav, we are aware of the issue. The cleaning crew will be dispatched by tomorrow afternoon.</div>
-                    <div class="text-muted" style="font-size: 0.9em;">(Posted on: March 5, 2024)</div>
-                </div>
-                <div class="message" style="margin-top: 15px;">
-                    <div><strong>Pranav:</strong> Thanks for the update! Can you confirm if it will cover the main road as well?</div>
-                    <div class="text-muted" style="font-size: 0.9em;">(Posted on: March 6, 2024)</div>
-                </div>
-                <div class="message" style="margin-top: 15px;">
-                    <div><strong>Surendra:</strong> Yes, the cleaning crew will cover the main road, including the area around the market.</div>
-                    <div class="text-muted" style="font-size: 0.9em;">(Posted on: March 6, 2024)</div>
-                </div>
+                <!-- Dynamic Chat Messages will be appended here -->
             </div>
             <div class="card-footer">
                 <input type="text" class="form-control" id="messageInput" placeholder="Type your message..." />
@@ -112,43 +96,74 @@
         </div>
     </div>
 </div>
-
-<!-- Chatbot Script -->
+<script src="~/js/signalr.js"></script>
 <script>
-    // Simple toggle for chatbot collapse
-    document.getElementById("chatbot-toggle-btn").addEventListener("click", function (event) {
-        event.preventDefault(); // Prevent default action of the button
-        var chatBox = document.getElementById("chatBox");
-        var chatButton = document.getElementById("chatbot-toggle-btn");
+    // Create a connection to the SignalR Hub
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/chathub")
+        .build();
 
+    // Start the connection
+    connection.start().then(function () {
+        console.log("Connected to SignalR!");
 
-        // Update the button icon based on the chat box visibility
-        if (chatBox.classList.contains("show")) {
-            chatButton.innerHTML = "❌"; // Show cross when chat is open
-        } else {
-            chatButton.innerHTML = "💬"; // Show chat icon when chat is closed
-        }
+        // Grievance ID (this is passed from the model)
+        const grievanceId = "@Model.Grievance.GrievanceID";
+
+        // Fetch previous messages from the server (optional)
+        fetch(`/api/chat/messages/${grievanceId}`)
+            .then(response => response.json())
+            .then(messages => {
+                const chatContent = document.getElementById("chatContent");
+                messages.forEach(msg => {
+                    const newMessage = document.createElement("div");
+                    newMessage.classList.add("message");
+                    newMessage.innerHTML = `<div><strong>${msg.name}:</strong> ${msg.message}</div><div class='text-muted' style='font-size: 0.9em;'>Posted on: ${new Date(msg.timestamp).toLocaleDateString()}</div>`;
+                    chatContent.appendChild(newMessage);
+                });
+            })
+            .catch(err => console.error(err));
+
+        // Join the chat group
+        connection.invoke("JoinChat", grievanceId).catch(function (err) {
+            return console.error(err.toString());
+        });
     });
 
-    // Handle sending message (for static demo purposes, we'll log it)
+    // Handle incoming messages
+    connection.on("ReceiveMessage", function (user, name, message) {
+    const chatContent = document.getElementById("chatContent");
+
+    // Append new message to the chat window
+    const newMessage = document.createElement("div");
+    newMessage.classList.add("message");
+    newMessage.innerHTML = `<div><strong>${name}:</strong> ${message}</div><div class='text-muted' style='font-size: 0.9em;'>Posted on: ${new Date().toLocaleDateString()}</div>`;
+    chatContent.appendChild(newMessage);
+
+    // Scroll to the bottom of the chat
+    chatContent.scrollTop = chatContent.scrollHeight;
+});
+
+
+    // Handle sending messages
     document.getElementById("sendMessageBtn").addEventListener("click", function () {
-        var messageInput = document.getElementById("messageInput");
-        var messageText = messageInput.value;
+        const messageInput = document.getElementById("messageInput");
+        const messageText = messageInput.value;
 
         if (messageText.trim() !== "") {
-            var chatContent = document.getElementById("chatContent");
+            const grievanceId = "@Model.Grievance.GrievanceID"; // Grievance ID passed from the model
+            const officerId = "@Model.Grievance.OfficerId"; // Officer ID passed from the model
+            console.log("Grievance ID: ", grievanceId);
+            console.log("Officer ID: ", officerId);
 
-            // Append new message to the chat window
-            var newMessage = document.createElement("div");
-            newMessage.classList.add("message");
-            newMessage.innerHTML = "<div><strong>Pranav:</strong> " + messageText + "</div><div class='text-muted' style='font-size: 0.9em;'>(Posted on: " + new Date().toLocaleDateString() + ")</div>";
-            chatContent.appendChild(newMessage);
+            // Send message to SignalR Hub
+            connection.invoke("SendMessage", grievanceId, "@User.Identity.Name", officerId, messageText).catch(function (err) {
+                return console.error(err.toString());
+            });
 
-            // Scroll to the bottom of the chat
-            chatContent.scrollTop = chatContent.scrollHeight;
-
-            // Clear the input
+            // Clear input
             messageInput.value = "";
         }
     });
+
 </script>

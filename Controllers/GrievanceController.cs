@@ -79,13 +79,13 @@ namespace GovConnect.Controllers
         {
             if (!grievanceId.HasValue)
             {
-                return NotFound(); // Return 404 if no grievance ID is provided
+                return NotFound();
             }
 
             var grievance = _grievanceService.GetGrievanceByIdAsync(grievanceId.Value).Result; // Get grievance details
             if (grievance == null)
             {
-                return View(); // Return an empty view if grievance not found
+                return View(); 
             }
 
             var timeline = _grievanceService.GetGrievanceTimelineAsync(grievanceId.Value).Result; // Get the timeline of actions for the grievance

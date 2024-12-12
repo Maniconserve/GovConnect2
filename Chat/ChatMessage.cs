@@ -7,7 +7,7 @@
         public string ReceiverId { get; set; }
         public string Message { get; set; }
         public DateTime Timestamp { get; set; }
-        public string GrievanceId { get; set; }
+        public int GrievanceId { get; set; }
+        public string Name { get; set; }
     }
-
 }
