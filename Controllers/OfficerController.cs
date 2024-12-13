@@ -1,4 +1,6 @@
-﻿namespace GovConnect.Controllers
+﻿using System.Security.Claims;
+
+namespace GovConnect.Controllers
 {
     public class OfficerController : Controller
     {
@@ -115,7 +117,10 @@
         public async Task<IActionResult> Details(int id)
         {
             var grievance = await _grievanceService.GetGrievanceByIdAsync(id);
-
+            if(grievance.OfficerId != User.FindFirstValue(ClaimTypes.NameIdentifier))
+            {
+                return View("AccessDenied");
+            }
             if (grievance == null)
             {
                 return NotFound(); 

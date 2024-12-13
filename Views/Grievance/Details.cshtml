@@ -2,6 +2,8 @@
 
 <head>
     <title>Grievance Details</title>
+    <style>
+    </style>
 </head>
 
 <div class="container mt-4 min-vh-100 pb-5">
@@ -47,6 +49,12 @@
                     </ul>
                 </div>
             }
+            <form method="post" enctype="multipart/form-data" asp-action="UploadFile" asp-controller="Grievance">
+                <input type="number" hidden value="@Model.Grievance.GrievanceID" name="id"/> 
+                <input type="file" class="form-control" id="grievance-FileUpload" name="files" accept=".pdf" multiple />
+                <button type="submit" class="btn btn-primary mt-3">Upload</button>
+            </form>
+
 
             <div class="mb-3">
                 <h5>TimeLine:</h5>
@@ -76,26 +84,34 @@
 
 <!-- Static Chat Section -->
 <div id="chatbot-container" class="position-fixed bottom-0 end-0 p-3">
-    <button id="chatbot-toggle-btn" class="btn btn-primary rounded-circle" data-bs-toggle="collapse" href="#chatBox" aria-expanded="false" aria-controls="chatBox">
-        💬
+    <!-- Chat Button -->
+    <button id="chatbot-toggle-btn" class="btn btn-info rounded-circle shadow-lg" data-bs-toggle="collapse" href="#chatBox" aria-expanded="false" aria-controls="chatBox" style="font-size: 24px; width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;">
+        <i class="fas fa-comments"></i> <!-- FontAwesome Chat Icon -->
     </button>
 
     <!-- Chat Box -->
-    <div id="chatBox" class="collapse" style="width: 300px; height: 400px; border: 1px solid #ccc; border-radius: 8px; background-color: white;">
-        <div class="card">
-            <div class="card-header bg-success text-white">
+    <div id="chatBox" class="collapse" style="width: 350px; height: 500px; border-radius: 8px; background-color: #fff; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
                 <strong>Grievance Chat</strong>
+                <button type="button" class="btn-close text-white" data-bs-toggle="collapse" href="#chatBox" aria-expanded="false" aria-controls="chatBox"></button>
             </div>
-            <div class="card-body" id="chatContent" style="overflow-y: auto; max-height: 300px;">
+            <div class="card-body" id="chatContent" style="overflow-y: auto; max-height: 380px; padding: 10px;">
                 <!-- Dynamic Chat Messages will be appended here -->
             </div>
-            <div class="card-footer">
-                <input type="text" class="form-control" id="messageInput" placeholder="Type your message..." />
-                <button class="btn btn-primary mt-2 w-100" id="sendMessageBtn">Send</button>
+            <div class="card-footer bg-light">
+                <div class="d-flex">
+                    <input type="text" class="form-control" id="messageInput" placeholder="Type your message..." />
+                    <button class="btn btn-success ms-2" id="sendMessageBtn"><i class="fas fa-paper-plane"></i> Send</button> <!-- Send button with Icon -->
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Include FontAwesome for icons -->
+<script src="https://kit.fontawesome.com/a076d05399.js"></script>
+
 <script src="~/js/signalr.js"></script>
 <script>
     // Create a connection to the SignalR Hub
@@ -105,7 +121,6 @@
 
     // Start the connection
     connection.start().then(function () {
-        console.log("Connected to SignalR!");
 
         // Grievance ID (this is passed from the model)
         const grievanceId = "@Model.Grievance.GrievanceID";
@@ -117,8 +132,11 @@
                 const chatContent = document.getElementById("chatContent");
                 messages.forEach(msg => {
                     const newMessage = document.createElement("div");
-                    newMessage.classList.add("message");
-                    newMessage.innerHTML = `<div><strong>${msg.name}:</strong> ${msg.message}</div><div class='text-muted' style='font-size: 0.9em;'>Posted on: ${new Date(msg.timestamp).toLocaleDateString()}</div>`;
+                    newMessage.classList.add("message", "mb-3", "p-3", "rounded", "bg-light");
+                    newMessage.innerHTML = `
+                        <div><strong>${msg.name}:</strong> ${msg.message}</div>
+                        <div class='text-muted' style='font-size: 0.9em;'>Posted on: ${new Date(msg.timestamp).toLocaleDateString()}</div>
+                    `;
                     chatContent.appendChild(newMessage);
                 });
             })
@@ -132,18 +150,20 @@
 
     // Handle incoming messages
     connection.on("ReceiveMessage", function (user, name, message) {
-    const chatContent = document.getElementById("chatContent");
+        const chatContent = document.getElementById("chatContent");
 
-    // Append new message to the chat window
-    const newMessage = document.createElement("div");
-    newMessage.classList.add("message");
-    newMessage.innerHTML = `<div><strong>${name}:</strong> ${message}</div><div class='text-muted' style='font-size: 0.9em;'>Posted on: ${new Date().toLocaleDateString()}</div>`;
-    chatContent.appendChild(newMessage);
+        // Append new message to the chat window
+        const newMessage = document.createElement("div");
+        newMessage.classList.add("message", "mb-3", "p-3", "rounded", "bg-light");
+        newMessage.innerHTML = `
+            <div><strong>${name}:</strong> ${message}</div>
+            <div class='text-muted' style='font-size: 0.9em;'>Posted on: ${new Date().toLocaleDateString()}</div>
+        `;
+        chatContent.appendChild(newMessage);
 
-    // Scroll to the bottom of the chat
-    chatContent.scrollTop = chatContent.scrollHeight;
-});
-
+        // Scroll to the bottom of the chat
+        chatContent.scrollTop = chatContent.scrollHeight;
+    });
 
     // Handle sending messages
     document.getElementById("sendMessageBtn").addEventListener("click", function () {
@@ -152,18 +172,18 @@
 
         if (messageText.trim() !== "") {
             const grievanceId = "@Model.Grievance.GrievanceID"; // Grievance ID passed from the model
-            const officerId = "@Model.Grievance.OfficerId"; // Officer ID passed from the model
-            console.log("Grievance ID: ", grievanceId);
-            console.log("Officer ID: ", officerId);
+            const officerId = "@Model.Grievance.OfficerId";
 
             // Send message to SignalR Hub
             connection.invoke("SendMessage", grievanceId, "@User.Identity.Name", officerId, messageText).catch(function (err) {
                 return console.error(err.toString());
             });
 
-            // Clear input
+            // Clear the input field
             messageInput.value = "";
         }
     });
 
 </script>
+
+

@@ -12,6 +12,7 @@ global using global::Microsoft.AspNetCore.Mvc;
 global using global::Microsoft.EntityFrameworkCore;
 global using global::System.ComponentModel.DataAnnotations;
 global using global::System.ComponentModel.DataAnnotations.Schema;
+global using global::GovConnect.API;
 namespace GovConnect.Namespaces
 {
     public class Global
