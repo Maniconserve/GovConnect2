@@ -86,48 +86,95 @@
 				<div class="flex justify-center">
 					<div class="w-full">
 						<label class="block mb-1">Pincode<span style="color:red">*</span></label>
-						<input asp-for="Pincode" type="text" placeholder="Enter Pincode" class="p-2 w-full border rounded" value="@Model.Pincode">
+						<input asp-for="Pincode" type="text" id="pincode" placeholder="Enter Pincode" class="p-2 w-full border rounded" value="@Model.Pincode">
 						<br /><span asp-validation-for="Pincode" class="text-danger"></span>
 					</div>
 				</div>
 
 				<div class="flex justify-center">
 					<div class="w-full">
+						<label class="block mb-1">District<span style="color:red">*</span></label>
+						<input asp-for="District" type="text" id="district" placeholder="District will be filled" class="p-2 w-full border rounded" value="@Model.District" readonly>
+						<br /><span asp-validation-for="District" class="text-danger"></span>
+					</div>
+				</div>
+
+				<!-- Mandal Field (will be populated dynamically) -->
+				<div class="flex justify-center">
+					<div class="w-full">
 						<label class="block mb-1">Mandal<span style="color:red">*</span></label>
-						<input asp-for="Mandal" type="text" placeholder="Enter Mandal" class="p-2 w-full border rounded" value="@Model.Mandal">
+						<input asp-for="Mandal" type="text" id="mandal" placeholder="Mandal will be filled" class="p-2 w-full border rounded" value="@Model.Mandal" readonly>
 						<br /><span asp-validation-for="Mandal" class="text-danger"></span>
 					</div>
 				</div>
 
 				<div class="flex justify-center">
 					<div class="w-full">
-						<label class="block mb-1">District<span style="color:red">*</span></label>
-						<input asp-for="District" type="text" placeholder="Enter District" class="p-2 w-full border rounded" value="@Model.District">
-						<br /><span asp-validation-for="District" class="text-danger"></span>
-					</div>
-				</div>
-
-				<div class="flex justify-center">
-					<div class="w-full">
 						<label class="block mb-1">City<span style="color:red">*</span></label>
-						<input asp-for="City" type="text" placeholder="Enter City" class="p-2 w-full border rounded" value="@Model.City">
+						<input asp-for="City" type="text" id="city" placeholder="City will be filled" class="p-2 w-full border rounded" value="@Model.City" readonly>
 						<br /><span asp-validation-for="City" class="text-danger"></span>
 					</div>
 				</div>
 
+				<!-- Village Field (dropdown to be populated dynamically) -->
 				<div class="flex justify-center">
 					<div class="w-full">
 						<label class="block mb-1">Village<span style="color:red">*</span></label>
-						<input asp-for="Village" type="text" placeholder="Enter Village" class="p-2 w-full border rounded" value="@Model.Village">
+						<select asp-for="Village" id="village" class="p-2 w-full border rounded">
+							<option value="">Select Village</option>
+						</select>
 						<br /><span asp-validation-for="Village" class="text-danger"></span>
 					</div>
 				</div>
 
+				<!-- Submit Button -->
 				<div class="col-span-2 flex justify-center mt-4">
 					<button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded">Submit</button>
 				</div>
+
 			</form>
 		</div>
 	</div>
+
+	<!-- JavaScript for Dynamic Address Population -->
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script>
+		// When the user enters a pincode with 6 digits, make an AJAX request to fetch address details
+		$('#pincode').on('input', function () {
+			var pincode = $(this).val();
+
+			// Check if the pincode has exactly 6 digits
+			if (pincode.length === 6 && /^\d{6}$/.test(pincode)) {
+				$.ajax({
+					url: '@Url.Action("GetAddressDetails", "Pincode")', // Replace with your controller name
+					type: 'POST',
+					data: { pincode: pincode },
+					success: function (data) {
+						if (data && data.addresses && data.addresses.length > 0) {
+							var addresses = data.addresses;
+							var firstAddress = addresses[0]; // Assuming you want to populate with the first address
+
+							// Populate District, Mandal, and Village dropdown
+							$('#district').val(firstAddress.district);
+							$('#mandal').val(firstAddress.block);
+							$('#city').val(firstAddress.block);
+
+							// Populate the Village dropdown
+							$('#village').empty().append('<option value="">Select Village</option>');
+							addresses.forEach(function (address) {
+								$('#village').append('<option value="' + address.name + '">' + address.name + '</option>');
+							});
+						} else {
+							alert('No address data found for the given pincode.');
+						}
+					},
+					error: function () {
+						alert('Error fetching address data.');
+					}
+				});
+			}
+		});
+	</script>
+
 	<script src="~/js/register.js"></script>
 </body>

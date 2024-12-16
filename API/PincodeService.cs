@@ -1,17 +1,16 @@
 ﻿using Newtonsoft.Json;
 namespace GovConnect.API
 {
-
-    public class PostOfficeService
+    public class PincodeService
     {
         private readonly HttpClient _httpClient;
 
-        public PostOfficeService(HttpClient httpClient)
+        public PincodeService(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }
 
-        public async Task<PostOfficeResponse> GetPostOfficeDataAsync(string pincode)
+        public async Task<List<Response>> GetAddressAsync(string pincode)
         {
             var url = $"https://api.postalpincode.in/pincode/{pincode}";
 
@@ -23,9 +22,8 @@ namespace GovConnect.API
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     Console.WriteLine(content);
-                    var postOffices = JsonConvert.DeserializeObject<PostOfficeResponse>(content);
-                    return postOffices;
-
+                    List<Response> addresses = JsonConvert.DeserializeObject<List<Response>>(content);
+                    return addresses;
                 }
                 else
                 {

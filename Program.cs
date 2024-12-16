@@ -18,7 +18,7 @@ builder.Services.AddScoped<ChatService>();
 builder.Services.AddTransient<DashboardService>();
 builder.Services.AddSingleton<EmailSender>();
 builder.Services.AddSignalR();
-builder.Services.AddHttpClient<PostOfficeService>();
+builder.Services.AddHttpClient<PincodeService>();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromSeconds(30);
