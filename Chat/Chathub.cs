@@ -19,7 +19,7 @@ namespace GovConnect.Chat
             await _chatService.SaveMessageAsync(senderId, officerId, grievanceId, message, name);
 
             // Broadcast the message to the relevant group
-            await Clients.Group(grievanceId).SendAsync("ReceiveMessage", senderId, name, message);
+            await Clients.Group(grievanceId).SendAsync("ReceiveMessage", senderId, name, message, grievanceId);
         }
 
         // Join a specific grievance chat group

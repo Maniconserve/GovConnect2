@@ -208,7 +208,7 @@
     });
 
     // Handle incoming messages
-    connection.on("ReceiveMessage", function (user, name, message) {
+        connection.on("ReceiveMessage", function (user, name, message, grievanceId) {
         const chatContent = document.getElementById("chatContent");
 
         // Append new message to the chat window

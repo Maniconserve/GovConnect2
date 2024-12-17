@@ -11,7 +11,7 @@
             _userManager = userManager;
         }
 
-        public OfficerDashboardViewModel GetOfficerDashboard(String officerId)
+        public async Task<OfficerDashboardViewModel> GetOfficerDashboard(String officerId)
         {
             // Retrieve officer details
             var officer = _context.PoliceOfficers.FirstOrDefault(o => o.OfficerId == officerId);

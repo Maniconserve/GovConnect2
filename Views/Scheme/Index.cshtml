@@ -1,50 +1,264 @@
 ﻿<head>
     <title>Home</title>
-</head>
-<div class="custom-home-bg p-5 shadow-sm d-flex flex-row justify-content-between align-items-center">
-    <div>
-        <p class="h5 font-weight-bold">
-            Public Grievance Redressal System(PGRS)” is a universal grievance redressal helpline that allows citizens to directly raise their issue to the Chief Minister’s Office.
-        </p>
-        <ul class="custom-list-group mt-5 m-3">
-            <li>Register individual or household-level grievances</li>
-            <li>Follow up on the status of a registered grievance</li>
-            <li>Enquire about government services and schemes</li>
-        </ul>
-    </div>
-    <div class="text-center">
-        <img alt="Hon'ble Chief Minister Government of Andhra Pradesh" class="custom-rounded-rectangle" src="~/Images/Elon.png" width="135" height="130" />
-        <p class="text-muted mt-3">
-            Hon'ble Chief Minister<br />
-            Government of Andhra Pradesh
-        </p>
-    </div>
-</div>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Chatbot Button */
+        .chatbot-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 10000; /* Ensure the button is above other elements */
+        }
 
-<div class="custom-process-bg p-5 rounded-lg shadow-sm mt-5 d-flex justify-content-center align-items-center">
-    <div class="text-center w-100">
-        <h2 class="text-primary font-weight-bold">Process Involved</h2>
-        <div class="row mt-4">
-            <div class="col-md-4">
-                <div class="bg-white p-4 rounded-lg shadow-sm custom-process-border">
-                    <i class="fas fa-headset fa-3x mb-2"></i>
-                    <p>Register Grievance</p>
+        /* Chatbot Popup */
+        .chatbot-popup {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 300px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+            z-index: 9999; /* Ensure popup is above other elements */
+            overflow: hidden;
+        }
+
+        .chatbot-header {
+            background-color: #007bff;
+            padding: 10px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chatbot-messages {
+            padding: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+        }
+
+        .chatbot-input-container {
+            display: flex;
+            padding: 10px;
+            background-color: #f1f1f1;
+        }
+
+        .chatbot-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            margin-right: 10px;
+        }
+
+        .chatbot-send-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .chatbot-message {
+            padding: 8px;
+            border-radius: 10px;
+            margin-bottom: 5px;
+        }
+
+        .user-message {
+            background-color: #e0e0e0;
+            text-align: right;
+        }
+
+        .bot-message {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .close-btn {
+            background: none;
+            color: white;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="custom-home-bg p-5 shadow-sm d-flex flex-row justify-content-between align-items-center">
+        <div>
+            <p class="h5 font-weight-bold">
+                Public Grievance Redressal System(PGRS)” is a universal grievance redressal helpline that allows citizens to directly raise their issue to the Chief Minister’s Office.
+            </p>
+            <ul class="custom-list-group mt-5 m-3">
+                <li>Register individual or household-level grievances</li>
+                <li>Follow up on the status of a registered grievance</li>
+                <li>Enquire about government services and schemes</li>
+            </ul>
+        </div>
+        <div class="text-center">
+            <img alt="Hon'ble Chief Minister Government of Andhra Pradesh" class="custom-rounded-rectangle" src="~/Images/Elon.png" width="135" height="130" />
+            <p class="text-muted mt-3">
+                Hon'ble Chief Minister<br />
+                Government of Andhra Pradesh
+            </p>
+        </div>
+    </div>
+
+    <div class="custom-process-bg p-5 rounded-lg shadow-sm mt-5 d-flex justify-content-center align-items-center">
+        <div class="text-center w-100">
+            <h2 class="text-primary font-weight-bold">Process Involved</h2>
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="bg-white p-4 rounded-lg shadow-sm custom-process-border">
+                        <i class="fas fa-headset fa-3x mb-2"></i>
+                        <p>Register Grievance</p>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="bg-white p-4 rounded-lg shadow-sm custom-process-border">
-                    <i class="fas fa-id-card-alt fa-3x mb-2"></i>
-                    <p>Receive Grievance No</p>
+                <div class="col-md-4">
+                    <div class="bg-white p-4 rounded-lg shadow-sm custom-process-border">
+                        <i class="fas fa-id-card-alt fa-3x mb-2"></i>
+                        <p>Receive Grievance No</p>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="bg-white p-4 rounded-lg shadow-sm custom-process-border">
-                    <i class="fas fa-user-check fa-3x mb-2"></i>
-                    <p>Get Updates</p>
+                <div class="col-md-4">
+                    <div class="bg-white p-4 rounded-lg shadow-sm custom-process-border">
+                        <i class="fas fa-user-check fa-3x mb-2"></i>
+                        <p>Get Updates</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-@await Component.InvokeAsync("GrievanceStats")
+    <!-- Floating Chatbot Button (only once) -->
+    <button id="chatbotButton" class="chatbot-button">
+        <i class="fas fa-comments"></i> Chat with us
+    </button>
+
+    <!-- Chatbot Popup -->
+    <div id="chatbotPopup" class="chatbot-popup">
+        <div class="chatbot-header">
+            <h5 class="text-white">Public Grievance Chatbot</h5>
+            <button class="close-btn" onclick="closeChatbot()">×</button>
+        </div>
+        <div id="chatbotMessages" class="chatbot-messages">
+            <!-- Chat messages will appear here -->
+        </div>
+        <div class="chatbot-input-container">
+            <input type="text" id="userInput" class="chatbot-input" placeholder="Type your message..." />
+            <button class="chatbot-send-btn" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+    @await Component.InvokeAsync("GrievanceStats")
+    <script>
+        // Replace with your actual API Key
+        const apiKey = 'AIzaSyC0tgBbEhAvJib8subqTQLdRi6xqy1COWc';  // Replace with your actual API key
+
+        // Google Gemini API URL
+        const geminiApiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
+
+        // Open the chatbot popup when the button is clicked
+        document.getElementById("chatbotButton").onclick = function () {
+            document.getElementById("chatbotPopup").style.display = 'block';
+        };
+
+        // Close the chatbot popup
+        function closeChatbot() {
+            document.getElementById("chatbotPopup").style.display = 'none';
+        }
+
+        // Send the message to the bot and display the response
+        async function sendMessage() {
+            const userMessage = document.getElementById("userInput").value;
+            if (userMessage.trim() === "") return;
+
+            // Display the user's message in the chat
+            appendMessage(userMessage, 'user');
+
+            // Clear the input field
+            document.getElementById("userInput").value = "";
+
+            try {
+                // Get the bot's response from the Gemini API
+                const botResponse = await getBotResponse(userMessage);
+                setTimeout(() => appendMessage(botResponse, 'bot'), 1000);  // Display bot's response after a small delay
+            } catch (error) {
+                console.error("Error fetching bot response:", error);
+                appendMessage("Sorry, I'm having trouble right now. Please try again later.", 'bot');
+            }
+        }
+
+        // Append the message to the chat
+        function appendMessage(message, sender) {
+            const messageContainer = document.createElement("div");
+            messageContainer.classList.add("chatbot-message", sender === 'user' ? 'user-message' : 'bot-message');
+            messageContainer.textContent = message;
+            document.getElementById("chatbotMessages").appendChild(messageContainer);
+            document.getElementById("chatbotMessages").scrollTop = document.getElementById("chatbotMessages").scrollHeight;
+        }
+
+        // Function to get bot's response from the Gemini API
+        async function getBotResponse(userMessage) {
+            try {
+                const response = await fetch(`${geminiApiUrl}?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [
+                            {
+                                parts: [
+                                    {
+                                        text: userMessage,
+                                    },
+                                ],
+                            },
+                        ],
+                    }),
+                });
+
+                // Check if the response is successful
+                if (!response.ok) {
+                    throw new Error(`API request failed with status: ${response.status}`);
+                }
+
+                // Log the raw response for debugging
+                const data = await response.json();
+                console.log("Response Data:", data);  // Log the full response
+
+                // Extract the bot's response from the 'candidates' array
+                if (data.candidates && data.candidates.length > 0) {
+                    const candidate = data.candidates[0]; // Get the first candidate response
+                    const content = candidate.content?.parts?.[0]?.text; // Get the actual text
+                    if (content) {
+                        return content;  // Return the generated response
+                    } else {
+                        return 'Sorry, I couldn\'t understand that. Can you try again?';
+                    }
+                } else {
+                    return 'Sorry, I couldn\'t generate a response. Please try again.';
+                }
+            } catch (error) {
+                console.error("Error fetching bot response:", error);
+                return 'Sorry, I\'m having trouble right now. Please try again later.';
+            }
+        }
+
+    </script>
+</body>

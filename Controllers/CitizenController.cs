@@ -396,12 +396,13 @@ namespace GovConnect.Controllers
         /// </summary>
         public async Task<IActionResult> Route()
         {
-            var officer = User.IsInRole("Officer");
+            var isOfficer = User.IsInRole("Officer");
 
             // If the user is an officer (not a regular user), redirect to the officer dashboard.
-            if (officer)
+            if (isOfficer)
             {
-                var officerId = HttpContext.Session.GetString("officerId");
+                var officer = await _citizenService.GetUserAsync(User);
+                var officerId = officer.Id;
 
                 // If the officerId is found, redirect to the officer dashboard.
                 if (!string.IsNullOrEmpty(officerId))

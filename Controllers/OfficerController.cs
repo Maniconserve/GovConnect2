@@ -96,10 +96,11 @@ namespace GovConnect.Controllers
         ///// <param name="officerId">The officer's ID</param>
         [Authorize(Roles = "Officer")]
         [HttpGet]
-        public IActionResult Dashboard(string officerId)
+        public async Task<IActionResult> Dashboard(string officerId)
         {
-            var model = _dashboardService.GetOfficerDashboard(officerId);
-            model.OfficerName = User.Identity.Name;
+            var model = await _dashboardService.GetOfficerDashboard(officerId);
+            var officer = await _citizenService.GetUserAsync(User);
+            model.OfficerName = officer.UserName;
             if (model == null)
             {
                 return NotFound(); // Return 404 if no dashboard data is found

@@ -1,13 +1,4 @@
 ﻿@inject UserManager<Citizen> citizenManager
-@{
-    string profilePic = "~/Images/Elon.png";
-    var user = await citizenManager.GetUserAsync(User);
-    @if (user != null && user.Profilepic != null && user.Profilepic.Length > 0)
-    {
-        var base64String = Convert.ToBase64String(user.Profilepic);
-        profilePic = $"data:image/jpeg;base64,{base64String}";
-    }
-}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,15 +14,20 @@
     
     <div class="custom-header">
         <div class="custom-gov-connect">
-            <a asp-action="Index" asp-controller="Scheme" style="text-decoration:none;color:black">
-                <span class="custom-g">G</span><span class="custom-ov">ov</span><span class="custom-g-5">C</span><span class="custom-connect">onnect</span>
-            </a>
+            <span class="custom-g">G</span><span class="custom-ov">ov</span><span class="custom-g-5">C</span><span class="custom-connect">onnect</span>
         </div>
         @if (User.Identity.IsAuthenticated)
         {
+            string profilePic = "~/Images/Elon.png";
+            var user = await citizenManager.GetUserAsync(User);
+            @if (user != null && user.Profilepic != null && user.Profilepic.Length > 0)
+            {
+                var base64String = Convert.ToBase64String(user.Profilepic);
+                profilePic = $"data:image/jpeg;base64,{base64String}";
+            }
             <div class="custom-dropdown hover-dropdown">
                 <button class="btn btn-link text-decoration-none" type="button" id="profileDropdown" aria-expanded="false">
-                    <img src="~/Images/Elon.png" alt="Profile" class="rounded-circle" width="40" height="40" />
+                    <img src="@profilePic" alt="Profile" class="rounded-circle" width="40" height="40" />
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
                     <li><a class="dropdown-item" asp-controller="Officer" asp-action="Logout">Logout</a></li>
