@@ -30,6 +30,15 @@ namespace GovConnect.Chat
             Console.WriteLine($"User {Context.UserIdentifier} joined group {grievanceId}");
         }
 
+        public async Task JoinGroup(List<Grievance> grievances)
+        {
+            for (int i = 0; i < grievances.Count; i++)
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, grievances[i].GrievanceID.ToString());
+                Console.WriteLine($"User {Context.UserIdentifier} joined group {grievances[i].GrievanceID}");
+            }
+        }
+
         // Leave the grievance chat group
         public async Task LeaveChat(string grievanceId)
         {

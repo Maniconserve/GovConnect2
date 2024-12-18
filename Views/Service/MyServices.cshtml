@@ -37,7 +37,7 @@
 				<div class="col-md-4">
 					<div class="card shadow-sm border-light rounded-lg">
 						<div class="card-body">
-							<h5 class="card-title text-primary">@service.ServiceName</h5>                              <p class="card-text"><strong>Status:</strong> @service.Status</p>
+							<h5 class="card-title text-primary"><a asp-action="Pservice" asp-route-id="@service.ServiceID" style="text-decoration:none;">@service.ServiceName</a></h5>                              <p class="card-text"><strong>Status:</strong> @service.Status</p>
 							<p class="card-text"><strong>Applied on:</strong> @service.ApplicationDate.ToString("dd MMM yyyy")</p>
 
 							@if (service.Status != Status.Completed && service.Status != Status.Withdrawn)

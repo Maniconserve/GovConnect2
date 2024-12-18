@@ -1,155 +1,238 @@
 ﻿@model OfficerDashboardViewModel
 <head>
-	<title>Officer Dashboard</title>
-	<script src="https://cdn.tailwindcss.com"></script>
+    <title>Officer Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Styles for the notifications container */
+        #notificationsWrapper {
+            position: relative;
+            overflow: visible; /* Disable scrolling */
+            transition: height 0.3s ease-in-out; /* Smooth transition */
+        }
+
+        #notificationsContainer {
+            display: flex;
+            flex-direction: column;
+            padding: 0; /* No padding */
+        }
+
+        .notification {
+            background-color: #ebf8ff; /* Light blue background */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: background-color 0.3s;
+        }
+
+            .notification:hover {
+                background-color: #bee3f8; /* Darker blue on hover */
+            }
+
+        .no-notifications {
+            text-align: center;
+            padding: 1rem;
+            color: #888;
+        }
+    </style>
 </head>
 <body>
-	<div class="bg-gray-100 font-sans leading-normal tracking-normal">
-		<!-- Main Container -->
-		<div class="max-w-7xl mx-auto p-8 min-h-screen flex items-center justify-center">
-			<div class="bg-white shadow-xl rounded-lg p-6 w-full">
-				<!-- Navbar -->
-				<nav class="flex justify-between items-center mb-8">
-					<h1 class="text-2xl font-bold text-blue-600">Officer Dashboard</h1>
-				</nav>
+    <div class="bg-gray-100 font-sans leading-normal tracking-normal">
+        <!-- Main Container -->
+        <div class="max-w-7xl mx-auto p-8 min-h-screen flex items-center justify-center">
+            <div class="bg-white shadow-xl rounded-lg p-6 w-full">
+                <!-- Navbar -->
+                <nav class="flex justify-between items-center mb-8">
+                    <h1 class="text-2xl font-bold text-blue-600">Officer Dashboard</h1>
+                </nav>
 
-				<!-- Alert Message -->
-				@if (TempData["EscalateMessage"] != null)
-				{
-					<div class="alert alert-success bg-blue-50 border border-blue-200 text-blue-600 p-4 mb-8 rounded-lg">
-						<p>@TempData["EscalateMessage"]</p>
-					</div>
-				}
+                <!-- Alert Message -->
+                @if (TempData["EscalateMessage"] != null)
+                {
+                    <div class="alert alert-success bg-blue-50 border border-blue-200 text-blue-600 p-4 mb-8 rounded-lg">
+                        <p>@TempData["EscalateMessage"]</p>
+                    </div>
+                }
 
-				<!-- Welcome Message -->
-				<div class="bg-blue-50 p-6 rounded-lg mb-8">
-					<h2 class="text-2xl font-semibold text-blue-600">Welcome, @Model.OfficerName</h2>
-					<p class="text-gray-600 mt-2">Here's an overview of your assigned tasks and notifications.</p>
-				</div>
+                <!-- Welcome Message -->
+                <div class="bg-blue-50 p-6 rounded-lg mb-8">
+                    <h2 class="text-2xl font-semibold text-blue-600">Welcome, @Model.OfficerName</h2>
+                    <p class="text-gray-600 mt-2">Here's an overview of your assigned tasks and notifications.</p>
+                </div>
 
-				<!-- Grievance Overview Section -->
-				<div class="mb-8">
+                <!-- Grievance Overview Section -->
+                <div class="mb-8">
 
-					<h3 class="text-xl font-semibold text-gray-800 mb-4">Grievance Overview</h3>
-					<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-						<!-- Card 1 -->
-						<div class="bg-gray-100 p-6 rounded-lg shadow-md">
-							<h4 class="text-lg font-semibold text-blue-600">Total Grievances</h4>
-							<p class="text-gray-800 text-2xl font-bold mt-4">@Model.TotalGrievances</p>
-						</div>
-						<!-- Card 2 -->
-						<div class="bg-gray-100 p-6 rounded-lg shadow-md">
-							<h4 class="text-lg font-semibold text-blue-600">Pending Grievances</h4>
-							<p class="text-gray-800 text-2xl font-bold mt-4">@Model.PendingGrievances</p>
-						</div>
-						<!-- Card 3 -->
-						<div class="bg-gray-100 p-6 rounded-lg shadow-md">
-							<h4 class="text-lg font-semibold text-blue-600">Resolved Grievances</h4>
-							<p class="text-gray-800 text-2xl font-bold mt-4">@Model.ResolvedGrievances</p>
-						</div>
-					</div>
-				</div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Grievance Overview</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Card 1 -->
+                        <div class="bg-gray-100 p-6 rounded-lg shadow-md">
+                            <h4 class="text-lg font-semibold text-blue-600">Total Grievances</h4>
+                            <p class="text-gray-800 text-2xl font-bold mt-4">@Model.TotalGrievances</p>
+                        </div>
+                        <!-- Card 2 -->
+                        <div class="bg-gray-100 p-6 rounded-lg shadow-md">
+                            <h4 class="text-lg font-semibold text-blue-600">Pending Grievances</h4>
+                            <p class="text-gray-800 text-2xl font-bold mt-4">@Model.PendingGrievances</p>
+                        </div>
+                        <!-- Card 3 -->
+                        <div class="bg-gray-100 p-6 rounded-lg shadow-md">
+                            <h4 class="text-lg font-semibold text-blue-600">Resolved Grievances</h4>
+                            <p class="text-gray-800 text-2xl font-bold mt-4">@Model.ResolvedGrievances</p>
+                        </div>
+                    </div>
+                </div>
 
-				<!-- Assigned Grievances Table -->
-				<div class="mb-8">
-					<h3 class="text-xl font-semibold text-gray-800 mb-4">Assigned Grievances</h3>
-					<div class="overflow-x-auto">
-						<table class="table-auto w-full border-collapse border border-gray-300">
-							<thead class="bg-blue-600 text-white">
-								<tr>
-									<th class="border border-gray-300 px-4 py-2 text-left">Grievance ID</th>
-									<th class="border border-gray-300 px-4 py-2 text-left">Title</th>
-									<th class="border border-gray-300 px-4 py-2 text-left">Status</th>
-									<th class="border border-gray-300 px-4 py-2 text-left">Posted On</th>
-									<th class="border border-gray-300 px-4 py-2 text-center">Action</th>
-								</tr>
-							</thead>
-							<tbody>
-								@foreach (var grievance in Model.AssignedGrievances)
-								{
-									<tr class="@(grievance.GrievanceID % 2 == 0 ? "bg-gray-100" : "")">
-										<td class="border border-gray-300 px-4 py-2">@grievance.GrievanceID</td>
-										<td class="border border-gray-300 px-4 py-2">@grievance.Title</td>
-										<td class="border border-gray-300 px-4 py-2">@grievance.Status</td>
-										<td class="border border-gray-300 px-4 py-2">@grievance.CreatedAt.ToString("MM/dd/yyyy")</td>
-										<td class="border border-gray-300 px-4 py-2 text-center">
-											<a asp-action="Details" asp-route-id="@grievance.GrievanceID" class="text-blue-600 hover:underline">View Details</a>
-										</td>
-									</tr>
-								}
-							</tbody>
-						</table>
-					</div>
-				</div>
+                <!-- Assigned Grievances Table -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Assigned Grievances</h3>
+                    <div class="overflow-x-auto">
+                        <table class="table-auto w-full border-collapse border border-gray-300">
+                            <thead class="bg-blue-600 text-white">
+                                <tr>
+                                    <th class="border border-gray-300 px-4 py-2 text-left">Grievance ID</th>
+                                    <th class="border border-gray-300 px-4 py-2 text-left">Title</th>
+                                    <th class="border border-gray-300 px-4 py-2 text-left">Status</th>
+                                    <th class="border border-gray-300 px-4 py-2 text-left">Posted On</th>
+                                    <th class="border border-gray-300 px-4 py-2 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var grievance in Model.AssignedGrievances)
+                                {
+                                    <tr class="@(grievance.GrievanceID % 2 == 0 ? "bg-gray-100" : "")">
+                                        <td class="border border-gray-300 px-4 py-2">@grievance.GrievanceID</td>
+                                        <td class="border border-gray-300 px-4 py-2">@grievance.Title</td>
+                                        <td class="border border-gray-300 px-4 py-2">@grievance.Status</td>
+                                        <td class="border border-gray-300 px-4 py-2">@grievance.CreatedAt.ToString("MM/dd/yyyy")</td>
+                                        <td class="border border-gray-300 px-4 py-2 text-center">
+                                            <a asp-action="Details" asp-route-id="@grievance.GrievanceID" class="text-blue-600 hover:underline">View Details</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
-				<!-- Notifications -->
-				<div>
-					<h3 class="text-xl font-semibold text-gray-800 mb-4">Notifications</h3>
-					<div id="notificationsContainer" class="bg-gray-100 p-4 rounded-lg shadow space-y-3">
-						<!-- New notifications will be added here -->
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<script src="~/js/signalr.js"></script>
-	<script>
-		// Create a connection to the SignalR Hub
-		const connection = new signalR.HubConnectionBuilder()
-			.withUrl("/chathub")
-			.build();
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Notifications</h3>
+                    <div id="notificationsWrapper">
+                        <div id="notificationsContainer">
+                            <!-- If no notifications, show a message -->
+                            <div class="no-notifications" id="noNotificationsMessage">No notifications</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="~/js/signalr.js"></script>
+    <script>
+        // Create a connection to the SignalR Hub
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chathub")
+            .build();
 
-		// Start the connection
-		connection.start().then(function () {
-			// Convert the C# model to a JavaScript array (serialize it)
-			var grievances = @Html.Raw(Json.Serialize(Model.AssignedGrievances));
+        // Start the connection
+        connection.start().then(function () {
+            // Example grievanceId
+            var grievances = @Html.Raw(Json.Serialize(Model.AssignedGrievances));
 
-			var grievanceId="387678"
+            // Join the chat for the grievance
+            connection.invoke("JoinGroup", grievances)
+                .catch(function (err) {
+                    console.error("Error while joining the chat for grievance: " + grievances, err.toString());
+                });
+        }).catch(function (err) {
+            console.error("Error while starting SignalR connection: ", err.toString());
+        });
 
-			// Loop through each grievanceId and invoke the JoinChat method
-			// for (var i = 0; i < grievances.length; i++) {
-			// 	var grievance = grievances[i]; // Each grievance is an object
-			// 	var grievanceId = grievance.grievanceID; // Assuming grievanceID is a property
+        connection.on("ReceiveMessage", function (user, name, message, grievanceId) {
+            // Hide the "No notifications" message when there are notifications
+            const noNotificationsMessage = document.getElementById("noNotificationsMessage");
+            noNotificationsMessage.style.display = "none";
 
-			// 	if (grievanceId) {
-			// 		// Call the SignalR method JoinChat and pass each grievanceId
-			// 		connection.invoke("JoinChat", grievanceId)
-			// 			.catch(function (err) {
-			// 				console.error("Error while joining the chat for grievance: " + grievanceId, err.toString());
-			// 			});
-			// 	} else {
-			// 		console.error("Grievance does not have a valid grievanceID", grievance);
-			// 	}
-			// }
-			connection.invoke("JoinChat", grievanceId)
-						.catch(function (err) {
-							console.error("Error while joining the chat for grievance: " + grievanceId, err.toString());
-						});
+            // Create a new notification div
+            const notificationDiv = document.createElement("div");
+            notificationDiv.classList.add("notification");
 
-		}).catch(function (err) {
-			// Handle connection start errors
-			console.error("Error while starting SignalR connection: ", err.toString());
-		});
-			connection.on("ReceiveMessage", function (user, name, message, grievanceId) {
-		// Create a new notification div
-		const notificationDiv = document.createElement("div");
-		notificationDiv.classList.add("bg-blue-50", "p-3", "rounded", "shadow-md", "mb-3", "transition", "duration-300", "ease-in-out");
+            // Add content to the notification
+            notificationDiv.innerHTML = `
+                <a href="/Officer/Details?id=${grievanceId}" class="text-blue-800 text-lg font-semibold mb-2 hover:underline">
+                    <strong>${name}</strong>
+                </a>
+                <span class="text-gray-600 text-base">${message}</span>
+            `;
 
-		// Add content to the notification
-		notificationDiv.innerHTML = `
-			<a href="/Officer/Details?id=${grievanceId}" class="text-gray-800 text-lg font-semibold mb-2">
-				<strong>${name}</strong>
-			</a>
-			<span class="text-gray-600 text-base">${message}</span>
-		`;
+            // Append the new notification to the notifications container
+            const notificationsContainer = document.getElementById("notificationsContainer");
+            notificationsContainer.appendChild(notificationDiv);
 
-		// Append the new notification to the notifications container
-		const notificationsContainer = document.getElementById("notificationsContainer");
-		notificationsContainer.appendChild(notificationDiv);
+            // Update the wrapper height to adjust based on notifications
+            document.getElementById("notificationsWrapper").style.height = `${notificationsContainer.scrollHeight}px`;
 
-		// Optionally, scroll to the bottom of the notifications container
-		notificationsContainer.scrollTop = notificationsContainer.scrollHeight;
+            // Store the notification in localStorage
+            let storedNotifications = JSON.parse(localStorage.getItem("notifications")) || [];
+            storedNotifications.push({ user, name, message, grievanceId });
+            localStorage.setItem("notifications", JSON.stringify(storedNotifications));
+        });
 
-			});
-	</script>
+        // Function to load and display notifications from localStorage when the page loads
+        window.onload = function () {
+            let storedNotifications = JSON.parse(localStorage.getItem("notifications")) || [];
+
+            // Loop through the stored notifications and display them
+            const notificationsContainer = document.getElementById("notificationsContainer");
+
+            // Check if there are any notifications
+            if (storedNotifications.length === 0) {
+                document.getElementById("noNotificationsMessage").style.display = "block"; // Show the "No notifications" message
+                document.getElementById("notificationsWrapper").style.height = "auto"; // Adjust the height to fit the "No notifications" message
+            } else {
+                document.getElementById("noNotificationsMessage").style.display = "none"; // Hide the message if there are notifications
+                storedNotifications.forEach(function (notification, index) {
+                    const notificationDiv = document.createElement("div");
+                    notificationDiv.classList.add("notification");
+
+                    notificationDiv.innerHTML = `
+                        <a href="/Officer/Details?id=${notification.grievanceId}" class="text-blue-800 text-lg font-semibold mb-2 hover:underline">
+                            <strong>${notification.name}</strong>
+                        </a>
+                        <span class="text-gray-600 text-base">${notification.message}</span>
+                    `;
+
+                    // Add the notification to the container
+                    notificationsContainer.appendChild(notificationDiv);
+                });
+
+                // Update the wrapper height to adjust based on notifications
+                document.getElementById("notificationsWrapper").style.height = `${notificationsContainer.scrollHeight}px`;
+            }
+        };
+
+        // Function to handle clicking a notification and removing all notifications with the same name
+        document.getElementById("notificationsContainer").addEventListener("click", function (event) {
+            if (event.target.closest("a")) {
+                const notificationLink = event.target.closest("a");
+                const notificationName = notificationLink.querySelector("strong").textContent;
+
+                // Remove notifications with the same name from localStorage
+                let storedNotifications = JSON.parse(localStorage.getItem("notifications")) || [];
+                storedNotifications = storedNotifications.filter(function (notification) {
+                    return notification.name !== notificationName;
+                });
+
+                // Update localStorage with the remaining notifications
+                localStorage.setItem("notifications", JSON.stringify(storedNotifications));
+
+                // Optionally, you can also remove the notifications from the UI (if needed)
+                const notificationsContainer = document.getElementById("notificationsContainer");
+                const notificationsToRemove = notificationsContainer.querySelectorAll(`[data-name="${notificationName}"]`);
+                notificationsToRemove.forEach(function (notification) {
+                    notification.remove();
+                });
+            }
+        });
+    </script>
+
 </body>

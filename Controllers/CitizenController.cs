@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 
 namespace GovConnect.Controllers
 {
+    
     public class CitizenController : Controller
     {
         private EmailSender emailSender;
@@ -19,7 +20,7 @@ namespace GovConnect.Controllers
 
         /// <summary>
         /// Displays the Registration page if the user is not authenticated.
-        /// </summary>
+        /// </summary>  
         [HttpGet]
         public IActionResult Register()
         {
@@ -214,11 +215,11 @@ namespace GovConnect.Controllers
             }
         }
 
-        /// <summary>
-        /// Displays the user's profile for editing.
-        /// </summary>
-        [Authorize]
-        [HttpGet]
+		/// <summary>
+		/// Displays the user's profile for editing.
+		/// </summary>
+		[Authorize(Roles = "User")]
+		[HttpGet]
         public async Task<IActionResult> Edit()
         {
             try
@@ -237,10 +238,11 @@ namespace GovConnect.Controllers
             }
         }
 
-        /// <summary>
-        /// Handles the profile update action (POST request).
-        /// </summary>
-        [HttpPost]
+		/// <summary>
+		/// Handles the profile update action (POST request).
+		/// </summary>
+		[Authorize(Roles = "User")]
+		[HttpPost]
         public async Task<IActionResult> Edit(Citizen citizen, IFormFile Profilepic)
         {
             bool result = await _citizenService.EditProfile(citizen, Profilepic, User);
@@ -252,10 +254,11 @@ namespace GovConnect.Controllers
             return RedirectToAction("Edit");
         }
 
-        /// <summary>
-        /// Initiates Google login.
-        /// </summary>
-        [HttpGet]
+		/// <summary>
+		/// Initiates Google login.
+		/// </summary>
+		[Authorize(Roles = "User")]
+		[HttpGet]
         public IActionResult GoogleLogin(String provider, String returnUrl = "")
         {
             var redirectUrl = Url.Action("GoogleLoginCallBack", "Citizen", new { ReturnUrl = returnUrl });
@@ -435,7 +438,7 @@ namespace GovConnect.Controllers
             }
             return View("Error"); // Otherwise, show a generic error page.
         }
-        public IActionResult AccessDenied()
+        public IActionResult AccessDenied(String? ReturnUrl)
         {
             return View("AccessDenied");
         }
