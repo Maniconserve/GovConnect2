@@ -17,6 +17,10 @@ namespace GovConnect.Controllers
             _citizenService = citizenService;
             _schemeService = schemeService;
         }
+        public IActionResult Game()
+        {
+            return View();
+        }
 
         /// <summary>
         /// Displays the Registration page if the user is not authenticated.
@@ -110,6 +114,12 @@ namespace GovConnect.Controllers
 
                 if (user != null)
                 {
+                    if (await _citizenService.checkPasswordAsync(user, model.Password) == false)
+                    {
+                        ModelState.AddModelError("","Password is invalid");
+                        model.Schemes = await _citizenService.GetAuthenticationSchemesAsync();
+                        return View(model);
+                    }
                     // Check if the user has the required role (e.g., Citizen, Officer, etc.)
                     var isUserRole = await _citizenService.CheckRoleAsync(user, "User"); // Replace "Citizen" with the required role
 

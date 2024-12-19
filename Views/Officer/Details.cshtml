@@ -104,23 +104,30 @@
                 <!-- Timeline -->
                 <div class="mb-3">
                     <h5>TimeLine:</h5>
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Work</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in Model.Grievance.GetTimeLine())
-                            {
+                    @if (Model.Grievance.GetTimeLine() == null || !Model.Grievance.GetTimeLine().Any())
+                    {
+                        <p class="text-muted">No timeline available for this grievance.</p>
+                    }
+                    else
+                    {
+                        <table class="table table-bordered">
+                            <thead>
                                 <tr>
-                                    <td>@item.Date.ToString("MMMM dd, yyyy")</td>
-                                    <td>@item.Work</td>
+                                    <th>Date</th>
+                                    <th>Work</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Grievance.GetTimeLine())
+                                {
+                                    <tr>
+                                        <td>@item.Date.ToString("MMMM dd, yyyy")</td>
+                                        <td>@item.Work</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
                 </div>
 
                 <!-- Add TimeLine Entry Form -->

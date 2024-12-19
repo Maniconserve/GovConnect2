@@ -51,6 +51,7 @@
                 <ul class="space-y-2">
                     <li>Government Fees = Rs @Model.FeeDetails.GovFee</li>
                     <li>Service Fees = Rs @Model.FeeDetails.ServiceFee</li>
+                    <li>Tax = Rs @Model.FeeDetails.Tax</li>
                     @{
                         var tFee = Model.FeeDetails.GovFee + Model.FeeDetails.ServiceFee + Model.FeeDetails.Tax;
                     }
@@ -69,7 +70,7 @@
 
             <div>
                 <h2 class="text-lg font-bold text-orange-600">Processing Time</h2>
-                <p class="text-gray-700">@Model.ProcessingTime</p>
+                <p class="text-gray-700">@Model.ProcessingTime Days</p>
             </div>
         </div>
     </div>

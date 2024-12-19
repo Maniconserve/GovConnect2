@@ -3,39 +3,113 @@
 <head>
 	<title>Grievance Status</title>
 	<link href="~/css/status.css" rel="stylesheet" />
+	<!-- Optional: Add your image CSS here -->
+	<style>
+		/* Full height container */
+		.full-height {
+			display: flex;
+			flex-direction: row; /* Align items horizontally (side-by-side) */
+			height: 100vh; /* Full viewport height */
+			align-items: stretch; /* Stretch to fill full height */
+		}
+
+		/* Left Image Stack (Vertical Bar on the left) */
+		.left-column {
+			width: 15%; /* Adjust the width of the left image stack */
+			display: flex;
+			flex-direction: column;
+			justify-content: flex-start; /* Align items to the top */
+			align-items: center;
+			overflow: hidden;
+		}
+
+		/* Right Image Stack (Vertical Bar on the right) */
+		.right-column {
+			width: 15%; /* Adjust the width of the right image stack */
+			display: flex;
+			flex-direction: column;
+			justify-content: flex-start; /* Align items to the top */
+			align-items: center;
+			overflow: hidden;
+		}
+
+		/* Image Styling for Stack */
+		.side-image {
+			width: 100%; /* Full width of the side column */
+			height: 165px; /* Fixed height to ensure all images are of the same height */
+			object-fit: cover; /* Ensures the image covers the area while maintaining aspect ratio */
+			margin-bottom: 10px; /* Add spacing between images */
+			transition: transform 0.3s ease, filter 0.3s ease, box-shadow 0.3s ease;
+			cursor: pointer; /* Change cursor to pointer to indicate it's clickable */
+		}
+
+			/* Hover effects for the images */
+			.side-image:hover {
+				transform: scale(1.05); /* Slightly enlarge the image */
+				filter: brightness(85%); /* Slightly darken the image */
+				box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
+			}
+
+		/* Main Content (Grievance Status Form and Table) */
+		.main-content {
+			width: 70%; /* Main content takes most of the space */
+			padding: 20px;
+			overflow-y: auto;
+		}
+
+		/* Optional: Style for the cards and forms */
+		.card {
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+		}
+
+		.card-body {
+			padding: 20px;
+		}
+
+		/* Style the Heading */
+		.head {
+			text-align: center;
+		}
+
+	</style>
 </head>
+
 <body>
 	<div class="min-vh-100">
 		<div class="head">
 			<h1>Grievance Status</h1>
 		</div>
 
-		<div class="container mt-5 w-75">
-			<div class="row justify-content-center">
-				<div class="col-md-8">
-					<div class="card p-4 shadow-lg">
-						<form method="post" action="@Url.Action("Status", "Grievance")">
-							<div class="row g-3">
-								<div class="col-md-6">
-									<label for="grievanceNo" class="form-label fw-bold">Grievance No<span class="text-danger">*</span></label>
-									<input type="text" class="form-control" id="grievanceNo" name="grievanceId" placeholder="Enter Grievance No" required>
-								</div>
-								<div class="col-md-6 d-flex align-items-end">
-									<button type="submit" class="btn btn-success w-100">Get Details</button>
-								</div>
-							</div>
-						</form>
-					</div>
-				</div>
+		<!-- Full Height Flex Layout with Image Bars -->
+		<div class="full-height">
+			<!-- Left Image Column (Vertical Bar at the start) -->
+			<div class="left-column">
+				<a href="https://www.trawell.in/andhra/amaravati" target="_blank"><img src="~/Images/719249815Dhyana_Buddha.jpg" alt="Heritage Site 1" class="side-image"></a>
+				<a href="https://www.trawell.in/andhra/gandikota" target="_blank"><img src="~/Images/626466138Penna_Gorge.jpg" alt="Heritage Site 2" class="side-image"></a>
+				<a href="https://www.trawell.in/andhra/kurnool" target="_blank"><img src="~/Images/565594159Kurnool_Main.jpg" alt="Heritage Site 1" class="side-image"></a>
+				<a href="https://www.tripadvisor.in/AttractionProductReview-g297628-d19779143-Lepakshi_Temple_Day_Tour_from_Bangalore-Bengaluru_Bangalore_District_Karnataka.html" target="_blank"><img src="~/Images/0d.jpg" alt="Heritage Site 2" class="side-image"></a>
 			</div>
-		</div>
 
-		@if (Model != null && Model.Count > 0)
-		{
-			<div class="row justify-content-center mt-5">
-				<div class="col-md-10">
-					<div class="card">
-						<div class="card-body">
+			<!-- Main Content (Grievance Form and Table) -->
+			<div class="main-content">
+				<div class="card p-4 shadow-lg">
+					<form method="post" action="@Url.Action("Status", "Grievance")">
+						<div class="row g-3">
+							<div class="col-md-6">
+								<label for="grievanceNo" class="form-label fw-bold">Grievance No<span class="text-danger">*</span></label>
+								<input type="text" class="form-control" id="grievanceNo" name="grievanceId" placeholder="Enter Grievance No" value="@ViewBag.GrievanceId" required>
+							</div>
+							<div class="col-md-6 d-flex align-items-end">
+								<button type="submit" class="btn btn-success w-100">Get Details</button>
+							</div>
+						</div>
+					</form>
+				</div>
+
+				@if (Model != null && Model.Count > 0)
+				{
+					<div class="row justify-content-center mt-5">
+						<div class="col-md-10">
 							<table class="table table-striped table-bordered">
 								<thead class="table-light">
 									<tr>
@@ -47,7 +121,7 @@
 									@foreach (var entry in Model)
 									{
 										<tr>
-											<td>@entry.Date</td>
+											<td>@entry.Date.ToString("dd-MM-yyyy")</td>
 											<td>@entry.Work</td>
 										</tr>
 									}
@@ -55,14 +129,22 @@
 							</table>
 						</div>
 					</div>
-				</div>
+				}
+				else if (Context.Request.Method == "POST")
+				{
+					<div class="alert alert-warning">
+						No timeline found for the given Grievance ID.
+					</div>
+				}
 			</div>
-		}
-		else if (Context.Request.Method == "POST")
-		{
-			<div class="alert alert-warning">
-				No timeline found for the given Grievance ID.
+
+			<!-- Right Image Column (Vertical Bar at the end) -->
+			<div class="right-column">
+				<a href="https://www.holidify.com/places/araku-valley/" target="_blank"><img src="~/Images/ARAKU-VALLEY.jpg" alt="Heritage Site 1" class="side-image"></a>
+				<a href="https://www.thomascook.in/places-to-visit/nallamala-hills-in-andhra-pradesh-22917" target="_blank"><img src="~/Images/Nallamala Hills.jpg" alt="Heritage Site 2" class="side-image"></a>
+				<a href="https://www.thomascook.in/places-to-visit/maredumilli-in-andhra-pradesh-22906" target="_blank"><img src="~/Images/Maredumilli.jpg" alt="Heritage Site 1" class="side-image"></a>
+				<a href="https://www.thomascook.in/places-to-visit/penchalakona-waterfalls-in-andhra-pradesh-22908" target="_blank"><img src="~/Images/Penchalakona Waterfalls.jpeg" alt="Heritage Site 2" class="side-image"></a>
 			</div>
-		}
+		</div>
 	</div>
 </body>

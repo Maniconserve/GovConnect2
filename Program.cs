@@ -85,8 +85,4 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Citizen}/{action=Route}");
-app.MapControllerRoute(
-	name: "DetailsRoute",
-	pattern: "Details/{Id}",
-	defaults: new { controller = "Product", action = "Details" });
 app.Run();

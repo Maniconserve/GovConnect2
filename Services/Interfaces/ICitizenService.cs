@@ -6,6 +6,7 @@ namespace GovConnect.Services.Interfaces
         Task<Citizen> GetUserByEmailAsync(string email);
         Task<IdentityResult> RegisterUserAsync(RegisterViewModel model);
         Task<bool> CheckRoleAsync(Citizen user, string role);
+        Task<bool> checkPasswordAsync(Citizen citizen, String password);
         Task<string> GetEmailConfirmationTokenAsync(string email);
         Task<Microsoft.AspNetCore.Identity.SignInResult> SignInUserAsync(Citizen user, LoginViewModel model, bool isPersistent, bool lockoutOnFailure);
         Task SignInAsync(Citizen user, bool isPersistent);

@@ -166,11 +166,11 @@
     </div>
     @await Component.InvokeAsync("GrievanceStats")
     <script>
-        // Replace with your actual API Key
-        const apiKey = 'AIzaSyC0tgBbEhAvJib8subqTQLdRi6xqy1COWc';  // Replace with your actual API key
+        // Replace with your actual OpenAI API Key
+        const apiKey = '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';  // Make sure this is the correct API key and do not expose it publicly
 
-        // Google Gemini API URL
-        const geminiApiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
+        // OpenAI ChatGPT API URL
+        const chatgptApiUrl = 'https://api.openai.com/v1/chat/completions';
 
         // Open the chatbot popup when the button is clicked
         document.getElementById("chatbotButton").onclick = function () {
@@ -194,7 +194,7 @@
             document.getElementById("userInput").value = "";
 
             try {
-                // Get the bot's response from the Gemini API
+                // Get the bot's response from the ChatGPT API
                 const botResponse = await getBotResponse(userMessage);
                 setTimeout(() => appendMessage(botResponse, 'bot'), 1000);  // Display bot's response after a small delay
             } catch (error) {
@@ -212,24 +212,22 @@
             document.getElementById("chatbotMessages").scrollTop = document.getElementById("chatbotMessages").scrollHeight;
         }
 
-        // Function to get bot's response from the Gemini API
+        // Function to get bot's response from the ChatGPT API
         async function getBotResponse(userMessage) {
             try {
-                const response = await fetch(`${geminiApiUrl}?key=${apiKey}`, {
+                const response = await fetch(chatgptApiUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`,  // Ensure the API key is passed correctly
                     },
                     body: JSON.stringify({
-                        contents: [
-                            {
-                                parts: [
-                                    {
-                                        text: userMessage,
-                                    },
-                                ],
-                            },
+                        model: 'gpt-3.5-turbo',  // You can change this to 'gpt-4' or other models if needed
+                        messages: [
+                            { role: 'user', content: userMessage }  // Send the user's message to the model
                         ],
+                        max_tokens: 150,  // Customize this based on the desired response length
+                        temperature: 0.7  // Adjust creativity (0.0 is most deterministic, 1.0 is most creative)
                     }),
                 });
 
@@ -238,19 +236,14 @@
                     throw new Error(`API request failed with status: ${response.status}`);
                 }
 
-                // Log the raw response for debugging
+                // Get the JSON response data
                 const data = await response.json();
-                console.log("Response Data:", data);  // Log the full response
+                console.log("Response Data:", data);  // Log the full response for debugging
 
-                // Extract the bot's response from the 'candidates' array
-                if (data.candidates && data.candidates.length > 0) {
-                    const candidate = data.candidates[0]; // Get the first candidate response
-                    const content = candidate.content?.parts?.[0]?.text; // Get the actual text
-                    if (content) {
-                        return content;  // Return the generated response
-                    } else {
-                        return 'Sorry, I couldn\'t understand that. Can you try again?';
-                    }
+                // Extract the bot's response from the API's 'choices' array
+                const content = data.choices && data.choices.length > 0 ? data.choices[0].message.content : null;
+                if (content) {
+                    return content;  // Return the generated response
                 } else {
                     return 'Sorry, I couldn\'t generate a response. Please try again.';
                 }
@@ -259,6 +252,7 @@
                 return 'Sorry, I\'m having trouble right now. Please try again later.';
             }
         }
-
     </script>
+
+
 </body>

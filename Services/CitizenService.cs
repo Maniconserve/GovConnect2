@@ -49,6 +49,11 @@ namespace GovConnect.Services
             return await _citizenRepository.isInRoleAsync(User, role);
         }
 
+        public async Task<bool> checkPasswordAsync(Citizen citizen, String password)
+        {
+            return await _citizenRepository.checkPasswordAsync(citizen, password);
+        }
+
         public async Task<String> GetEmailConfirmationTokenAsync(string email)
         {
             var user = await _citizenRepository.GetUserByEmailAsync(email);

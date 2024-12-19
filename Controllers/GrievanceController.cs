@@ -89,7 +89,7 @@ namespace GovConnect.Controllers
             }
 
             var timeline = _grievanceService.GetGrievanceTimelineAsync(grievanceId.Value).Result; // Get the timeline of actions for the grievance
-
+            ViewBag.GrievanceId = grievanceId; 
             return View(timeline); // Return the timeline view
         }
 

@@ -8,6 +8,8 @@ namespace GovConnect.Repository.Interfaces
         Task<IdentityResult> CreateUserAsync(Citizen citizen, string password);
         Task<IdentityResult> AddToRoleAsync(Citizen user, string role);
         Task<bool> isInRoleAsync(Citizen user, string role);
+
+        Task<bool> checkPasswordAsync(Citizen citizen, String password);
         Task<string> GenerateTokenAsync(Citizen user);
         Task<Microsoft.AspNetCore.Identity.SignInResult> PasswordSignInAsync(Citizen user, LoginViewModel model, bool isPersistent, bool lockoutOnFailure);
         Task<IdentityResult> ConfirmEmailAsync(Citizen user, string token);

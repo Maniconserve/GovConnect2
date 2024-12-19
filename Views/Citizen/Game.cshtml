@@ -1,0 +1,123 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bike Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+        }
+
+        canvas {
+            border: 2px solid #000;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        // Set up the game canvas
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = 800;
+        canvas.height = 400;
+
+        // Game variables
+        let bikeX = 50, bikeY = canvas.height - 60, bikeWidth = 40, bikeHeight = 20;
+        let bikeSpeed = 4, bikeDirection = "RIGHT";
+        let obstacles = [];
+        let score = 0;
+        let gameInterval;
+
+        // Bike and obstacle properties
+        const bike = new Image();
+        bike.src = "https://img.icons8.com/ios/452/bicycle.png"; // You can replace this with your own bike image
+
+        const obstacleWidth = 30, obstacleHeight = 30;
+
+        // Function to create random obstacles
+        function createObstacle() {
+            let obstacleX = canvas.width;
+            let obstacleY = Math.random() * (canvas.height - obstacleHeight);
+            obstacles.push({ x: obstacleX, y: obstacleY });
+        }
+
+        // Function to draw bike and obstacles
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw bike
+            ctx.drawImage(bike, bikeX, bikeY, bikeWidth, bikeHeight);
+
+            // Move and draw obstacles
+            for (let i = 0; i < obstacles.length; i++) {
+                const obs = obstacles[i];
+                obs.x -= 5; // Move obstacles from right to left
+                ctx.fillStyle = "red";
+                ctx.fillRect(obs.x, obs.y, obstacleWidth, obstacleHeight);
+
+                // Check for collision
+                if (obs.x < bikeX + bikeWidth && obs.x + obstacleWidth > bikeX &&
+                    obs.y < bikeY + bikeHeight && obs.y + obstacleHeight > bikeY) {
+                    endGame();
+                }
+
+                // Remove obstacles that go off-screen
+                if (obs.x + obstacleWidth < 0) {
+                    obstacles.splice(i, 1);
+                    score++;
+                }
+            }
+
+            // Display score
+            ctx.font = "20px Arial";
+            ctx.fillText("Score: " + score, 10, 30);
+
+            // Check if game is over
+            if (bikeY > canvas.height - bikeHeight || bikeY < 0) {
+                endGame();
+            }
+        }
+
+        // Function to handle key presses
+        function moveBike(event) {
+            if (event.key === "ArrowUp") bikeY -= bikeSpeed;
+            if (event.key === "ArrowDown") bikeY += bikeSpeed;
+        }
+
+        // Function to end the game
+        function endGame() {
+            clearInterval(gameInterval);
+            alert("Game Over! Your Score: " + score);
+        }
+
+        // Start the game
+        function startGame() {
+            obstacles = [];
+            score = 0;
+            bikeY = canvas.height - 60;
+
+            gameInterval = setInterval(() => {
+                draw();
+                createObstacle();
+            }, 20);
+        }
+
+        // Event listener for key presses
+        document.addEventListener("keydown", moveBike);
+
+        // Start the game when the page loads
+        startGame();
+    </script>
+
+</body>
+</html>

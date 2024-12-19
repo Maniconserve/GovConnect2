@@ -1,7 +1,4 @@
 ﻿using System.Security.Claims;
-using GovConnect.Repository.Interfaces;
-using Microsoft.AspNetCore.Identity;
-
 namespace GovConnect.Repository
 {
     public class CitizenRepository : ICitizenRepository
@@ -33,6 +30,11 @@ namespace GovConnect.Repository
         public async Task<bool> isInRoleAsync(Citizen User,String role)
         {
             return await _citizenManager.IsInRoleAsync(User,role);
+        }
+
+        public async Task<bool> checkPasswordAsync(Citizen citizen,String password)
+        {
+            return await _citizenManager.CheckPasswordAsync(citizen, password);
         }
 
         public async Task<String> GenerateTokenAsync(Citizen user)
