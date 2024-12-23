@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 
 namespace GovConnect.Controllers
 {
-    
     public class CitizenController : Controller
     {
         private EmailSender emailSender;
@@ -17,11 +16,6 @@ namespace GovConnect.Controllers
             _citizenService = citizenService;
             _schemeService = schemeService;
         }
-        public IActionResult Game()
-        {
-            return View();
-        }
-
         /// <summary>
         /// Displays the Registration page if the user is not authenticated.
         /// </summary>  

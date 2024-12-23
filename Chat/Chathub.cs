@@ -27,7 +27,6 @@ namespace GovConnect.Chat
         {
             // Add user to the group
             await Groups.AddToGroupAsync(Context.ConnectionId, grievanceId);
-            Console.WriteLine($"User {Context.UserIdentifier} joined group {grievanceId}");
         }
 
         public async Task JoinGroup(List<Grievance> grievances)
@@ -35,7 +34,6 @@ namespace GovConnect.Chat
             for (int i = 0; i < grievances.Count; i++)
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, grievances[i].GrievanceID.ToString());
-                Console.WriteLine($"User {Context.UserIdentifier} joined group {grievances[i].GrievanceID}");
             }
         }
 
@@ -43,7 +41,6 @@ namespace GovConnect.Chat
         public async Task LeaveChat(string grievanceId)
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, grievanceId);
-            Console.WriteLine($"User {Context.UserIdentifier} left group {grievanceId}");
         }
     }
 }

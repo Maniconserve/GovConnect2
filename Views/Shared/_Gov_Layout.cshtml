@@ -1,59 +1,66 @@
 ﻿@inject UserManager<Citizen> citizenManager
+@inject IGrievanceRepository grievanceRepository
 <!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<link rel="icon" href="~/Images/ap-logo.png" />
-	<link rel="stylesheet" href="~/css/govconnect.min.css" asp-append-version="true"/>
-	<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true"/>
+	<link rel="stylesheet" href="~/css/govconnect.min.css" asp-append-version="true" />
+	<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEJ6H5f6O5Q9w6YF7L1h8wL2Zw8z57ZyD6gDqg6uJek1V5dq5de1lfdJgn1F9" crossorigin="anonymous">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<link href="~/css/notification.css" rel="stylesheet" />
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
 
-    <div class="custom-header">
-        <div class="custom-gov-connect">
-            <a asp-action="Index" asp-controller="Scheme" style="text-decoration:none;color:black">
-                <span class="custom-g">G</span><span class="custom-ov">ov</span><span class="custom-g-5">C</span><span class="custom-connect">onnect</span>
-            </a>
-        </div>
-        <div class="custom-header-menu">
-            <div class="custom-menu-item"><a asp-action="Index" asp-controller="Scheme" class="custom-no-link">Home</a></div>
-            <div class="custom-menu-item"><a asp-controller="Grievance" asp-action="Lodge" class="custom-no-link">Lodge</a></div>
-            <div class="custom-menu-item"><a asp-controller="Grievance" asp-action="Status" class="custom-no-link">Status</a></div>
-            <div class="custom-menu-item"><a asp-controller="Service" asp-action="Index" class="custom-no-link">Services</a></div>
-            <div class="custom-menu-item"><a asp-controller="Scheme" asp-action="Search" class="custom-no-link">Schemes</a></div>
-        </div>
-        @if (User.Identity.IsAuthenticated)
-        {
-            string profilePic = "~/Images/Elon.png";
-            var username = User.Identity.Name;
-            var user = await citizenManager.GetUserAsync(User);
-            @if (user != null && user.Profilepic != null && user.Profilepic.Length > 0)
-            {
-                var base64String = Convert.ToBase64String(user.Profilepic);
-                profilePic = $"data:image/jpeg;base64,{base64String}";
-            }
+	<div class="custom-header">
+		<div class="custom-gov-connect">
+			<a asp-action="Index" asp-controller="Scheme" style="text-decoration:none;color:black">
+				<span class="custom-g">G</span><span class="custom-ov">ov</span><span class="custom-g-5">C</span><span class="custom-connect">onnect</span>
+			</a>
+		</div>
+		<div class="custom-header-menu">
+			<div class="custom-menu-item"><a asp-action="Index" asp-controller="Scheme" class="custom-no-link">Home</a></div>
+			<div class="custom-menu-item"><a asp-controller="Grievance" asp-action="Lodge" class="custom-no-link">Lodge</a></div>
+			<div class="custom-menu-item"><a asp-controller="Grievance" asp-action="Status" class="custom-no-link">Status</a></div>
+			<div class="custom-menu-item"><a asp-controller="Service" asp-action="Index" class="custom-no-link">Services</a></div>
+			<div class="custom-menu-item"><a asp-controller="Scheme" asp-action="Search" class="custom-no-link">Schemes</a></div>
+		</div>
+		@if (User.Identity.IsAuthenticated)
+		{
+			string profilePic = "~/Images/Elon.png";
+			var username = User.Identity.Name;
+			var user = await citizenManager.GetUserAsync(User);
+			ViewBag.UserId = user.Id;
+			@if (user != null && user.Profilepic != null && user.Profilepic.Length > 0)
+			{
+				var base64String = Convert.ToBase64String(user.Profilepic);
+				profilePic = $"data:image/jpeg;base64,{base64String}";
+			}
 
-            <div class="custom-dropdown hover-dropdown">
-                <button class="btn btn-link text-decoration-none" type="button" id="profileDropdown" aria-expanded="false">
-                    <img src="@profilePic" alt="Profile" class="rounded-circle" width="40" height="40" />
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-                    <li><a class="dropdown-item" asp-controller="Citizen" asp-action="Edit">My Profile</a></li>
-                    <li><a class="dropdown-item" asp-controller="Service" asp-action="MyServices">My Services</a></li>
-                    <li><a class="dropdown-item" asp-controller="Grievance" asp-action="MyGrievances">My Grievances</a></li>
-                    <li><a class="dropdown-item" asp-controller="Citizen" asp-action="Logout">Logout</a></li>
-                </ul>
-            </div>
-        }
-        else
-        {   
-            <a asp-controller="Citizen" asp-action="Login" class="custom-button text-decoration-none"><span class="custom-try-free">Login</span></a>
-        }
-    </div>
-
+			<div class="custom-dropdown hover-dropdown">
+				<button class="btn btn-link text-decoration-none" type="button" id="profileDropdown" aria-expanded="false">
+					<img src="@profilePic" alt="Profile" class="rounded-circle" width="40" height="40" />
+				</button>
+				<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+					<li><a class="dropdown-item" asp-controller="Citizen" asp-action="Edit">My Profile</a></li>
+					<li><a class="dropdown-item" asp-controller="Service" asp-action="MyServices">My Services</a></li>
+					<li><a class="dropdown-item" asp-controller="Grievance" asp-action="MyGrievances">My Grievances</a></li>
+					<li><a class="dropdown-item" asp-controller="Citizen" asp-action="Logout">Logout</a></li>
+				</ul>
+			</div>
+		}
+		else
+		{
+			<a asp-controller="Citizen" asp-action="Login" class="custom-button text-decoration-none"><span class="custom-try-free">Login</span></a>
+		}
+	</div>
+	<div id="notification-wrapper" style="display: none;">
+		<div id="notification-overlay" class="notification-container">
+			<button id="clear-all-btn" class="clear-all-btn">&times;</button>
+		</div>
+	</div>
 	<div class="container mt-4 flex-grow-1">
 		@RenderBody()
 	</div>
@@ -64,8 +71,142 @@
 		}
 	</footer>
 	<script src="~/js/govconnect.min.js" asp-append-version="true"></script>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    @await Html.PartialAsync("_ValidationScriptsPartial")
+	<script src="~/lib/jquery/dist/jquery.min.js"></script>
+	@await Html.PartialAsync("_ValidationScriptsPartial")
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="~/js/signalr.js"></script>
+	<script>
+		// Create a connection to the SignalR Hub
+		const connection = new signalR.HubConnectionBuilder()
+			.withUrl("/chathub")
+			.build();
+
+		// Start the connection
+		connection.start().then(function () {
+			var grievances = @Html.Raw(Json.Serialize(await grievanceRepository.GetGrievancesByUserAsync(ViewBag.UserId, null)));
+
+			// Join the chat for the grievance
+			connection.invoke("JoinGroup", grievances)
+				.catch(function (err) {
+					console.error("Error while joining the chat for grievance: " + grievances, err.toString());
+				});
+		}).catch(function (err) {
+			console.error("Error while starting SignalR connection: ", err.toString());
+		});
+
+		connection.on("ReceiveMessage", function (user, name, message, grievanceId) {
+			// Hide the "No notifications" message when there are notifications
+			const noNotificationsMessage = document.getElementById("noNotificationsMessage");
+			if (noNotificationsMessage) {
+				noNotificationsMessage.style.display = "none";
+			}
+
+			// Create a new notification div
+			const notificationDiv = document.createElement("div");
+			notificationDiv.classList.add("notification");
+
+			// Add content to the notification
+			notificationDiv.innerHTML = `
+							<a href="/Grievance/Details?id=${grievanceId}" class="text-white text-lg font-bold hover:underline">
+								<strong>${name}</strong>
+							</a>
+							<span class="text-white text-base">${message}</span>
+							<button class="close-btn">&times;</button>
+							`;
+
+			// Add a data-name attribute to identify each notification uniquely
+			notificationDiv.setAttribute("data-name", name);
+
+			// Append the new notification to the notification overlay container
+			const notificationWrapper = document.getElementById("notification-wrapper");
+			const notificationOverlay = document.getElementById("notification-overlay");
+
+			// Show the notification wrapper if hidden
+			notificationWrapper.style.display = "flex";
+
+			// Append the notification to the container
+			notificationOverlay.appendChild(notificationDiv);
+
+			// Store the notification in localStorage
+			let storedNotifications = JSON.parse(localStorage.getItem("notifications")) || [];
+			storedNotifications.push({ user, name, message, grievanceId });
+			localStorage.setItem("notifications", JSON.stringify(storedNotifications));
+		});
+
+		// Function to load and display notifications from localStorage when the page loads
+		window.onload = function () {
+			let storedNotifications = JSON.parse(localStorage.getItem("notifications")) || [];
+
+			// Loop through the stored notifications and display them
+			const notificationWrapper = document.getElementById("notification-wrapper");
+			const notificationOverlay = document.getElementById("notification-overlay");
+
+			// Check if there are any notifications
+			if (storedNotifications.length === 0) {
+				const noNotificationsMessage = document.getElementById("noNotificationsMessage");
+				if (noNotificationsMessage) {
+					noNotificationsMessage.style.display = "block"; // Show the "No notifications" message
+				}
+				notificationWrapper.style.display = "none"; // Hide notification wrapper if no notifications
+			} else {
+				notificationWrapper.style.display = "flex"; // Show the notification overlay
+				storedNotifications.forEach(function (notification) {
+					const notificationDiv = document.createElement("div");
+					notificationDiv.classList.add("notification");
+
+					notificationDiv.innerHTML = `
+												<a href="/Officer/Details?id=${notification.grievanceId}" class="text-blue-800 text-lg font-semibold hover:underline">
+													<strong>${notification.name}</strong>
+												</a>
+												<span class="text-gray-600 text-base">${notification.message}</span>
+												<button class="close-btn">&times;</button>
+											`;
+
+					// Add the notification to the overlay container
+					notificationDiv.setAttribute("data-name", notification.name);
+					notificationOverlay.appendChild(notificationDiv);
+				});
+			}
+		};
+
+		// Handle clearing of all notifications
+		document.getElementById("clear-all-btn").addEventListener("click", function () {
+			// Clear all notifications from UI
+			const notificationOverlay = document.getElementById("notification-overlay");
+			notificationOverlay.innerHTML = ''; // Clear all notifications from the container
+
+			// Clear notifications from localStorage
+			localStorage.setItem("notifications", JSON.stringify([]));
+
+			// Hide the notification wrapper
+			document.getElementById("notification-wrapper").style.display = "none";
+		});
+
+		// Handle close button for individual notifications
+		document.getElementById("notification-overlay").addEventListener("click", function (event) {
+			if (event.target.closest("a")) {
+				const notificationDiv = event.target.closest(".notification");
+
+				// Remove the notification from UI
+				notificationDiv.remove();
+
+				// Remove the notification from localStorage
+				let storedNotifications = JSON.parse(localStorage.getItem("notifications")) || [];
+				const grievanceId = notificationDiv.querySelector("a").href.split("=")[1];
+				storedNotifications = storedNotifications.filter(function (notification) {
+					return notification.grievanceId !== grievanceId;
+				});
+
+				// Update localStorage with the remaining notifications
+				localStorage.setItem("notifications", JSON.stringify(storedNotifications));
+
+				// Hide "No notifications" message if there are no notifications left
+				if (storedNotifications.length === 0) {
+					document.getElementById("noNotificationsMessage").style.display = "block";
+					document.getElementById("notification-wrapper").style.display = "none";
+				}
+			}
+		});
+	</script>
 </body>
 </html>
