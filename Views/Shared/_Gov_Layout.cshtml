@@ -1,5 +1,7 @@
 ﻿@inject UserManager<Citizen> citizenManager
 @inject IGrievanceRepository grievanceRepository
+@using Microsoft.AspNetCore.Mvc;
+@using System.Security.Claims;
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -33,7 +35,8 @@
 			var username = User.Identity.Name;
 			var user = await citizenManager.GetUserAsync(User);
 			ViewBag.UserId = user.Id;
-			@if (user != null && user.Profilepic != null && user.Profilepic.Length > 0)
+
+			if (user != null && user.Profilepic != null && user.Profilepic.Length > 0)
 			{
 				var base64String = Convert.ToBase64String(user.Profilepic);
 				profilePic = $"data:image/jpeg;base64,{base64String}";
@@ -56,11 +59,14 @@
 			<a asp-controller="Citizen" asp-action="Login" class="custom-button text-decoration-none"><span class="custom-try-free">Login</span></a>
 		}
 	</div>
-	<div id="notification-wrapper" style="display: none;">
-		<div id="notification-overlay" class="notification-container">
-			<button id="clear-all-btn" class="clear-all-btn">&times;</button>
+	@if (User.Identity.IsAuthenticated)
+	{
+		<div id="notification-wrapper" style="display: none;">
+			<div id="notification-overlay" class="notification-container">
+				<button id="clear-all-btn" class="clear-all-btn">&times;</button>
+			</div>
 		</div>
-	</div>
+	}
 	<div class="container mt-4 flex-grow-1">
 		@RenderBody()
 	</div>
@@ -95,118 +101,132 @@
 		});
 
 		connection.on("ReceiveMessage", function (user, name, message, grievanceId) {
-			// Hide the "No notifications" message when there are notifications
-			const noNotificationsMessage = document.getElementById("noNotificationsMessage");
-			if (noNotificationsMessage) {
-				noNotificationsMessage.style.display = "none";
-			}
+    // Hide the "No notifications" message when there are notifications
+    const noNotificationsMessage = document.getElementById("noNotificationsMessage");
+    if (noNotificationsMessage) {
+        noNotificationsMessage.style.display = "none";
+    }
 
-			// Create a new notification div
-			const notificationDiv = document.createElement("div");
-			notificationDiv.classList.add("notification");
+    // Create a new notification div
+    const notificationDiv = document.createElement("div");
+    notificationDiv.classList.add("notification");
 
-			// Add content to the notification
-			notificationDiv.innerHTML = `
-							<a href="/Grievance/Details?id=${grievanceId}" class="text-white text-lg font-bold hover:underline">
-								<strong>${name}</strong>
-							</a>
-							<span class="text-white text-base">${message}</span>
-							<button class="close-btn">&times;</button>
-							`;
+    // Add content to the notification
+    notificationDiv.innerHTML = `
+        <a href="/Grievance/Details?id=${grievanceId}" class="text-white text-lg font-bold hover:underline">
+            <strong>${name}</strong>
+        </a>
+        <span class="text-white text-base">${message}</span>
+        <button class="close-btn">&times;</button>
+    `;
 
-			// Add a data-name attribute to identify each notification uniquely
-			notificationDiv.setAttribute("data-name", name);
+    // Add a data-name attribute to identify each notification uniquely
+    notificationDiv.setAttribute("data-name", name);
 
-			// Append the new notification to the notification overlay container
-			const notificationWrapper = document.getElementById("notification-wrapper");
-			const notificationOverlay = document.getElementById("notification-overlay");
+    // Append the new notification to the notification overlay container
+    const notificationWrapper = document.getElementById("notification-wrapper");
+    const notificationOverlay = document.getElementById("notification-overlay");
 
-			// Show the notification wrapper if hidden
-			notificationWrapper.style.display = "flex";
+    // Show the notification wrapper if hidden
+    notificationWrapper.style.display = "flex";
 
-			// Append the notification to the container
-			notificationOverlay.appendChild(notificationDiv);
+    // Append the notification to the container
+    notificationOverlay.appendChild(notificationDiv);
 
-			// Store the notification in localStorage
-			let storedNotifications = JSON.parse(localStorage.getItem("notifications")) || [];
-			storedNotifications.push({ user, name, message, grievanceId });
-			localStorage.setItem("notifications", JSON.stringify(storedNotifications));
-		});
+    // Get the current user's id to associate the notification
+    var currentUserId = '@User.FindFirstValue(ClaimTypes.NameIdentifier)';
+    
+    // Retrieve the notifications for the current user or initialize an empty array
+    let storedNotifications = JSON.parse(localStorage.getItem(currentUserId)) || [];
+
+    // Add the new notification to the stored notifications
+    storedNotifications.push({ user, name, message, grievanceId, userId: currentUserId });
+
+    // Store the updated notifications for the current user
+    localStorage.setItem(currentUserId, JSON.stringify(storedNotifications));
+});
+
 
 		// Function to load and display notifications from localStorage when the page loads
-		window.onload = function () {
-			let storedNotifications = JSON.parse(localStorage.getItem("notifications")) || [];
+// Function to load and display notifications from localStorage when the page loads
+window.onload = function () {
+    // Get the current user's id
+    var currentUserId = '@User.FindFirstValue(ClaimTypes.NameIdentifier)';
 
-			// Loop through the stored notifications and display them
-			const notificationWrapper = document.getElementById("notification-wrapper");
-			const notificationOverlay = document.getElementById("notification-overlay");
+    // Retrieve the stored notifications for the current user
+    let storedNotifications = JSON.parse(localStorage.getItem(currentUserId)) || [];
 
-			// Check if there are any notifications
-			if (storedNotifications.length === 0) {
-				const noNotificationsMessage = document.getElementById("noNotificationsMessage");
-				if (noNotificationsMessage) {
-					noNotificationsMessage.style.display = "block"; // Show the "No notifications" message
-				}
-				notificationWrapper.style.display = "none"; // Hide notification wrapper if no notifications
-			} else {
-				notificationWrapper.style.display = "flex"; // Show the notification overlay
-				storedNotifications.forEach(function (notification) {
-					const notificationDiv = document.createElement("div");
-					notificationDiv.classList.add("notification");
+    // Loop through the stored notifications and display them
+    const notificationWrapper = document.getElementById("notification-wrapper");
+    const notificationOverlay = document.getElementById("notification-overlay");
 
-					notificationDiv.innerHTML = `
-												<a href="/Officer/Details?id=${notification.grievanceId}" class="text-blue-800 text-lg font-semibold hover:underline">
-													<strong>${notification.name}</strong>
-												</a>
-												<span class="text-gray-600 text-base">${notification.message}</span>
-												<button class="close-btn">&times;</button>
-											`;
+    // Check if there are any notifications for the current user
+    if (storedNotifications.length === 0) {
+        notificationWrapper.style.display = "none"; // Hide notification wrapper if no notifications
+    } else {
+        notificationWrapper.style.display = "flex"; // Show the notification overlay
+        storedNotifications.forEach(function (notification) {
+            const notificationDiv = document.createElement("div");
+            notificationDiv.classList.add("notification");
 
-					// Add the notification to the overlay container
-					notificationDiv.setAttribute("data-name", notification.name);
-					notificationOverlay.appendChild(notificationDiv);
-				});
-			}
-		};
+            notificationDiv.innerHTML = `
+                <a href="/Grievance/Details?id=${notification.grievanceId}" class="text-blue-800 text-lg font-semibold hover:underline">
+                    <strong>${notification.name}</strong>
+                </a>
+                <span class="text-gray-600 text-base">${notification.message}</span>
+                <button class="close-btn">&times;</button>
+            `;
 
-		// Handle clearing of all notifications
-		document.getElementById("clear-all-btn").addEventListener("click", function () {
-			// Clear all notifications from UI
-			const notificationOverlay = document.getElementById("notification-overlay");
-			notificationOverlay.innerHTML = ''; // Clear all notifications from the container
+            // Add the notification to the overlay container
+            notificationDiv.setAttribute("data-name", notification.name);
+            notificationOverlay.appendChild(notificationDiv);
+        });
+    }
+};
 
-			// Clear notifications from localStorage
-			localStorage.setItem("notifications", JSON.stringify([]));
 
-			// Hide the notification wrapper
-			document.getElementById("notification-wrapper").style.display = "none";
-		});
+// Handle clearing of all notifications
+document.getElementById("clear-all-btn").addEventListener("click", function () {
+    // Clear all notifications from UI
+    const notificationOverlay = document.getElementById("notification-overlay");
+    notificationOverlay.innerHTML = ''; // Clear all notifications from the container
 
-		// Handle close button for individual notifications
-		document.getElementById("notification-overlay").addEventListener("click", function (event) {
-			if (event.target.closest("a")) {
-				const notificationDiv = event.target.closest(".notification");
+    // Clear notifications from localStorage
+    localStorage.setItem("notifications", JSON.stringify([]));
 
-				// Remove the notification from UI
-				notificationDiv.remove();
+    // Hide the notification wrapper
+    document.getElementById("notification-wrapper").style.display = "none";
+});
 
-				// Remove the notification from localStorage
-				let storedNotifications = JSON.parse(localStorage.getItem("notifications")) || [];
-				const grievanceId = notificationDiv.querySelector("a").href.split("=")[1];
-				storedNotifications = storedNotifications.filter(function (notification) {
-					return notification.grievanceId !== grievanceId;
-				});
+// Handle close button for individual notifications
+// Handle close button for individual notifications
+document.getElementById("notification-overlay").addEventListener("click", function (event) {
+    if (event.target.closest(".close-btn")) {  // Check if the target is the close button
+        const notificationDiv = event.target.closest(".notification"); // Get the closest notification div
+        const grievanceId = notificationDiv.querySelector("a").href.split("=")[1]; // Get the grievanceId
 
-				// Update localStorage with the remaining notifications
-				localStorage.setItem("notifications", JSON.stringify(storedNotifications));
+        // Remove the notification from UI
+        notificationDiv.remove();
 
-				// Hide "No notifications" message if there are no notifications left
-				if (storedNotifications.length === 0) {
-					document.getElementById("noNotificationsMessage").style.display = "block";
-					document.getElementById("notification-wrapper").style.display = "none";
-				}
-			}
-		});
+        // Retrieve the stored notifications for the current user
+        var currentUserId = '@User.FindFirstValue(ClaimTypes.NameIdentifier)';
+        let storedNotifications = JSON.parse(localStorage.getItem(currentUserId)) || [];
+
+        // Remove the notification from localStorage by filtering out the grievanceId
+        storedNotifications = storedNotifications.filter(function (notification) {
+            return notification.grievanceId !== grievanceId;
+        });
+
+        // Update localStorage with the remaining notifications
+        localStorage.setItem(currentUserId, JSON.stringify(storedNotifications));
+
+        // If there are no more notifications left, hide the notification wrapper
+        if (storedNotifications.length === 0) {
+            document.getElementById("notification-wrapper").style.display = "none";
+        }
+    }
+});
+
 	</script>
 </body>
 </html>

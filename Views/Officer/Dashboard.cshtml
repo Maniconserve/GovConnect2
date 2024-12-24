@@ -1,4 +1,7 @@
 ﻿@model OfficerDashboardViewModel
+@using Microsoft.AspNetCore.Mvc;
+@using System.Security.Claims;
+
 <head>
     <title>Officer Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -6,27 +9,23 @@
         /* Styles for the notifications container */
         #notificationsWrapper {
             position: relative;
-            overflow: visible; /* Disable scrolling */
-            transition: height 0.3s ease-in-out; /* Smooth transition */
+            overflow: visible;
+            transition: height 0.3s ease-in-out;
         }
 
         #notificationsContainer {
             display: flex;
             flex-direction: column;
-            padding: 0; /* No padding */
+            padding: 0;
         }
 
         .notification {
-            background-color: #ebf8ff; /* Light blue background */
+            background-color: bg-blue-600;
             padding: 1rem;
             border-radius: 0.5rem;
             margin-bottom: 0.5rem;
             transition: background-color 0.3s;
         }
-
-            .notification:hover {
-                background-color: #bee3f8; /* Darker blue on hover */
-            }
 
         .no-notifications {
             text-align: center;
@@ -61,7 +60,6 @@
 
                 <!-- Grievance Overview Section -->
                 <div class="mb-8">
-
                     <h3 class="text-xl font-semibold text-gray-800 mb-4">Grievance Overview</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <!-- Card 1 -->
@@ -128,110 +126,133 @@
     </div>
     <script src="~/js/signalr.js"></script>
     <script>
-        // Create a connection to the SignalR Hub
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl("/chathub")
-            .build();
+    // Create a connection to the SignalR Hub
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/chathub")
+        .build();
 
-        // Start the connection
-        connection.start().then(function () {
-            // Example grievanceId
-            var grievances = @Html.Raw(Json.Serialize(Model.AssignedGrievances));
+    // Start the connection
+    connection.start().then(function () {
+        var grievances = @Html.Raw(Json.Serialize(Model.AssignedGrievances));
 
-            // Join the chat for the grievance
-            connection.invoke("JoinGroup", grievances)
-                .catch(function (err) {
-                    console.error("Error while joining the chat for grievance: " + grievances, err.toString());
-                });
-        }).catch(function (err) {
-            console.error("Error while starting SignalR connection: ", err.toString());
-        });
+        // Join the chat for the grievance
+        connection.invoke("JoinGroup", grievances)
+            .catch(function (err) {
+                console.error("Error while joining the chat for grievance: " + grievances, err.toString());
+            });
+    }).catch(function (err) {
+        console.error("Error while starting SignalR connection: ", err.toString());
+    });
 
-        connection.on("ReceiveMessage", function (user, name, message, grievanceId) {
-            // Hide the "No notifications" message when there are notifications
-            const noNotificationsMessage = document.getElementById("noNotificationsMessage");
-            noNotificationsMessage.style.display = "none";
+    connection.on("ReceiveMessage", function (user, name, message, grievanceId) {
+        // Hide the "No notifications" message when there are notifications
+        const noNotificationsMessage = document.getElementById("noNotificationsMessage");
+        noNotificationsMessage.style.display = "none";
 
-            // Create a new notification div
-            const notificationDiv = document.createElement("div");
-            notificationDiv.classList.add("notification");
+        // Create a new notification div
+        const notificationDiv = document.createElement("div");
+        notificationDiv.classList.add("notification");
 
-            // Add content to the notification
-            notificationDiv.innerHTML = `
-                <a href="/Officer/Details?id=${grievanceId}" class="text-blue-800 text-lg font-semibold mb-2 hover:underline">
-                    <strong>${name}</strong>
-                </a>
-                <span class="text-gray-600 text-base">${message}</span>
-            `;
+        // Add content to the notification
+        notificationDiv.innerHTML = `
+            <a href="/Officer/Details?id=${grievanceId}" class="text-blue-800 text-lg font-semibold mb-2 hover:underline">
+                <strong>${name}</strong>
+            </a>
+            <span class="text-gray-600 text-base">${message}</span>
+        `;
 
-            // Append the new notification to the notifications container
+        // Add the click event to remove the notification on click
+        notificationDiv.addEventListener("click", function() {
+            // Remove the notification from localStorage
+            removeNotificationFromLocalStorage(grievanceId);
+
+            // Remove the notification from the DOM
+            notificationDiv.remove();
+
+            // Check if there are no more notifications
             const notificationsContainer = document.getElementById("notificationsContainer");
-            notificationsContainer.appendChild(notificationDiv);
+            if (notificationsContainer.children.length === 0) {
+                document.getElementById("noNotificationsMessage").style.display = "block";
+            }
 
-            // Update the wrapper height to adjust based on notifications
+            // Adjust the height of the notifications container
             document.getElementById("notificationsWrapper").style.height = `${notificationsContainer.scrollHeight}px`;
-
-            // Store the notification in localStorage
-            let storedNotifications = JSON.parse(localStorage.getItem("notifications")) || [];
-            storedNotifications.push({ user, name, message, grievanceId });
-            localStorage.setItem("notifications", JSON.stringify(storedNotifications));
         });
 
-        // Function to load and display notifications from localStorage when the page loads
-        window.onload = function () {
-            let storedNotifications = JSON.parse(localStorage.getItem("notifications")) || [];
+        // Append the new notification to the container
+        const notificationsContainer = document.getElementById("notificationsContainer");
+        notificationsContainer.appendChild(notificationDiv);
 
-            // Loop through the stored notifications and display them
-            const notificationsContainer = document.getElementById("notificationsContainer");
+        // Adjust the height of the notification wrapper based on the content
+        document.getElementById("notificationsWrapper").style.height = `${notificationsContainer.scrollHeight}px`;
+        var currentUserId = '@User.FindFirstValue(ClaimTypes.NameIdentifier)';
+        // Store the notification in localStorage with currentUserId
+        let storedNotifications = JSON.parse(localStorage.getItem("notifications")) || [];
+        storedNotifications.push({ user, name, message, grievanceId, userId: currentUserId });
+        localStorage.setItem("notifications", JSON.stringify(storedNotifications));
+    });
 
-            // Check if there are any notifications
-            if (storedNotifications.length === 0) {
-                document.getElementById("noNotificationsMessage").style.display = "block"; // Show the "No notifications" message
-                document.getElementById("notificationsWrapper").style.height = "auto"; // Adjust the height to fit the "No notifications" message
-            } else {
-                document.getElementById("noNotificationsMessage").style.display = "none"; // Hide the message if there are notifications
-                storedNotifications.forEach(function (notification, index) {
-                    const notificationDiv = document.createElement("div");
-                    notificationDiv.classList.add("notification");
-
-                    notificationDiv.innerHTML = `
-                        <a href="/Officer/Details?id=${notification.grievanceId}" class="text-blue-800 text-lg font-semibold mb-2 hover:underline">
-                            <strong>${notification.name}</strong>
-                        </a>
-                        <span class="text-gray-600 text-base">${notification.message}</span>
-                    `;
-
-                    // Add the notification to the container
-                    notificationsContainer.appendChild(notificationDiv);
-                });
-
-                // Update the wrapper height to adjust based on notifications
-                document.getElementById("notificationsWrapper").style.height = `${notificationsContainer.scrollHeight}px`;
-            }
-        };
-
-        // Function to handle clicking a notification and removing all notifications with the same name
-        document.getElementById("notificationsContainer").addEventListener("click", function (event) {
-            if (event.target.closest("a")) {
-                const notificationLink = event.target.closest("a");
-                const notificationName = notificationLink.querySelector("strong").textContent;
-
-                // Remove notifications with the same name from localStorage
-                let storedNotifications = JSON.parse(localStorage.getItem("notifications")) || [];
-                storedNotifications = storedNotifications.filter(function (notification) {
-                    return notification.name !== notificationName;
-                });
-
-                // Update localStorage with the remaining notifications
-                localStorage.setItem("notifications", JSON.stringify(storedNotifications));
-
-                // Optionally, you can also remove the notifications from the UI (if needed)
-                const notificationsContainer = document.getElementById("notificationsContainer");
-                const notificationsToRemove = notificationsContainer.querySelectorAll(`[data-name="${notificationName}"]`);
-                notificationsToRemove.forEach(function (notification) {
-                    notification.remove();
-                });
-            }
+    // Function to load and display notifications from localStorage
+    window.onload = function () {
+        let storedNotifications = JSON.parse(localStorage.getItem("notifications")) || [];
+        storedNotifications = storedNotifications.filter(function(notification) {
+            return notification.userId === currentUserId;
         });
-    </script>
+
+        const notificationsContainer = document.getElementById("notificationsContainer");
+
+        // If there are no notifications, show the "No notifications" message
+        if (storedNotifications.length === 0) {
+            document.getElementById("noNotificationsMessage").style.display = "block"; // Show message
+            document.getElementById("notificationsWrapper").style.height = "auto"; // Adjust container height
+        } else {
+            document.getElementById("noNotificationsMessage").style.display = "none"; // Hide message
+
+            storedNotifications.forEach(function (notification) {
+                const notificationDiv = document.createElement("div");
+                notificationDiv.classList.add("notification");
+
+                notificationDiv.innerHTML = `
+                    <a href="/Grievance/Details?id=${notification.grievanceId}" class="text-blue-800 text-lg font-semibold mb-2 hover:underline">
+                        <strong>${notification.name}</strong>
+                    </a>
+                    <span class="text-gray-600 text-base">${notification.message}</span>
+                `;
+
+                // Add the click event to remove the notification on click
+                notificationDiv.addEventListener("click", function() {
+                    // Remove the notification from localStorage
+                    removeNotificationFromLocalStorage(notification.grievanceId);
+
+                    // Remove the notification from the DOM
+                    notificationDiv.remove();
+
+                    // Check if there are no more notifications
+                    if (notificationsContainer.children.length === 0) {
+                        document.getElementById("noNotificationsMessage").style.display = "block";
+                    }
+
+                    // Adjust the height of the notifications container
+                    document.getElementById("notificationsWrapper").style.height = `${notificationsContainer.scrollHeight}px`;
+                });
+
+                // Append the notification to the container
+                notificationsContainer.appendChild(notificationDiv);
+            });
+
+            // Adjust the height of the notification wrapper based on the content
+            document.getElementById("notificationsWrapper").style.height = `${notificationsContainer.scrollHeight}px`;
+        }
+    };
+
+    // Function to remove a notification from localStorage
+    function removeNotificationFromLocalStorage(grievanceId) {
+        let storedNotifications = JSON.parse(localStorage.getItem("notifications")) || [];
+        storedNotifications = storedNotifications.filter(function(notification) {
+            return notification.grievanceId !== grievanceId; // Remove the notification by grievanceId
+        });
+        localStorage.setItem("notifications", JSON.stringify(storedNotifications));
+    }
+</script>
+
 </body>
