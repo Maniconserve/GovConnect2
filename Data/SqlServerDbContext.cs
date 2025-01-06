@@ -7,7 +7,6 @@ namespace GovConnect.Data
         public SqlServerDbContext(DbContextOptions<SqlServerDbContext> options)
             : base(options)
         {
-
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
