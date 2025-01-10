@@ -2,7 +2,7 @@
 {
     public class PincodeController : Controller
     {
-        private readonly PincodeService _pincodeServic;
+        private readonly PincodeService _pincodeService;
 
         public PincodeController(PincodeService pincodeService)
         {
