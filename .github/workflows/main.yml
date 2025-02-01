@@ -1,0 +1,45 @@
+name: ASP.NET Core CI/CD Pipeline
+ 
+on:
+  push:
+    branches:
+      - main  # Change to your main branch
+  pull_request:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+    - name: Restore Dependencies
+      run: dotnet restore
+    - name: Build Solution
+      run: dotnet build --configuration Release --no-restore
+    - name: Publish Application
+      run: dotnet publish -c Release -o ./publish
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: published-app
+        path: ./publish
+  deploy:
+    runs-on: windows-latest
+    needs: build
+    steps:
+    - name: Download Artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: published-app
+        path: ./publish
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'SatLearnings'
+        publish-profile: ${{ secrets.secret }}
+        package: ./publish
