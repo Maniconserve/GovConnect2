@@ -41,5 +41,5 @@ jobs:
       uses: azure/webapps-deploy@v2
       with:
         app-name: 'CICDPractice'
-        publish-profile: ${{ secrets.SECRET }}
+        publish-profile: ${{ secrets.CICD }}
         package: ./publish
