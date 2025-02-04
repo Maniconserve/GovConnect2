@@ -8,7 +8,7 @@
             "enabled": true,
             "renameLocals": true
         },
-        "includeInProject": false
+        "includeInProject": true
     },
     {
         "outputFileName": "wwwroot/css/GovConnect.min.css",
@@ -19,6 +19,6 @@
             "enabled": true,
             "renameLocals": true
         },
-        "includeInProject": false
+        "includeInProject": true
     }
 ]
